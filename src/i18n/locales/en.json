@@ -5,7 +5,9 @@
     "settings": "Settings",
     "logout": "Logout",
     "loading": "Loading...",
-    "error": "An error occurred."
+    "error": "An error occurred.",
+    "error_api_key_missing": "Gemini API key is missing. Please check your API key in settings.",
+    "error_generating_quote": "An error occurred while generating the quote. Please try again later."
   },
   "home": {
     "title": "Today's Quote",

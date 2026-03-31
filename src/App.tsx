@@ -97,8 +97,6 @@ export default function App() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-
   // Auth Listener
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
@@ -162,20 +160,35 @@ export default function App() {
     if (!user) return;
     setIsGenerating(true);
     setError(null);
+    
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      setError(t('common.error_api_key_missing'));
+      setIsGenerating(false);
+      return;
+    }
+
     try {
-      const model = ai.models.generateContent({
+      const ai = new GoogleGenAI({ apiKey });
+      const themeLabel = THEMES.find(t => t.id === settings.theme)?.labelKey || 'theme_motivation';
+      const prompt = `테마: ${t(themeLabel)}. 다음 JSON 형식으로 응답하세요: { "text": "명언 내용", "author": "저자 이름", "explanation": "해설 내용" }`;
+      
+      const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
+        contents: [{ parts: [{ text: prompt }] }],
         config: {
           systemInstruction: `당신은 세계 최고의 동기부여 전문가이자 작가입니다. 사용자가 선택한 테마에 맞춰 깊은 통찰력을 담은 명언과 그에 대한 따뜻한 해설을 제공하세요. 모든 응답은 반드시 '${i18n.language}' 언어로 작성해야 합니다.`,
           responseMimeType: "application/json",
         },
-        contents: `테마: ${t(THEMES.find(t => t.id === settings.theme)?.labelKey || '')}. 다음 JSON 형식으로 응답하세요: { "text": "명언 내용", "author": "저자 이름", "explanation": "해설 내용" }`
       });
 
-      const result = await model;
-      const data = JSON.parse(result.text);
+      if (!response.text) {
+        throw new Error('Empty response from AI');
+      }
+
+      const data = JSON.parse(response.text);
       
-      const newQuote: Quote = {
+      const newQuote: Omit<Quote, 'id'> = {
         ...data,
         theme: settings.theme,
         createdAt: serverTimestamp(),
@@ -184,10 +197,10 @@ export default function App() {
 
       // Save to Firestore
       const docRef = await addDoc(collection(db, 'users', user.uid, 'history'), newQuote);
-      setCurrentQuote({ ...newQuote, id: docRef.id });
+      setCurrentQuote({ ...newQuote, id: docRef.id } as Quote);
     } catch (err) {
       console.error('Error generating quote:', err);
-      setError(t('common.error'));
+      setError(t('common.error_generating_quote'));
     } finally {
       setIsGenerating(false);
     }
