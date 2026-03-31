@@ -4,28 +4,22 @@ import { getFirestore } from 'firebase/firestore';
 import { getMessaging, getToken } from 'firebase/messaging';
 
 // Import local config as fallback
-export let localConfig: any = {};
+// Vite handles JSON imports synchronously and bundles them
+import localConfigImport from '../firebase-applet-config.json';
+export const localConfig = localConfigImport as any;
+
 if (typeof window !== 'undefined') {
   console.log('Current origin:', window.location.origin);
-  try {
-    // Use fetch instead of import to avoid Vite resolution errors
-    // Use a relative path to ensure it works when hosted at a subpath
-    const response = await fetch('./firebase-applet-config.json');
-    if (response.ok) {
-      localConfig = await response.json();
-      console.log('Firebase config loaded successfully from ./firebase-applet-config.json');
-    } else {
-      console.warn('Failed to fetch Firebase config from ./firebase-applet-config.json');
-    }
-  } catch (e) {
-    console.warn('Firebase config file not found, falling back to environment variables');
-  }
+  console.log('Local config loaded via import:', {
+    ...localConfig,
+    apiKey: localConfig.apiKey ? '***' + localConfig.apiKey.slice(-4) : 'missing'
+  });
 }
 
 // Use environment variables with fallback to local config
 // Ensure we handle empty strings from env vars correctly
 const getCfg = (envVal: string | undefined, localVal: string | undefined) => {
-  if (envVal && envVal !== 'undefined' && envVal !== '""' && envVal !== "''") return envVal;
+  if (envVal && envVal !== 'undefined' && envVal !== '""' && envVal !== "''" && envVal !== "") return envVal;
   return localVal;
 };
 
