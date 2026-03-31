@@ -5,38 +5,56 @@ import { getMessaging, getToken } from 'firebase/messaging';
 
 // Import local config as fallback
 let localConfig: any = {};
-try {
-  // @ts-ignore
-  const config = await import('../firebase-applet-config.json');
-  localConfig = config.default || config;
-} catch (e) {
-  // Ignore if file doesn't exist
+if (typeof window !== 'undefined') {
+  try {
+    // Use fetch instead of import to avoid Vite resolution errors
+    // Use a relative path to ensure it works when hosted at a subpath
+    const response = await fetch('./firebase-applet-config.json');
+    if (response.ok) {
+      localConfig = await response.json();
+      console.log('Firebase config loaded successfully from ./firebase-applet-config.json');
+    } else {
+      console.warn('Failed to fetch Firebase config from ./firebase-applet-config.json');
+    }
+  } catch (e) {
+    console.warn('Firebase config file not found, falling back to environment variables');
+  }
 }
 
 // Use environment variables with fallback to local config
 const firebaseConfig = {
-  apiKey: process.env.VITE_FIREBASE_API_KEY || (localConfig as any).apiKey,
-  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN || (localConfig as any).authDomain,
-  projectId: process.env.VITE_FIREBASE_PROJECT_ID || (localConfig as any).projectId,
-  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET || (localConfig as any).storageBucket,
-  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || (localConfig as any).messagingSenderId,
-  appId: process.env.VITE_FIREBASE_APP_ID || (localConfig as any).appId,
-  measurementId: process.env.VITE_FIREBASE_MEASUREMENT_ID || (localConfig as any).measurementId,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || localConfig.apiKey,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || localConfig.authDomain,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || localConfig.projectId,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || localConfig.storageBucket,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || localConfig.messagingSenderId,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || localConfig.appId,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || localConfig.measurementId,
 };
 
-const databaseId = process.env.VITE_FIREBASE_DATABASE_ID || (localConfig as any).firestoreDatabaseId;
+const databaseId = import.meta.env.VITE_FIREBASE_DATABASE_ID || localConfig.firestoreDatabaseId;
 
 // Check if we have the minimum required config
-const isConfigValid = firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.appId;
+const isConfigValid = !!(firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.appId && firebaseConfig.apiKey !== 'missing');
 
 if (!isConfigValid) {
-  console.warn('Firebase configuration is missing or incomplete. Check your environment variables or firebase-applet-config.json.');
+  console.error('Firebase configuration is missing or incomplete. Please set up Firebase in the AI Studio UI or provide a valid firebase-applet-config.json.');
 }
 
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase only if config is valid to avoid immediate crash
+// If invalid, we provide a dummy app to prevent export errors, but it will fail on usage
+const app = isConfigValid 
+  ? initializeApp(firebaseConfig) 
+  : initializeApp({ 
+      apiKey: "missing", 
+      projectId: "missing", 
+      appId: "missing",
+      messagingSenderId: "missing" // Added to prevent Messaging crash
+    });
+
 export const auth = getAuth(app);
 export const db = getFirestore(app, databaseId || undefined);
-export const messaging = typeof window !== 'undefined' ? getMessaging(app) : null;
+export const messaging = (typeof window !== 'undefined' && isConfigValid) ? getMessaging(app) : null;
 export const googleProvider = new GoogleAuthProvider();
 
 export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
