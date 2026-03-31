@@ -5,8 +5,10 @@ importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compa
 // Initialize the Firebase app in the service worker by passing in
 // your app's Firebase config object.
 // https://firebase.google.com/docs/web/setup#config-object
+// Note: These values should be provided at build time or via environment variables
+// For GitHub security, we use placeholders for sensitive values.
 firebase.initializeApp({
-  apiKey: "AIzaSyDwj48xtxWNK4b2ejOBediztjgHZjJ2iAY",
+  apiKey: "REPLACE_WITH_YOUR_FIREBASE_API_KEY",
   authDomain: "spheric-shield-487302-a2.firebaseapp.com",
   projectId: "spheric-shield-487302-a2",
   storageBucket: "spheric-shield-487302-a2.firebasestorage.app",
