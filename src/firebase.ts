@@ -6,6 +6,7 @@ import { getMessaging, getToken } from 'firebase/messaging';
 // Import local config as fallback
 export let localConfig: any = {};
 if (typeof window !== 'undefined') {
+  console.log('Current origin:', window.location.origin);
   try {
     // Use fetch instead of import to avoid Vite resolution errors
     // Use a relative path to ensure it works when hosted at a subpath
@@ -57,7 +58,25 @@ export const db = getFirestore(app, databaseId || undefined);
 export const messaging = (typeof window !== 'undefined' && isConfigValid) ? getMessaging(app) : null;
 export const googleProvider = new GoogleAuthProvider();
 
-export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
+export const signInWithGoogle = async () => {
+  if (!isConfigValid) {
+    const error = 'Firebase configuration is missing or incomplete. Please check your environment variables or firebase-applet-config.json.';
+    console.error(error);
+    alert(error);
+    return Promise.reject(new Error(error));
+  }
+  try {
+    return await signInWithPopup(auth, googleProvider);
+  } catch (error: any) {
+    if (error.code === 'auth/unauthorized-domain') {
+      const currentDomain = window.location.hostname;
+      const message = `This domain (${currentDomain}) is not authorized for Firebase Authentication. Please add it to the "Authorized domains" list in the Firebase Console (Authentication > Settings).`;
+      console.error(message);
+      alert(message);
+    }
+    throw error;
+  }
+};
 export const logout = () => signOut(auth);
 
 export enum OperationType {
