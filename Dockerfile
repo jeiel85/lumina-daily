@@ -13,6 +13,8 @@ COPY package*.json ./
 RUN npm install --production
 COPY --from=build /app/docs ./docs
 COPY server.ts ./
+# Copy config file if it exists (it's ignored by git, but might be in build context)
+COPY firebase-applet-config.json* ./
 # We need tsx to run server.ts
 RUN npm install -g tsx
 ENV NODE_ENV=production
