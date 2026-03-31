@@ -4,7 +4,7 @@ import { getFirestore } from 'firebase/firestore';
 import { getMessaging, getToken } from 'firebase/messaging';
 
 // Import local config as fallback
-let localConfig: any = {};
+export let localConfig: any = {};
 if (typeof window !== 'undefined') {
   try {
     // Use fetch instead of import to avoid Vite resolution errors

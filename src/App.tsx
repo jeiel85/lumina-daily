@@ -31,6 +31,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   auth, 
   db, 
+  localConfig,
   signInWithGoogle, 
   logout, 
   requestNotificationPermission,
@@ -359,7 +360,7 @@ export default function App() {
     setIsGenerating(true);
     setError(null);
     
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = localConfig.geminiApiKey || process.env.GEMINI_API_KEY;
     if (!apiKey) {
       setError(t('common.error_api_key_missing'));
       setIsGenerating(false);
@@ -524,7 +525,7 @@ export default function App() {
     setIsGeneratingCard(true);
     setError(null);
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey = localConfig.geminiApiKey || process.env.GEMINI_API_KEY;
     if (!apiKey) {
       setError(t('common.error_api_key_missing'));
       setIsGeneratingCard(false);
