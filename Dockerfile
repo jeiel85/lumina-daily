@@ -4,6 +4,8 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
+# Explicitly copy config file if it exists (it's ignored by git)
+COPY firebase-applet-config.json* ./
 RUN npm run build
 
 # Production stage
