@@ -1,12 +1,41 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, User as FirebaseUser } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import { getMessaging, getToken, onMessage } from 'firebase/messaging';
-import firebaseConfig from '../firebase-applet-config.json';
+import { getMessaging, getToken } from 'firebase/messaging';
+
+// Import local config as fallback
+let localConfig: any = {};
+try {
+  // @ts-ignore
+  const config = await import('../firebase-applet-config.json');
+  localConfig = config.default || config;
+} catch (e) {
+  // Ignore if file doesn't exist
+}
+
+// Use environment variables with fallback to local config
+const firebaseConfig = {
+  apiKey: process.env.VITE_FIREBASE_API_KEY || (localConfig as any).apiKey,
+  authDomain: process.env.VITE_FIREBASE_AUTH_DOMAIN || (localConfig as any).authDomain,
+  projectId: process.env.VITE_FIREBASE_PROJECT_ID || (localConfig as any).projectId,
+  storageBucket: process.env.VITE_FIREBASE_STORAGE_BUCKET || (localConfig as any).storageBucket,
+  messagingSenderId: process.env.VITE_FIREBASE_MESSAGING_SENDER_ID || (localConfig as any).messagingSenderId,
+  appId: process.env.VITE_FIREBASE_APP_ID || (localConfig as any).appId,
+  measurementId: process.env.VITE_FIREBASE_MEASUREMENT_ID || (localConfig as any).measurementId,
+};
+
+const databaseId = process.env.VITE_FIREBASE_DATABASE_ID || (localConfig as any).firestoreDatabaseId;
+
+// Check if we have the minimum required config
+const isConfigValid = firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.appId;
+
+if (!isConfigValid) {
+  console.warn('Firebase configuration is missing or incomplete. Check your environment variables or firebase-applet-config.json.');
+}
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+export const db = getFirestore(app, databaseId || undefined);
 export const messaging = typeof window !== 'undefined' ? getMessaging(app) : null;
 export const googleProvider = new GoogleAuthProvider();
 
@@ -41,16 +70,17 @@ interface FirestoreErrorInfo {
   }
 }
 
-export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null) {
+export function handleFirestoreError(error: unknown, operationType: OperationType, path: string | null, user?: FirebaseUser | null) {
+  const currentUser = user || auth.currentUser;
   const errInfo: FirestoreErrorInfo = {
     error: error instanceof Error ? error.message : String(error),
     authInfo: {
-      userId: auth.currentUser?.uid,
-      email: auth.currentUser?.email,
-      emailVerified: auth.currentUser?.emailVerified,
-      isAnonymous: auth.currentUser?.isAnonymous,
-      tenantId: auth.currentUser?.tenantId,
-      providerInfo: auth.currentUser?.providerData.map(provider => ({
+      userId: currentUser?.uid,
+      email: currentUser?.email,
+      emailVerified: currentUser?.emailVerified,
+      isAnonymous: currentUser?.isAnonymous,
+      tenantId: currentUser?.tenantId,
+      providerInfo: currentUser?.providerData.map(provider => ({
         providerId: provider.providerId,
         displayName: provider.displayName,
         email: provider.email,

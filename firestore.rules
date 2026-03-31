@@ -1,0 +1,122 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: /users/{userId}
+    // Document ID: userId (UID)
+    // Fields:
+    //   - uid: string (required)
+    //   - email: string (required, email format)
+    //   - notificationTime: string (required)
+    //   - theme: string (required)
+    //   - language: string (required)
+    //   - darkMode: string (required, light|dark|system)
+    //   - isSubscribed: boolean (required)
+    //   - updatedAt: timestamp (required)
+    //   - fcmToken: string (optional)
+    //
+    // Collection: /users/{userId}/history/{quoteId}
+    // Document ID: quoteId (auto-generated)
+    // Fields:
+    //   - text: string (required, max 1000)
+    //   - author: string (required, max 100)
+    //   - explanation: string (required, max 2000)
+    //   - theme: string (required)
+    //   - createdAt: timestamp (required)
+    //   - imageUrl: string (optional)
+    //   - uid: string (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (
+          (request.auth.token.email == "jeiel85@gmail.com" && request.auth.token.email_verified == true) ||
+          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+        );
+    }
+
+    function isValidEmail(email) {
+      return email is string &&
+        email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return hasRequiredFields(['uid', 'email', 'notificationTime', 'theme', 'preferredThemes', 'preferredCardStyle', 'language', 'darkMode', 'isSubscribed', 'updatedAt']) &&
+             hasOnlyAllowedFields(['uid', 'email', 'notificationTime', 'theme', 'preferredThemes', 'preferredCardStyle', 'language', 'darkMode', 'isSubscribed', 'updatedAt', 'fcmToken', 'role']) &&
+             data.uid == request.auth.uid &&
+             isValidEmail(data.email) &&
+             data.notificationTime is string && data.notificationTime.size() <= 5 &&
+             data.theme is string && data.theme.size() <= 50 &&
+             data.preferredThemes is list && data.preferredThemes.size() <= 10 &&
+             data.preferredCardStyle is string && data.preferredCardStyle.size() <= 50 &&
+             data.language is string && data.language.size() <= 10 &&
+             data.darkMode in ['light', 'dark', 'system', 'material'] &&
+             data.isSubscribed is bool &&
+             data.updatedAt is timestamp &&
+             (!('fcmToken' in data) || (data.fcmToken is string && data.fcmToken.size() <= 1000)) &&
+             (!('role' in data) || data.role == 'client' || isAdmin());
+    }
+
+    function isValidQuote(data) {
+      return hasRequiredFields(['text', 'author', 'explanation', 'theme', 'createdAt', 'uid']) &&
+             hasOnlyAllowedFields(['text', 'author', 'explanation', 'theme', 'createdAt', 'uid', 'imageUrl']) &&
+             data.text is string && data.text.size() <= 1000 &&
+             data.author is string && data.author.size() <= 100 &&
+             data.explanation is string && data.explanation.size() <= 2000 &&
+             data.theme is string && data.theme.size() <= 50 &&
+             data.createdAt is timestamp &&
+             (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() <= 1000000)) &&
+             data.uid == request.auth.uid;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      allow get: if isOwner(userId) || isAdmin();
+      allow list: if isAdmin(); // Users shouldn't be listing the users collection
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && isValidUser(request.resource.data) && 
+                      (request.resource.data.role == resource.data.role || isAdmin());
+
+      match /history/{quoteId} {
+        allow list: if isOwner(userId) || isAdmin();
+        allow get: if isOwner(userId) || isAdmin();
+        allow create: if isOwner(userId) && isValidQuote(request.resource.data);
+        allow update: if isOwner(userId) && isValidQuote(request.resource.data) && 
+                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['imageUrl']);
+        allow delete: if isOwner(userId) || isAdmin();
+      }
+    }
+  }
+}

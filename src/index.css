@@ -1,1 +1,45 @@
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Georgia", serif;
+}
+
+/* Use the class strategy for dark mode in Tailwind v4 */
+@variant dark (.dark &);
+
+/* Material You Theme */
+@theme {
+  --color-m3-primary: #6750A4;
+  --color-m3-on-primary: #FFFFFF;
+  --color-m3-primary-container: #EADDFF;
+  --color-m3-on-primary-container: #21005D;
+  --color-m3-secondary: #625B71;
+  --color-m3-on-secondary: #FFFFFF;
+  --color-m3-surface: #FEF7FF;
+  --color-m3-on-surface: #1D1B20;
+  --color-m3-surface-variant: #E7E0EB;
+  --color-m3-on-surface-variant: #49454F;
+  --radius-m3: 2rem;
+}
+
+.theme-material {
+  --bg-app: var(--color-m3-surface);
+  --text-primary: var(--color-m3-on-surface);
+  --text-secondary: var(--color-m3-on-surface-variant);
+  --accent: var(--color-m3-primary);
+  --card-bg: white;
+  --card-border: var(--color-m3-surface-variant);
+}
+
+.theme-material .rounded-3xl {
+  border-radius: var(--radius-m3);
+}
+
+.theme-material .bg-indigo-600 {
+  background-color: var(--color-m3-primary);
+}
+
+.theme-material .text-indigo-600 {
+  color: var(--color-m3-primary);
+}
