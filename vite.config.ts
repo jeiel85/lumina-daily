@@ -5,8 +5,10 @@ import {defineConfig, loadEnv} from 'vite';
 
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
+  const isGithubPages = mode === 'production';
+  
   return {
-    base: '/daily-quote/',
+    base: isGithubPages ? '/daily-quote/' : '/',
     plugins: [react(), tailwindcss()],
     build: {
       outDir: 'docs',
