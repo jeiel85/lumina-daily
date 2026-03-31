@@ -1,0 +1,49 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile and settings",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "The unique identifier for the user" },
+        "email": { "type": "string", "format": "email", "description": "The user's email address" },
+        "notificationTime": { "type": "string", "description": "The time for daily notifications" },
+        "theme": { "type": "string", "description": "The currently active theme for manual generation" },
+        "preferredThemes": { "type": "array", "items": { "type": "string" }, "description": "Themes selected for daily notifications" },
+        "preferredCardStyle": { "type": "string", "description": "The user's preferred visual style for quote cards" },
+        "language": { "type": "string", "description": "The user's preferred language" },
+        "darkMode": { "type": "string", "enum": ["light", "dark", "system"], "description": "Dark mode setting" },
+        "isSubscribed": { "type": "boolean", "description": "Whether the user is subscribed to notifications" },
+        "fcmToken": { "type": "string", "description": "The Firebase Cloud Messaging token" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "The last time the user profile was updated" },
+        "role": { "type": "string", "description": "The user's role" }
+      },
+      "required": ["uid", "email", "notificationTime", "theme", "preferredThemes", "preferredCardStyle", "language", "darkMode", "isSubscribed", "updatedAt", "role"]
+    },
+    "Quote": {
+      "title": "Quote",
+      "description": "A generated quote with AI explanation",
+      "type": "object",
+      "properties": {
+        "text": { "type": "string", "description": "The content of the quote" },
+        "author": { "type": "string", "description": "The author of the quote" },
+        "explanation": { "type": "string", "description": "The AI-generated explanation of the quote" },
+        "theme": { "type": "string", "description": "The theme of the quote" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "When the quote was generated" },
+        "imageUrl": { "type": "string", "description": "URL of the generated quote card image (base64)" },
+        "uid": { "type": "string", "description": "The UID of the user who generated the quote" }
+      },
+      "required": ["text", "author", "explanation", "theme", "createdAt", "uid"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile and settings"
+    },
+    "/users/{userId}/history/{quoteId}": {
+      "schema": "Quote",
+      "description": "User's history of generated quotes"
+    }
+  }
+}

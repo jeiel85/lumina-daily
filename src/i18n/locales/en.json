@@ -14,18 +14,24 @@
   },
   "home": {
     "title": "Today's Quote",
-    "ai_explanation": "AI Explanation",
+    "ai_explanation": "Explanation",
     "no_quote": "No quotes generated yet.",
     "generate_first": "Generate First Quote",
     "refresh": "Refresh",
     "notification_at": "Alert at {{time}}",
+    "generate_card": "Create Quote Card",
+    "download_card": "Download Card",
+    "regenerate_card": "Regenerate Card",
     "subscribe_title": "Get Daily Alerts",
     "subscribe_desc": "We'll send a quote at your chosen time.",
     "activate": "Activate"
   },
   "history": {
     "title": "Past Quotes",
-    "just_now": "Just now"
+    "just_now": "Just now",
+    "no_history": "No history yet.",
+    "download": "Download",
+    "regenerate": "Regenerate"
   },
   "settings": {
     "title": "Settings",
@@ -33,6 +39,12 @@
     "notification_desc": "Quotes arrive daily at this time.",
     "theme": "Quote Theme",
     "language": "Language",
+    "visual_theme": "Visual Theme",
+    "dark_mode": "Dark Mode",
+    "light_mode": "Light Mode",
+    "system_mode": "System Setting",
+    "material_mode": "Material You",
+    "visual_desc": "Change the visual appearance of the app.",
     "status": "Notification Status",
     "status_desc": "Browser push notification status",
     "enabled": "Enabled",
@@ -41,13 +53,34 @@
   },
   "auth": {
     "welcome": "Lumina Daily",
-    "desc": "Start your day with a special AI quote just for you.",
+    "desc": "Start your day with a special quote just for you.",
     "google_login": "Start with Google"
   },
   "themes": {
     "motivation": "Motivation",
     "comfort": "Comfort",
     "humor": "Humor",
-    "success": "Success"
+    "success": "Success",
+    "business": "Business",
+    "love": "Love",
+    "philosophy": "Philosophy",
+    "wisdom": "Wisdom",
+    "life": "Life"
+  },
+  "cardStyles": {
+    "title": "Card Style",
+    "classic": "Classic",
+    "modern": "Modern",
+    "minimal": "Minimal",
+    "bold": "Bold"
+  },
+  "preferredThemes": {
+    "title": "Preferred Themes (for Notifications)",
+    "description": "Select themes you'd like to receive in daily notifications."
+  },
+  "share": {
+    "button": "Share",
+    "success": "Shared successfully.",
+    "error": "Error sharing."
   }
 }

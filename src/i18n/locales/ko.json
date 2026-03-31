@@ -14,18 +14,24 @@
   },
   "home": {
     "title": "오늘의 명언",
-    "ai_explanation": "AI 해설",
+    "ai_explanation": "해설",
     "no_quote": "아직 생성된 명언이 없습니다.",
     "generate_first": "첫 명언 생성하기",
     "refresh": "새로고침",
     "notification_at": "{{time}} 알림",
+    "generate_card": "명언 카드 만들기",
+    "download_card": "카드 다운로드",
+    "regenerate_card": "카드 다시 만들기",
     "subscribe_title": "매일 알림 받기",
     "subscribe_desc": "지정한 시간에 명언을 보내드려요.",
     "activate": "활성화"
   },
   "history": {
     "title": "지난 명언들",
-    "just_now": "방금 전"
+    "just_now": "방금 전",
+    "no_history": "기록이 없습니다.",
+    "download": "다운로드",
+    "regenerate": "다시 만들기"
   },
   "settings": {
     "title": "설정",
@@ -33,6 +39,12 @@
     "notification_desc": "매일 이 시간에 명언이 도착합니다.",
     "theme": "명언 테마",
     "language": "언어 설정",
+    "visual_theme": "비주얼 테마",
+    "dark_mode": "다크 모드",
+    "light_mode": "라이트 모드",
+    "system_mode": "시스템 설정",
+    "material_mode": "머터리얼 유",
+    "visual_desc": "앱의 시각적 테마를 변경합니다.",
     "status": "알림 상태",
     "status_desc": "브라우저 푸시 알림 상태",
     "enabled": "활성화됨",
@@ -41,13 +53,34 @@
   },
   "auth": {
     "welcome": "Lumina Daily",
-    "desc": "매일 아침, 당신만을 위한 AI의 특별한 명언으로 하루를 시작해보세요.",
+    "desc": "매일 아침, 당신만을 위한 특별한 명언으로 하루를 시작해보세요.",
     "google_login": "Google로 시작하기"
   },
   "themes": {
     "motivation": "동기부여",
     "comfort": "위로",
     "humor": "유머",
-    "success": "성공"
+    "success": "성공",
+    "business": "비즈니스",
+    "love": "사랑",
+    "philosophy": "철학",
+    "wisdom": "지혜",
+    "life": "인생"
+  },
+  "cardStyles": {
+    "title": "카드 스타일",
+    "classic": "클래식",
+    "modern": "모던",
+    "minimal": "미니멀",
+    "bold": "볼드"
+  },
+  "preferredThemes": {
+    "title": "선호하는 주제 (알림용)",
+    "description": "매일 알림으로 받고 싶은 주제를 선택하세요."
+  },
+  "share": {
+    "button": "공유하기",
+    "success": "공유되었습니다.",
+    "error": "공유 중 오류가 발생했습니다."
   }
 }

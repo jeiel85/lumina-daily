@@ -28,6 +28,8 @@
     "notification_desc": "毎日この時間に格言が届きます。",
     "theme": "格言テーマ",
     "language": "言語設定",
+    "visual_theme": "ビジュアルテーマ",
+    "material_mode": "Material You",
     "status": "通知ステータ스",
     "status_desc": "ブラウザプッシュ通知ステータス",
     "enabled": "有効",

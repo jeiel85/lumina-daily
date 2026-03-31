@@ -28,6 +28,8 @@
     "notification_desc": "名言将在每天此时间到达。",
     "theme": "名言主题",
     "language": "语言设置",
+    "visual_theme": "视觉主题",
+    "material_mode": "Material You",
     "status": "通知状态",
     "status_desc": "浏览器推送通知状态",
     "enabled": "已启用",
