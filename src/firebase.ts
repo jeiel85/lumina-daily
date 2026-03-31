@@ -23,23 +23,42 @@ if (typeof window !== 'undefined') {
 }
 
 // Use environment variables with fallback to local config
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || localConfig.apiKey,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || localConfig.authDomain,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || localConfig.projectId,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || localConfig.storageBucket,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || localConfig.messagingSenderId,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID || localConfig.appId,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || localConfig.measurementId,
+// Ensure we handle empty strings from env vars correctly
+const getCfg = (envVal: string | undefined, localVal: string | undefined) => {
+  if (envVal && envVal !== 'undefined' && envVal !== '""' && envVal !== "''") return envVal;
+  return localVal;
 };
 
-const databaseId = import.meta.env.VITE_FIREBASE_DATABASE_ID || localConfig.firestoreDatabaseId;
+const firebaseConfig = {
+  apiKey: getCfg(import.meta.env.VITE_FIREBASE_API_KEY, localConfig.apiKey),
+  authDomain: getCfg(import.meta.env.VITE_FIREBASE_AUTH_DOMAIN, localConfig.authDomain),
+  projectId: getCfg(import.meta.env.VITE_FIREBASE_PROJECT_ID, localConfig.projectId),
+  storageBucket: getCfg(import.meta.env.VITE_FIREBASE_STORAGE_BUCKET, localConfig.storageBucket),
+  messagingSenderId: getCfg(import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID, localConfig.messagingSenderId),
+  appId: getCfg(import.meta.env.VITE_FIREBASE_APP_ID, localConfig.appId),
+  measurementId: getCfg(import.meta.env.VITE_FIREBASE_MEASUREMENT_ID, localConfig.measurementId),
+};
+
+const databaseId = getCfg(import.meta.env.VITE_FIREBASE_DATABASE_ID, localConfig.firestoreDatabaseId);
 
 // Check if we have the minimum required config
-const isConfigValid = !!(firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.appId && firebaseConfig.apiKey !== 'missing');
+const isConfigValid = !!(firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.appId && firebaseConfig.apiKey !== 'missing' && firebaseConfig.authDomain);
+
+if (typeof window !== 'undefined') {
+  console.log('Final Firebase Config:', {
+    ...firebaseConfig,
+    apiKey: firebaseConfig.apiKey ? '***' + firebaseConfig.apiKey.slice(-4) : 'missing',
+    isConfigValid
+  });
+}
 
 if (!isConfigValid) {
-  console.error('Firebase configuration is missing or incomplete. Please set up Firebase in the AI Studio UI or provide a valid firebase-applet-config.json.');
+  console.error('Firebase configuration is missing or incomplete. Fields check:', {
+    apiKey: !!firebaseConfig.apiKey,
+    projectId: !!firebaseConfig.projectId,
+    appId: !!firebaseConfig.appId,
+    authDomain: !!firebaseConfig.authDomain
+  });
 }
 
 // Initialize Firebase only if config is valid to avoid immediate crash
