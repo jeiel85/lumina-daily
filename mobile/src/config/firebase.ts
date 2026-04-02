@@ -1,15 +1,13 @@
-import { initializeApp, getApps, getApp } from "firebase/app";
+import { initializeApp } from 'firebase/app';
 import { 
-  getFirestore, 
-  initializeFirestore, 
-  persistentLocalCache, 
-  persistentMultipleTabManager 
-} from "firebase/firestore";
-import { initializeAuth, getReactNativePersistence, GoogleAuthProvider } from "firebase/auth";
-import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
-import Constants from 'expo-constants';
+  getAuth, 
+  initializeAuth, 
+  getReactNativePersistence,
+  GoogleAuthProvider // 추가: 구글 제공업체
+} from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// For Expo, we use process.env or Constants
 const firebaseConfig = {
   apiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
   authDomain: process.env.EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -17,21 +15,17 @@ const firebaseConfig = {
   storageBucket: process.env.EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.EXPO_PUBLIC_FIREBASE_APP_ID,
+  databaseURL: process.env.EXPO_PUBLIC_FIREBASE_DATABASE_URL
 };
 
-// Initialize Firebase
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const app = initializeApp(firebaseConfig);
 
-// Initialize Firestore with better native persistence
-const db = initializeFirestore(app, {
-  localCache: persistentLocalCache({
-    tabManager: persistentMultipleTabManager()
-  })
-}, process.env.EXPO_PUBLIC_FIREBASE_DATABASE_ID || "lumina-daily");
-
+// Persistence check with version safety
 const auth = initializeAuth(app, {
-  persistence: getReactNativePersistence(ReactNativeAsyncStorage)
+  persistence: getReactNativePersistence(AsyncStorage)
 });
-const googleProvider = new GoogleAuthProvider();
 
-export { app, db, auth, googleProvider };
+const db = getFirestore(app);
+const googleProvider = new GoogleAuthProvider(); // 구글 로그인 제공업체 초기화
+
+export { auth, db, googleProvider };
