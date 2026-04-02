@@ -12,63 +12,59 @@ export interface Quote {
 }
 
 export const generateNativeQuote = async (theme: string, language: string = 'ko'): Promise<Quote> => {
-  try {
-    // Correcting to a stable model name: gemini-1.5-flash
-    const model = genAI.getGenerativeModel({ 
-      model: "gemini-1.5-flash",
-      systemInstruction: `당신은 세계 최고의 동기부여 전문가이자 작가입니다. 사용자가 선택한 테마에 맞춰 깊은 통찰력을 담은 명언과 그에 대한 따뜻한 해설을 제공하세요. 모든 응답은 반드시 '${language}' 언어로 작성해야 합니다.`
-    });
+  // Array of models to try in order of preference
+  const modelsToTry = ["gemini-1.5-flash", "gemini-1.5-pro", "gemini-2.0-flash"];
+  let lastError = null;
 
-    const prompt = `테마: ${theme}. 다음 JSON 형식으로 응답하세요: { "text": "명언 내용", "author": "저자 이름", "explanation": "해설 내용" }`;
+  for (const modelName of modelsToTry) {
+    try {
+      console.log(`[AI] Attempting quote generation with: ${modelName}`);
+      const model = genAI.getGenerativeModel({ 
+        model: modelName,
+        systemInstruction: `당신은 세계 최고의 동기부여 전문가이자 작가입니다. 사용자가 선택한 테마에 맞춰 깊은 통찰력을 담은 명언과 그에 대한 따뜻한 해설을 제공하세요. 모든 응답은 반드시 '${language}' 언어로 작성해야 합니다.`
+      });
 
-    console.log(`[AI] Requesting quote for theme: ${theme}, lang: ${language}`);
-    
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
-      generationConfig: {
-        responseMimeType: "application/json",
-      }
-    });
+      const prompt = `테마: ${theme}. 다음 JSON 형식으로 응답하세요: { "text": "명언 내용", "author": "저자 이름", "explanation": "해설 내용" }`;
+      
+      const result = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: {
+          responseMimeType: "application/json",
+        }
+      });
 
-    const response = await result.response;
-    const text = response.text();
-    console.log('[AI] Received raw response:', text);
-    
-    const data = JSON.parse(text);
-    
-    return {
-      ...data,
-      theme
-    };
-  } catch (error) {
-    console.error('[AI Mobile Error] Failed to generate quote:', error);
-    throw error;
+      const response = await result.response;
+      const text = response.text();
+      console.log(`[AI] Response from ${modelName} successful.`);
+      
+      const data = JSON.parse(text);
+      return { ...data, theme };
+      
+    } catch (error) {
+      console.warn(`[AI] Model ${modelName} failed, trying next...`, error);
+      lastError = error;
+      continue; // Try next model
+    }
   }
+
+  // If all models failed
+  console.error('[AI Mobile] All models failed to generate content');
+  throw lastError || new Error('All AI models failed');
 };
 
 export const generateNativeImage = async (theme: string): Promise<string> => {
+  // Image generation is secondary; we return empty to avoid crashing if it fails
   try {
-    if (!apiKey) return "";
-    
-    const prompt = `A beautiful, high-quality, artistic and atmospheric background for a quote about "${theme}". Minimalist, poetic, inspiring, cinematic lighting, 4k background, no text.`;
-    
-    // Using a more standard Gemini Pro Vision or stable endpoint if available, 
-    // but for now, we'll ensure the existing one doesn't crash the app.
-    console.log(`[AI] Requesting image for theme: ${theme}`);
-    
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: `Generate a high quality base64 image representation prompt for: ${prompt}` }] }]
-      })
-    });
-
-    // Note: Standard Gemini doesn't return raw image bytes directly like this in some versions.
-    // As a fallback, we return an empty string to allow gradient background if image fails.
+    if (!apiKey) {
+      console.warn('[AI] API Key missing for image generation');
+      return "";
+    }
+    console.log(`[AI] Image generation request for theme: ${theme}`);
+    // Currently, Imagen 3 integration might vary, we leave this as a stub for future integration
+    // while ensuring the app works with gradient backgrounds.
     return ""; 
   } catch (error) {
-    console.error('[AI Mobile Error] Failed to generate image:', error);
+    console.error('[AI Image Error]', error);
     return ""; 
   }
 };
