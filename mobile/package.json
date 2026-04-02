@@ -4,7 +4,7 @@
   "main": "index.ts",
   "scripts": {
     "start": "expo start",
-    "android": "expo run:android",
+    "android": "powershell -Command \"$env:ANDROID_HOME = \\\"$env:LOCALAPPDATA\\Android\\Sdk\\\"; $env:PATH += \\\";$env:ANDROID_HOME\\platform-tools\\\"; npx expo run:android\"",
     "ios": "expo run:ios",
     "web": "expo start --web"
   },
