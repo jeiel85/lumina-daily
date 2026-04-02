@@ -3,10 +3,8 @@ import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, User as Firebase
 import { getFirestore } from 'firebase/firestore';
 import { getMessaging, getToken } from 'firebase/messaging';
 
-// Import local config as fallback
-// Vite handles JSON imports synchronously and bundles them
-import localConfigImport from '../firebase-applet-config.json';
-export const localConfig = localConfigImport as any;
+// localConfig is now handled via environment variables in .env
+export const localConfig = {} as any;
 
 if (typeof window !== 'undefined') {
   console.log('Current origin:', window.location.origin);
@@ -67,13 +65,14 @@ const app = isConfigValid
     });
 
 export const auth = getAuth(app);
-export const db = getFirestore(app, databaseId || undefined);
+// Using the custom database ID 'lumina-daily' as requested
+export const db = getFirestore(app, 'lumina-daily');
 export const messaging = (typeof window !== 'undefined' && isConfigValid) ? getMessaging(app) : null;
 export const googleProvider = new GoogleAuthProvider();
 
 export const signInWithGoogle = async () => {
   if (!isConfigValid) {
-    const error = 'Firebase configuration is missing or incomplete. Please check your environment variables or firebase-applet-config.json.';
+    const error = '환경 변수가 설정되지 않았습니다. .env 파일을 작성하거나 Firebase 콘솔에서 설정을 확인해 주세요.';
     console.error(error);
     alert(error);
     return Promise.reject(new Error(error));
@@ -81,11 +80,16 @@ export const signInWithGoogle = async () => {
   try {
     return await signInWithPopup(auth, googleProvider);
   } catch (error: any) {
+    console.error('Google Sign-In Error:', error);
     if (error.code === 'auth/unauthorized-domain') {
       const currentDomain = window.location.hostname;
-      const message = `This domain (${currentDomain}) is not authorized for Firebase Authentication. Please add it to the "Authorized domains" list in the Firebase Console (Authentication > Settings).`;
+      const message = `도메인 (${currentDomain})이 Firebase 콘솔에서 승인되지 않았습니다. Firebase Console > Authentication > Settings > Authorized domains 에 추가해 주세요.`;
       console.error(message);
       alert(message);
+    } else if (error.code === 'auth/popup-closed-by-user') {
+      console.warn('사용자가 로그인 팝업을 닫았습니다.');
+    } else {
+      alert(`로그인 중 오류가 발생했습니다: ${error.message}`);
     }
     throw error;
   }
@@ -134,6 +138,7 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
         providerId: provider.providerId,
         displayName: provider.displayName,
         email: provider.email,
+        model: "gemini-pro",
         photoUrl: provider.photoURL
       })) || []
     },
