@@ -5,7 +5,8 @@ import {
   persistentLocalCache, 
   persistentMultipleTabManager 
 } from "firebase/firestore";
-import { getAuth, GoogleAuthProvider } from "firebase/auth";
+import { initializeAuth, getReactNativePersistence, GoogleAuthProvider } from "firebase/auth";
+import ReactNativeAsyncStorage from '@react-native-async-storage/async-storage';
 import Constants from 'expo-constants';
 
 // For Expo, we use process.env or Constants
@@ -28,7 +29,9 @@ const db = initializeFirestore(app, {
   })
 }, process.env.EXPO_PUBLIC_FIREBASE_DATABASE_ID || "lumina-daily");
 
-const auth = getAuth(app);
+const auth = initializeAuth(app, {
+  persistence: getReactNativePersistence(ReactNativeAsyncStorage)
+});
 const googleProvider = new GoogleAuthProvider();
 
 export { app, db, auth, googleProvider };
