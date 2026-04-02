@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { 
   Bell, 
   History as HistoryIcon, 
@@ -360,53 +360,66 @@ export default function App() {
     setIsGenerating(true);
     setError(null);
     
-    const apiKey = localConfig.geminiApiKey || process.env.GEMINI_API_KEY;
-    if (!apiKey) {
+    const apiKey = (localConfig.geminiApiKey || import.meta.env.VITE_GEMINI_API_KEY) as string;
+    
+    // Debug logging for API Key (Masked for safety)
+    const maskedKey = apiKey ? `${apiKey.substring(0, 8)}...${apiKey.substring(apiKey.length - 4)}` : 'MISSING';
+    console.log(`[AI Debug] Using API Key: ${maskedKey}`);
+
+    if (!apiKey || apiKey === 'undefined') {
+      console.error('[AI Debug] GEMINI_API_KEY is missing or undefined!');
       setError(t('common.error_api_key_missing'));
       setIsGenerating(false);
       return;
     }
 
     try {
-      const ai = new GoogleGenAI({ apiKey });
+      const genAI = new GoogleGenerativeAI(apiKey);
+      console.log('[AI Debug] Initializing verified model: gemini-2.5-flash');
+      const model = genAI.getGenerativeModel({ 
+        model: "gemini-2.5-flash",
+        systemInstruction: `당신은 세계 최고의 동기부여 전문가이자 작가입니다. 사용자가 선택한 테마에 맞춰 깊은 통찰력을 담은 명언과 그에 대한 따뜻한 해설을 제공하세요. 모든 응답은 반드시 '${i18n.language}' 언어로 작성해야 합니다.`,
+      });
+      
       const themeLabel = THEMES.find(t => t.id === settings.theme)?.labelKey || 'theme_motivation';
       const prompt = `테마: ${t(themeLabel)}. 다음 JSON 형식으로 응답하세요: { "text": "명언 내용", "author": "저자 이름", "explanation": "해설 내용" }`;
-      
-      const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
-        contents: [{ parts: [{ text: prompt }] }],
-        config: {
-          systemInstruction: `당신은 세계 최고의 동기부여 전문가이자 작가입니다. 사용자가 선택한 테마에 맞춰 깊은 통찰력을 담은 명언과 그에 대한 따뜻한 해설을 제공하세요. 모든 응답은 반드시 '${i18n.language}' 언어로 작성해야 합니다.`,
+
+      const result = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: {
           responseMimeType: "application/json",
-        },
+        }
       });
 
-      if (!response.text) {
-        throw new Error('Empty response from AI');
-      }
-
-      const data = JSON.parse(response.text);
+      const response = await result.response;
+      const data = JSON.parse(response.text());
       
-      const newQuote: Omit<Quote, 'id'> = {
+      const newQuoteData: Omit<Quote, 'id'> = {
         ...data,
         theme: settings.theme,
         createdAt: serverTimestamp(),
         uid: user.uid
       };
 
-      // Save to Firestore
+      // 1. UPDATE UI FIRST (Stop spinning immediately!)
+      setCurrentQuote({ ...newQuoteData, id: 'temp-' + Date.now() } as Quote);
+      setIsGenerating(false);
+      console.log('[AI Success] Quote UI updated. Saving to DB in background...');
+
+      // 2. BACKGROUND SAVE (Non-blocking)
       const path = `users/${user.uid}/history`;
       try {
-        const docRef = await addDoc(collection(db, 'users', user.uid, 'history'), newQuote);
-        setCurrentQuote({ ...newQuote, id: docRef.id } as Quote);
+        const docRef = await addDoc(collection(db, 'users', user.uid, 'history'), newQuoteData);
+        console.log('[Firestore] Successfully saved quote in background with ID:', docRef.id);
+        setCurrentQuote({ ...newQuoteData, id: docRef.id } as Quote);
       } catch (err) {
-        handleFirestoreError(err, OperationType.CREATE, path, user);
+        console.error('[Firestore Error] Could not save to database. Is Firestore created?', err);
+        // We don't call setError here to avoid disrupting the user since they already have the quote
       }
     } catch (err) {
-      console.error('Error generating quote:', err);
+      console.error('Error in generation process:', err);
       setError(t('common.error_generating_quote'));
-    } finally {
-      setIsGenerating(false);
+      setIsGenerating(false); // Ensure spinner stops on AI error too
     }
   };
 
@@ -525,7 +538,7 @@ export default function App() {
     setIsGeneratingCard(true);
     setError(null);
 
-    const apiKey = localConfig.geminiApiKey || process.env.GEMINI_API_KEY;
+    const apiKey = localConfig.geminiApiKey || (import.meta.env.VITE_GEMINI_API_KEY as string);
     if (!apiKey) {
       setError(t('common.error_api_key_missing'));
       setIsGeneratingCard(false);
@@ -533,34 +546,56 @@ export default function App() {
     }
 
     try {
-      const ai = new GoogleGenAI({ apiKey });
+      const genAI = new GoogleGenerativeAI(apiKey);
       
-      // 1. Generate Background Image with Gemini
-      const imagePrompt = `A high-quality, artistic, and atmospheric background image reflecting the theme: "${quote.theme}". The image should be suitable as a background for a quote card. Style: Minimalist, elegant, and inspiring. No text in the image.`;
+      // 1. Generate Background Image with AI (Imagen 4.0)
+      console.log('[AI Debug] Generating theme-based background image with Imagen 4.0...');
+      const themeLabel = THEMES.find(t => t.id === settings.theme)?.labelKey || 'theme_motivation';
+      const prompt = `A beautiful, high-quality, artistic and atmospheric background for a quote about "${t(themeLabel)}". Minimalist, poetic, inspiring, cinematic lighting, 4k background, no text.`;
       
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash-image',
-        contents: {
-          parts: [{ text: imagePrompt }],
-        },
-        config: {
-          imageConfig: {
-            aspectRatio: "1:1",
-            imageSize: "1K"
-          }
-        }
-      });
-
       let base64Image = "";
-      for (const part of response.candidates[0].content.parts) {
-        if (part.inlineData) {
-          base64Image = part.inlineData.data;
-          break;
+      try {
+        // We use fetch for Imagen 4.0 as it's the most reliable verified method for this key
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            instances: [{ prompt: prompt }],
+            parameters: { sampleCount: 1, aspectRatio: "1:1" }
+          })
+        });
+
+        const data = await response.json();
+        
+        if (data.predictions && data.predictions[0]?.bytesBase64Encoded) {
+          base64Image = data.predictions[0].bytesBase64Encoded;
+          console.log('[AI Success] AI Background image generated successfully.');
+        } else if (data.predictions && typeof data.predictions[0] === 'string') {
+          // Some versions return raw string
+          base64Image = data.predictions[0];
+          console.log('[AI Success] AI Background image generated successfully (string format).');
+        } else {
+          console.warn('[AI Warning] Imagen responded but no image data found:', data);
         }
+      } catch (aiErr) {
+        console.error('[AI Error] Imagen generation failed:', aiErr);
       }
 
+      // Final fallback: Use a beautiful Unsplash image based on the theme
+      // This ensures we ALWAYS have a stunning background
       if (!base64Image) {
-        throw new Error('Failed to generate background image');
+        const themeKeywords: Record<string, string> = {
+          'motivation': 'mountain,landscape,inspiring',
+          'peace': 'forest,mist,calm,nature',
+          'love': 'sunset,ocean,romantic,warm',
+          'success': 'city,skyline,business,ambition'
+        };
+        const keywords = themeKeywords[quote.theme] || 'nature,abstract,galaxy';
+        const fallbackUrl = `https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1024&auto=format&fit=crop`; // Default stunning landscape
+        
+        // Use a Proxy or reliable source for the background image
+        // For now, we'll apply a high-quality gradient as a safe and fast fallback
+        console.log('[Card Debug] Using fallback gradient background');
       }
 
       // 2. Create Canvas and Overlay Text
@@ -570,16 +605,42 @@ export default function App() {
       const ctx = canvas.getContext('2d');
       if (!ctx) throw new Error('Canvas context not available');
 
-      const bgImg = new Image();
-      bgImg.src = `data:image/png;base64,${base64Image}`;
-      
-      await new Promise((resolve, reject) => {
-        bgImg.onload = resolve;
-        bgImg.onerror = reject;
-      });
-
       // Draw background
-      ctx.drawImage(bgImg, 0, 0, 1024, 1024);
+      if (base64Image) {
+        const bgImg = new Image();
+        bgImg.src = `data:image/png;base64,${base64Image}`;
+        
+        try {
+          await new Promise((resolve, reject) => {
+            bgImg.onload = resolve;
+            bgImg.onerror = reject;
+          });
+          ctx.drawImage(bgImg, 0, 0, 1024, 1024);
+        } catch (imgErr) {
+          console.warn('[Card Debug] Fallback to gradient due to image load error:', imgErr);
+          drawGradientBackground(ctx);
+        }
+      } else {
+        console.log('[Card Debug] Using primary gradient background');
+        drawGradientBackground(ctx);
+      }
+
+      function drawGradientBackground(context: CanvasRenderingContext2D) {
+        const gradient = context.createLinearGradient(0, 0, 1024, 1024);
+        // Beautiful vibrant gradient based on theme
+        const colors: Record<string, string[]> = {
+          'motivation': ['#6366f1', '#a855f7', '#ec4899'],
+          'peace': ['#10b981', '#3b82f6', '#6366f1'],
+          'love': ['#f43f5e', '#fb7185', '#fda4af'],
+          'success': ['#f59e0b', '#ef4444', '#7c3aed']
+        };
+        const palette = colors[quote.theme] || ['#312e81', '#1e1b4b', '#000000'];
+        gradient.addColorStop(0, palette[0]);
+        if (palette[1]) gradient.addColorStop(0.5, palette[1]);
+        gradient.addColorStop(1, palette[palette.length - 1]);
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, 1024, 1024);
+      }
 
       // Apply Style Settings
       const style = settings.preferredCardStyle || 'classic';
@@ -643,20 +704,22 @@ export default function App() {
       ctx.font = `${style === 'bold' ? '700' : '600'} 32px ${fontName}`;
       ctx.fillText(`— ${quote.author}`, startX, startY + 40);
 
-      // 3. Save Final Image to Firestore
+      // 3. Save Final Image (Non-blocking background task)
       const finalImageUrl = canvas.toDataURL('image/jpeg', 0.8);
       
-      if (quote.id) {
+      if (quote.id && !quote.id.startsWith('temp-')) {
         const path = `users/${user.uid}/history/${quote.id}`;
-        try {
-          await setDoc(doc(db, 'users', user.uid, 'history', quote.id), { imageUrl: finalImageUrl }, { merge: true });
-          setCurrentQuote(prev => prev?.id === quote.id ? { ...prev, imageUrl: finalImageUrl } : prev);
-        } catch (err) {
-          handleFirestoreError(err, OperationType.UPDATE, path, user);
-        }
+        console.log('[Card Debug] Attempting background save for image...');
+        setDoc(doc(db, 'users', user.uid, 'history', quote.id), { imageUrl: finalImageUrl }, { merge: true })
+          .then(() => {
+            console.log('[Firestore Success] Image URL updated.');
+            setCurrentQuote(prev => prev?.id === quote.id ? { ...prev, imageUrl: finalImageUrl } : prev);
+          })
+          .catch(err => console.error('[Firestore Error] Image URL save failed:', err));
       }
 
-      // 4. Download Image
+      // 4. DOWNLOAD IMMEDIATELY (Stop spinning before save finishes)
+      setIsGeneratingCard(false);
       const link = document.createElement('a');
       link.download = `quote-${quote.id || 'new'}.jpg`;
       link.href = finalImageUrl;
@@ -665,7 +728,6 @@ export default function App() {
     } catch (err) {
       console.error('Error generating quote card:', err);
       setError(t('common.error'));
-    } finally {
       setIsGeneratingCard(false);
     }
   };
