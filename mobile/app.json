@@ -32,7 +32,9 @@
             {
               "name": "QuoteWidget",
               "label": "Lumina Daily Wisdom",
-              "configXml": "@xml/quote_widget_info"
+              "configXml": "@xml/quote_widget_info",
+              "minWidth": "110dp",
+              "minHeight": "110dp"
             }
           ]
         }
