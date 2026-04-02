@@ -1,67 +1,69 @@
-# ✨ AI Daily Quote Notifier (PWA)
+# ✨ Lumina: Your Daily Dose of Wisdom
 
-[![License: Apache-2.0](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
-[![React](https://img.shields.io/badge/React-19.0-blue.svg)](https://reactjs.org/)
-[![Firebase](https://img.shields.io/badge/Firebase-11.0-orange.svg)](https://firebase.google.com/)
-[![Gemini AI](https://img.shields.io/badge/Gemini_AI-3.1_Pro-purple.svg)](https://ai.google.dev/)
+> **"Lumina: 당신의 하루를 채우는 지혜 한 조각"**
+>
+> Lumina는 전 세계의 지혜로운 명언과 성찰을 아름다운 이미지와 함께 제공하는 지능형 지혜 큐레이션 플랫폼입니다. 이제 웹과 모바일(Android) 모두에서 Lumina를 경험해 보세요.
 
-AI 기반의 맞춤형 데일리 명언 알림 웹앱입니다. 매일 아침, 당신만을 위한 AI의 특별한 명언과 따뜻한 해설로 하루를 시작해보세요.
+---
 
-## 🚀 주요 기능
+## 🌟 주요 특징 (Key Features)
 
-- **🤖 AI 맞춤형 명언 생성**: Google Gemini AI를 활용하여 사용자가 선택한 테마에 맞춰 명언과 해설을 생성합니다.
-- **🌐 다국어 지원**: 한국어, English, 日本語, 中文(简体) 4개 국어를 지원합니다.
-- **🔔 스마트 푸시 알림**: 사용자가 설정한 시간에 맞춰 매일 새로운 명언을 브라우저 푸시 알림으로 전달합니다.
-- **📱 PWA (Progressive Web App)**: 모바일 기기에서 홈 화면에 추가하여 네이티브 앱처럼 사용할 수 있습니다.
-- **📜 히스토리 관리**: 과거에 수신했던 명언들을 언제든지 다시 확인할 수 있습니다.
-- **🎨 4가지 테마**: 동기부여, 위로, 유머, 성공 중 원하는 분위기를 선택할 수 있습니다.
+### 📲 모바일 앱 (Porting Completed)
+- **완위 네이티브 경험**: Expo와 Android Native를 결합한 최고의 퍼포먼스.
+- **오프라인 번들링**: 네트워크 환경과 관계없이 안정적이고 빠른 실행 속도 보장.
+- **프리미엄 UI/UX**: 웹 버전의 감성을 유지하면서 모바일의 편리함(하단 탭, 알림)을 더한 디자인.
+- **맞춤형 빌드 자동화**: 개발자와 사용자를 위한 전용 자동 빌드/설치 스크립트(`build_and_install.bat`) 제공.
 
-## 🛠 기술 스택
+### 🧠 지능형 지혜 큐레이션
+- **AI-Powered Insights**: Google Gemini 가 단순히 명언을 찾는 것을 넘어, 그 속에 담긴 '지혜의 깊이'를 성찰할 수 있는 해설을 생성합니다.
+- **Dynamic Imagery**: 문구의 정서에 최적화된 배경 이미지를 실시간으로 생성하여 시각적 몰입감을 더합니다.
 
-- **Frontend**: React 19, Tailwind CSS, Framer Motion, Lucide React
-- **Backend/DB**: Firebase (Firestore, Authentication, Cloud Messaging)
-- **AI**: Google Gemini API (Google AI SDK)
-- **Internationalization**: i18next
-- **Build Tool**: Vite
+### 🌐 글로벌 대응
+- **4개 국어 지원**: 한국어, English, 日本語, 中文을 실시간으로 전환하여 이용 가능합니다.
 
-## 📦 설치 및 실행 방법
+### 💌 지혜 배달 (Notifications)
+- **Daily Notification**: 사용자가 원하는 시간에 맞춰 매일 신선한 지혜의 메시지를 푸시 알림으로 전달합니다.
 
-### 1. 저장소 복제
-```bash
-git clone https://github.com/your-username/ai-quote-notifier.git
-cd ai-quote-notifier
+---
+
+## 🛠 기술 스택 (Tech Stack)
+
+### **Frontend & Mobile**
+- **Mobile**: `React Native`, `Expo (Bare Workflow)`
+- **Web**: `Next.js`, `React`
+- **Styling**: `Vanilla CSS`, `React Native StyleSheet` (Neutral-50 Design System)
+- **Icons**: `Lucide React (Native)`
+
+### **Backend & Infrastructure**
+- **Authentication**: `Firebase Auth` (Anonymous Login support)
+- **Database**: `Cloud Firestore` (History & Settings persistence)
+- **Generative AI**: `Google Gemini SDK` (Text-to-Wisdom & Theme-to-Image)
+
+---
+
+## 🚀 시작하기 (Getting Started)
+
+### **Mobile (Android Build & Install)**
+사용자님의 S24 등 안드로이드 기기가 연결된 상태에서 다음을 실행하세요:
+```batch
+.\build_and_install.bat
 ```
+*이 명령은 코드 번들링, 에셋 동기화, APK 빌드 및 기기 설치를 한 번에 완료합니다.*
 
-### 2. 의존성 설치
-```bash
-npm install
-```
-
-### 3. 환경 변수 설정
-`.env.example` 파일을 복사하여 `.env` 파일을 만들고 필요한 API 키를 입력하세요.
-```env
-VITE_GEMINI_API_KEY=your_gemini_api_key
-```
-
-### 4. Firebase 설정
-`firebase-applet-config.json` 파일에 본인의 Firebase 프로젝트 설정을 입력하세요.
-
-### 5. 개발 서버 실행
+### **Web Development**
 ```bash
 npm run dev
 ```
 
-## 🌐 GitHub Pages 배포 (github.io)
+---
 
-이 프로젝트는 Vite를 사용하므로 GitHub Pages에 배포하려면 다음 단계를 따르세요:
-
-1. `vite.config.ts`에서 `base` 경로를 설정합니다 (예: `/ai-quote-notifier/`).
-2. `npm run build`를 실행하여 `dist` 폴더를 생성합니다.
-3. GitHub 저장소 설정에서 `Settings > Pages`로 이동하여 배포 소스를 `gh-pages` 브랜치나 `docs` 폴더로 설정합니다.
-
-## 📄 라이선스
-
-이 프로젝트는 Apache-2.0 라이선스에 따라 배포됩니다.
+## 📜 개발 지침 (Guidelines)
+프로젝트의 자세한 개발 철학 및 기술 지침은 [MOBILE_GUIDELINES.md](./MOBILE_GUIDELINES.md)를 참고해 주시기 바랍니다.
 
 ---
-Developed with ❤️ by [jeiel85](https://github.com/jeiel85)
+
+## 🤝 기여 (Contributing)
+Lumina는 지혜를 나누는 모든 이들의 참여를 환영합니다. 코드 기여 및 버그 제보는 Issue나 Pull Request를 이용해 주세요.
+
+---
+© 2026 Lumina Project. All rights reserved.
