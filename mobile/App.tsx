@@ -34,6 +34,11 @@ import * as MediaLibrary from 'expo-media-library';
 import { generateNativeQuote, generateNativeImage, Quote } from './src/lib/ai';
 import { auth, db } from './src/config/firebase';
 import { 
+  registerForPushNotificationsAsync, 
+  scheduleDailyQuoteNotification,
+  cancelAllNotifications 
+} from './src/lib/notifications';
+import { 
   collection, 
   addDoc, 
   serverTimestamp, 
@@ -42,6 +47,7 @@ import {
   limit, 
   onSnapshot 
 } from 'firebase/firestore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
 
@@ -49,13 +55,37 @@ export default function App() {
   const [quote, setQuote] = useState<Quote | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [isNotified, setIsNotified] = useState(false);
   const [history, setHistory] = useState<Quote[]>([]);
   const viewRef = useRef(null);
 
-  // Initial generation
+  // Initial generation and Notification Sync
   useEffect(() => {
     handleGenerate();
+    checkNotificationStatus();
   }, []);
+
+  const checkNotificationStatus = async () => {
+    const saved = await AsyncStorage.getItem('@lumina_notified');
+    setIsNotified(saved === 'true');
+  };
+
+  const toggleNotification = async () => {
+    if (!isNotified) {
+      const token = await registerForPushNotificationsAsync();
+      if (token) {
+        await scheduleDailyQuoteNotification(8, 0, quote?.text || "오늘도 당신만의 지혜를 발견해 보세요.");
+        setIsNotified(true);
+        await AsyncStorage.setItem('@lumina_notified', 'true');
+        Alert.alert('알림 활성화', '매일 아침 8시에 오늘의 명언을 보내드림니다.');
+      }
+    } else {
+      await cancelAllNotifications();
+      setIsNotified(false);
+      await AsyncStorage.setItem('@lumina_notified', 'false');
+      Alert.alert('알림 해제', '더 이상 데일리 알림을 보내드리지 않습니다.');
+    }
+  };
 
   const handleGenerate = async () => {
     setIsGenerating(true);
@@ -187,6 +217,24 @@ export default function App() {
             <Share2 color="#6366f1" size={20} />
             <Text style={[styles.actionButtonText, { color: '#6366f1' }]}>카드 저장 및 공유</Text>
           </TouchableOpacity>
+
+          {/* New Notification Toggle Button */}
+          <TouchableOpacity 
+            style={[
+              styles.actionButton, 
+              styles.notifyButton,
+              isNotified && styles.notifyActiveButton
+            ]} 
+            onPress={toggleNotification}
+          >
+            <Sparkles color={isNotified ? "#fff" : "#6366f1"} size={20} />
+            <Text style={[
+              styles.actionButtonText, 
+              { color: isNotified ? "white" : "#6366f1" }
+            ]}>
+              {isNotified ? '데일리 알림 ON (08:00)' : '매일 아침 명언 받기'}
+            </Text>
+          </TouchableOpacity>
         </View>
 
         {/* History Section Hint */}
@@ -312,6 +360,15 @@ const styles = StyleSheet.create({
   },
   shareButton: {
     backgroundColor: 'white',
+  },
+  notifyButton: {
+    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+    borderWidth: 1,
+    borderColor: '#6366f1',
+  },
+  notifyActiveButton: {
+    backgroundColor: '#10b981',
+    borderColor: '#10b981',
   },
   actionButtonText: {
     fontSize: 16,
