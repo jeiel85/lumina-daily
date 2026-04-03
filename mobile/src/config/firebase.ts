@@ -2,9 +2,10 @@ import { initializeApp } from 'firebase/app';
 import { 
   getAuth, 
   initializeAuth, 
+  // @ts-ignore
+  getReactNativePersistence,
   GoogleAuthProvider // 추가: 구글 제공업체
 } from 'firebase/auth';
-import { getReactNativePersistence } from 'firebase/auth/react-native';
 import { getFirestore } from 'firebase/firestore';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
@@ -21,6 +22,8 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 // Persistence check with version safety
+// For React Native, initializeAuth is needed. 
+// If getReactNativePersistence is missing from your types, we use ts-ignore but it should exist at runtime in JS SDK v10+.
 const auth = initializeAuth(app, {
   persistence: getReactNativePersistence(AsyncStorage)
 });
