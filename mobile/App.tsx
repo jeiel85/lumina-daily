@@ -188,9 +188,14 @@ export default function App() {
     try {
       const newQuoteData = await generateNativeQuote(theme, language);
       const base64Image = await generateNativeImage(theme);
-      const finalQuote = { ...newQuoteData, imageUrl: base64Image ? `data:image/png;base64,${base64Image}` : undefined };
+      const finalQuote: any = { ...newQuoteData };
+      if (base64Image) finalQuote.imageUrl = `data:image/png;base64,${base64Image}`;
+      
       setQuote(finalQuote);
-      if (user) await addDoc(collection(db, 'users', user.uid, 'history'), { ...finalQuote, createdAt: serverTimestamp(), theme });
+      if (user) {
+        const firestoreData = { ...finalQuote, createdAt: serverTimestamp(), theme };
+        await addDoc(collection(db, 'users', user.uid, 'history'), firestoreData);
+      }
     } catch (error: any) {
       Alert.alert(t('errorTitle'), `${t('errorMsg')}\n\n[Details]\n${error.message}`);
     } finally { setIsGenerating(false); }
