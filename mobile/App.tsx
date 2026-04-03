@@ -140,10 +140,10 @@ export default function App() {
     ? (sysScheme === 'dark' ? APP_THEMES.dark : APP_THEMES.white)
     : (APP_THEMES[appTheme] || APP_THEMES.white);
 
-  // Google Auth: Successfully updated with User's NEW project IDs
+  // Google Auth: FINALIZED with correct Web client ID for new project
   const [request, response, promptAsync] = Google.useAuthRequest({
     androidClientId: "28269870370-9n32cpa1hclfmno0plr9e5ctpa4a5c6c.apps.googleusercontent.com",
-    webClientId: "28269870370-l464dp70lvgfjuuvk88mimdpllvahmvf.apps.googleusercontent.com",
+    webClientId: "28269870370-knbfrt9acp1kgvjcfbj7pbdhl1rhfrlj.apps.googleusercontent.com",
   });
 
   useEffect(() => {
