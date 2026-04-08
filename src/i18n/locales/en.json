@@ -10,7 +10,9 @@
     "error_generating_quote": "An error occurred while generating the quote. Please try again later.",
     "error_boundary_title": "An error occurred.",
     "error_boundary_desc": "An unexpected error occurred in the application.",
-    "error_boundary_retry": "Retry"
+    "error_boundary_retry": "Retry",
+    "cancel": "Cancel",
+    "done": "Done"
   },
   "home": {
     "title": "Today's Quote",
@@ -46,10 +48,16 @@
     "material_mode": "Material You",
     "visual_desc": "Change the visual appearance of the app.",
     "status": "Notification Status",
-    "status_desc": "Browser push notification status",
+    "status_desc": "App notification status",
     "enabled": "Enabled",
     "disabled": "Disabled",
-    "turn_on": "Turn On"
+    "turn_on": "Turn On",
+    "section_notification": "Notifications",
+    "section_content": "Content",
+    "section_appearance": "Appearance",
+    "section_app": "App Settings",
+    "section_support": "Support",
+    "buy_coffee": "Buy me a coffee"
   },
   "auth": {
     "welcome": "Lumina Daily",
