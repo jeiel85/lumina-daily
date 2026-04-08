@@ -59,6 +59,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import './i18n/config';
 import React, { Component, ReactNode } from 'react';
+import { Capacitor } from '@capacitor/core';
 
 // Error Boundary Component
 interface ErrorBoundaryProps {
@@ -183,6 +184,9 @@ export default function App() {
   });
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingCard, setIsGeneratingCard] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [tempHour, setTempHour] = useState(8);
+  const [tempMinute, setTempMinute] = useState(0);
   const [isLandscape, setIsLandscape] = useState(false);
   const [isMobileOrTablet, setIsMobileOrTablet] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -546,56 +550,32 @@ export default function App() {
     }
 
     try {
-      const genAI = new GoogleGenerativeAI(apiKey);
-      
-      // 1. Generate Background Image with AI (Imagen 4.0)
-      console.log('[AI Debug] Generating theme-based background image with Imagen 4.0...');
-      const themeLabel = THEMES.find(t => t.id === settings.theme)?.labelKey || 'theme_motivation';
-      const prompt = `A beautiful, high-quality, artistic and atmospheric background for a quote about "${t(themeLabel)}". Minimalist, poetic, inspiring, cinematic lighting, 4k background, no text.`;
-      
+      // 1. Picsum Photos로 테마별 배경 이미지 가져오기 (무료, API 키 불필요)
+      const themeSeeds: Record<string, string> = {
+        'motivation': 'mountain-peak',
+        'peace':      'calm-forest',
+        'love':       'golden-sunset',
+        'success':    'city-lights',
+      };
+      const seed = themeSeeds[quote.theme] || 'nature-sky';
+
       let base64Image = "";
       try {
-        // We use fetch for Imagen 4.0 as it's the most reliable verified method for this key
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/imagen-4.0-generate-001:predict?key=${apiKey}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            instances: [{ prompt: prompt }],
-            parameters: { sampleCount: 1, aspectRatio: "1:1" }
-          })
-        });
-
-        const data = await response.json();
-        
-        if (data.predictions && data.predictions[0]?.bytesBase64Encoded) {
-          base64Image = data.predictions[0].bytesBase64Encoded;
-          console.log('[AI Success] AI Background image generated successfully.');
-        } else if (data.predictions && typeof data.predictions[0] === 'string') {
-          // Some versions return raw string
-          base64Image = data.predictions[0];
-          console.log('[AI Success] AI Background image generated successfully (string format).');
-        } else {
-          console.warn('[AI Warning] Imagen responded but no image data found:', data);
+        const imgResponse = await fetch(`https://picsum.photos/seed/${seed}/1024/1024`);
+        if (imgResponse.ok) {
+          const blob = await imgResponse.blob();
+          base64Image = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              const result = (reader.result as string).replace(/^data:[^;]+;base64,/, '');
+              resolve(result);
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+          });
         }
-      } catch (aiErr) {
-        console.error('[AI Error] Imagen generation failed:', aiErr);
-      }
-
-      // Final fallback: Use a beautiful Unsplash image based on the theme
-      // This ensures we ALWAYS have a stunning background
-      if (!base64Image) {
-        const themeKeywords: Record<string, string> = {
-          'motivation': 'mountain,landscape,inspiring',
-          'peace': 'forest,mist,calm,nature',
-          'love': 'sunset,ocean,romantic,warm',
-          'success': 'city,skyline,business,ambition'
-        };
-        const keywords = themeKeywords[quote.theme] || 'nature,abstract,galaxy';
-        const fallbackUrl = `https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1024&auto=format&fit=crop`; // Default stunning landscape
-        
-        // Use a Proxy or reliable source for the background image
-        // For now, we'll apply a high-quality gradient as a safe and fast fallback
-        console.log('[Card Debug] Using fallback gradient background');
+      } catch (imgErr) {
+        console.warn('[Card] Picsum fetch failed, using gradient fallback');
       }
 
       // 2. Create Canvas and Overlay Text
@@ -718,12 +698,30 @@ export default function App() {
           .catch(err => console.error('[Firestore Error] Image URL save failed:', err));
       }
 
-      // 4. DOWNLOAD IMMEDIATELY (Stop spinning before save finishes)
+      // 4. DOWNLOAD / SHARE IMMEDIATELY
       setIsGeneratingCard(false);
-      const link = document.createElement('a');
-      link.download = `quote-${quote.id || 'new'}.jpg`;
-      link.href = finalImageUrl;
-      link.click();
+      if (Capacitor.isNativePlatform()) {
+        const { Filesystem, Directory } = await import('@capacitor/filesystem');
+        const { Share } = await import('@capacitor/share');
+        const base64Data = finalImageUrl.replace(/^data:image\/jpeg;base64,/, '');
+        const fileName = `quote-${quote.id || 'new'}.jpg`;
+        await Filesystem.writeFile({
+          path: fileName,
+          data: base64Data,
+          directory: Directory.Cache,
+        });
+        const { uri } = await Filesystem.getUri({ path: fileName, directory: Directory.Cache });
+        try {
+          await Share.share({ title: t('home.title'), url: uri, dialogTitle: t('home.title') });
+        } catch {
+          // 공유 시트 닫기/취소는 에러 아님 — 무시
+        }
+      } else {
+        const link = document.createElement('a');
+        link.download = `quote-${quote.id || 'new'}.jpg`;
+        link.href = finalImageUrl;
+        link.click();
+      }
 
     } catch (err) {
       console.error('Error generating quote card:', err);
@@ -822,22 +820,32 @@ export default function App() {
                       </p>
                     </div>
 
-                    <div className="pt-4 flex gap-2">
-                      <button 
+                    <div className="pt-4 flex flex-col gap-2">
+                      <button
                         onClick={() => generateQuoteCard(currentQuote)}
                         disabled={isGeneratingCard}
-                        className="flex-1 py-3 px-4 bg-indigo-600 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 disabled:opacity-50 transition-all"
+                        className="w-full py-3 px-4 bg-indigo-600 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 disabled:opacity-50 transition-all"
                       >
                         {isGeneratingCard ? <RefreshCw className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
                         {t('home.generate_card')}
                       </button>
-                      <button 
-                        onClick={() => handleShare(currentQuote)}
-                        className="flex-1 py-3 px-4 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border border-neutral-100 dark:border-neutral-700 rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all"
-                      >
-                        <ExternalLink className="w-4 h-4" />
-                        {t('share.button')}
-                      </button>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={generateQuote}
+                          disabled={isGenerating}
+                          className="flex-1 py-3 px-4 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border border-neutral-100 dark:border-neutral-700 rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-neutral-50 dark:hover:bg-neutral-700 disabled:opacity-50 transition-all"
+                        >
+                          <RefreshCw className={`w-4 h-4 text-indigo-600 dark:text-indigo-400 ${isGenerating ? 'animate-spin' : ''}`} />
+                          {t('home.refresh')}
+                        </button>
+                        <button
+                          onClick={() => handleShare(currentQuote)}
+                          className="flex-1 py-3 px-4 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border border-neutral-100 dark:border-neutral-700 rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          {t('share.button')}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ) : (
@@ -858,31 +866,6 @@ export default function App() {
               </div>
 
               <div className="space-y-6">
-                {/* Quick Actions */}
-                <div className="grid grid-cols-2 gap-4">
-                  <button 
-                    onClick={generateQuote}
-                    disabled={isGenerating}
-                    className="bg-white dark:bg-neutral-900 p-4 rounded-2xl border border-neutral-100 dark:border-neutral-800 flex flex-col items-center gap-2 hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
-                  >
-                    <RefreshCw className={`w-6 h-6 text-indigo-600 dark:text-indigo-400 ${isGenerating ? 'animate-spin' : ''}`} />
-                    <span className="text-xs font-bold text-neutral-600 dark:text-neutral-400">{t('home.refresh')}</span>
-                  </button>
-                  <div className="bg-white dark:bg-neutral-900 p-4 rounded-2xl border border-neutral-100 dark:border-neutral-800 flex flex-col items-center gap-2">
-                    <Clock className="w-6 h-6 text-purple-600 dark:text-purple-400" />
-                    <span className="text-xs font-bold text-neutral-600 dark:text-neutral-400">{t('home.notification_at', { time: settings.notificationTime })}</span>
-                  </div>
-                </div>
-
-                {/* Ad Placeholder */}
-                <div className="bg-neutral-100 dark:bg-neutral-900 rounded-2xl p-4 border border-dashed border-neutral-300 dark:border-neutral-700 flex flex-col items-center justify-center min-h-[100px] text-neutral-400 dark:text-neutral-600">
-                  <p className="text-[10px] uppercase font-bold tracking-widest mb-1">Advertisement</p>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs">Sponsor Area</span>
-                    <ExternalLink className="w-3 h-3" />
-                  </div>
-                </div>
-
                 {/* Notification Banner */}
                 {!settings.isSubscribed && (
                   <div className="bg-indigo-600 rounded-2xl p-6 text-white flex items-center justify-between">
@@ -931,41 +914,64 @@ export default function App() {
                     </div>
                     
                     {quote.imageUrl && (
-                      <div className="relative aspect-square rounded-xl overflow-hidden shadow-inner bg-neutral-100 dark:bg-neutral-800">
-                        <img src={quote.imageUrl} alt="Quote Card" className="w-full h-full object-cover" />
-                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                          <button 
+                      <div className="space-y-2">
+                        <div className="aspect-square rounded-xl overflow-hidden shadow-inner bg-neutral-100 dark:bg-neutral-800">
+                          <img src={quote.imageUrl} alt="Quote Card" className="w-full h-full object-cover" />
+                        </div>
+                        <div className="flex gap-2">
+                          <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              const link = document.createElement('a');
-                              link.download = `quote-${quote.id}.jpg`;
-                              link.href = quote.imageUrl!;
-                              link.click();
+                              if (Capacitor.isNativePlatform()) {
+                                import('@capacitor/filesystem').then(async ({ Filesystem, Directory }) => {
+                                  const { Share } = await import('@capacitor/share');
+                                  const res = await fetch(quote.imageUrl!);
+                                  const blob = await res.blob();
+                                  const reader = new FileReader();
+                                  reader.onloadend = async () => {
+                                    const base64Data = (reader.result as string).replace(/^data:image\/jpeg;base64,/, '');
+                                    const fileName = `quote-${quote.id}.jpg`;
+                                    await Filesystem.writeFile({ path: fileName, data: base64Data, directory: Directory.Cache });
+                                    const { uri } = await Filesystem.getUri({ path: fileName, directory: Directory.Cache });
+                                    try {
+                                      await Share.share({ url: uri });
+                                    } catch {
+                                      // 공유 취소는 에러 아님
+                                    }
+                                  };
+                                  reader.readAsDataURL(blob);
+                                });
+                              } else {
+                                const link = document.createElement('a');
+                                link.download = `quote-${quote.id}.jpg`;
+                                link.href = quote.imageUrl!;
+                                link.click();
+                              }
                             }}
-                            className="w-9 h-9 bg-white rounded-full flex items-center justify-center text-neutral-900 hover:scale-110 transition-transform"
-                            title={t('history.download')}
+                            className="flex-1 py-2 px-3 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
                           >
-                            <Download className="w-4 h-4" />
+                            <Download className="w-3.5 h-3.5" />
+                            {t('history.download')}
                           </button>
-                          <button 
+                          <button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleShare(quote);
                             }}
-                            className="w-9 h-9 bg-white rounded-full flex items-center justify-center text-neutral-900 hover:scale-110 transition-transform"
-                            title={t('share.button')}
+                            className="flex-1 py-2 px-3 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
                           >
-                            <ExternalLink className="w-4 h-4" />
+                            <ExternalLink className="w-3.5 h-3.5" />
+                            {t('share.button')}
                           </button>
-                          <button 
+                          <button
                             onClick={(e) => {
                               e.stopPropagation();
                               generateQuoteCard(quote);
                             }}
-                            className="w-9 h-9 bg-white rounded-full flex items-center justify-center text-neutral-900 hover:scale-110 transition-transform"
-                            title={t('history.regenerate')}
+                            className="flex-1 py-2 px-3 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
                           >
-                            <RefreshCw className="w-4 h-4" />
+                            <RefreshCw className="w-3.5 h-3.5" />
+                            {t('history.regenerate')}
                           </button>
                         </div>
                       </div>
@@ -994,7 +1000,7 @@ export default function App() {
           )}
 
           {activeTab === 'settings' && (
-            <motion.div 
+            <motion.div
               key="settings"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -1002,72 +1008,213 @@ export default function App() {
               className="space-y-8"
             >
               <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">{t('settings.title')}</h2>
-              
-              <section className="space-y-4">
-                <h3 className="text-sm font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">{t('settings.notification_time')}</h3>
-                <div className="bg-white dark:bg-neutral-900 p-6 rounded-3xl border border-neutral-100 dark:border-neutral-800 flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center">
-                      <Clock className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+
+              {/* ─── 그룹 1: 알림 ─── */}
+              <section className="space-y-3">
+                <h3 className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">{t('settings.section_notification')}</h3>
+                <div className="bg-white dark:bg-neutral-900 rounded-3xl border border-neutral-100 dark:border-neutral-800 divide-y divide-neutral-100 dark:divide-neutral-800 overflow-hidden">
+                  {/* 알림 상태 */}
+                  <div className="p-5 flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${settings.isSubscribed ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
+                        <Bell className={`w-5 h-5 ${settings.isSubscribed ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`} />
+                      </div>
+                      <div>
+                        <p className="font-bold text-neutral-800 dark:text-neutral-200 text-sm">{settings.isSubscribed ? t('settings.enabled') : t('settings.disabled')}</p>
+                        <p className="text-xs text-neutral-400 dark:text-neutral-500">{t('settings.status_desc')}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-bold text-neutral-800 dark:text-neutral-200">{settings.notificationTime}</p>
-                      <p className="text-xs text-neutral-400 dark:text-neutral-500">{t('settings.notification_desc')}</p>
+                    {!settings.isSubscribed && (
+                      <button onClick={handleSubscribe} className="text-indigo-600 dark:text-indigo-400 font-bold text-sm">
+                        {t('settings.turn_on')}
+                      </button>
+                    )}
+                  </div>
+                  {/* 알림 시간 */}
+                  <button
+                    onClick={() => {
+                      const [h, m] = settings.notificationTime.split(':').map(Number);
+                      setTempHour(h);
+                      setTempMinute(m);
+                      setShowTimePicker(true);
+                    }}
+                    className="w-full p-5 flex items-center justify-between hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center">
+                        <Clock className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                      </div>
+                      <div className="text-left">
+                        <p className="font-bold text-neutral-800 dark:text-neutral-200 text-sm">{t('settings.notification_time')}</p>
+                        <p className="text-xs text-neutral-400 dark:text-neutral-500">{t('settings.notification_desc')}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-extrabold text-indigo-600 dark:text-indigo-400 tabular-nums">{settings.notificationTime}</span>
+                      <ChevronRight className="w-4 h-4 text-neutral-300 dark:text-neutral-600" />
+                    </div>
+                  </button>
+                </div>
+              </section>
+
+              {/* Time Picker Modal */}
+              {showTimePicker && (
+                <div className="fixed inset-0 z-50 flex items-end" onClick={() => setShowTimePicker(false)}>
+                  <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+                  <div
+                    className="relative w-full bg-white dark:bg-neutral-900 rounded-t-3xl px-6 pt-6 pb-10 space-y-6"
+                    onClick={e => e.stopPropagation()}
+                  >
+                    <div className="w-10 h-1 bg-neutral-200 dark:bg-neutral-700 rounded-full mx-auto" />
+                    <div className="flex items-center justify-between">
+                      <button onClick={() => setShowTimePicker(false)} className="text-sm text-neutral-400 dark:text-neutral-500 font-semibold px-2 py-1">{t('common.cancel')}</button>
+                      <h3 className="text-base font-extrabold text-neutral-900 dark:text-neutral-100">{t('settings.notification_time')}</h3>
+                      <button
+                        onClick={() => {
+                          const time = `${String(tempHour).padStart(2,'0')}:${String(tempMinute).padStart(2,'0')}`;
+                          saveSettings({ notificationTime: time });
+                          setShowTimePicker(false);
+                        }}
+                        className="text-sm text-indigo-600 dark:text-indigo-400 font-bold px-2 py-1"
+                      >{t('common.done')}</button>
+                    </div>
+                    <div className="flex items-center justify-center gap-3 py-2">
+                      <div className="flex flex-col items-center gap-3">
+                        <button onClick={() => setTempHour(h => (h + 1) % 24)} className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-2xl font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">▲</button>
+                        <span className="text-6xl font-black text-neutral-900 dark:text-neutral-100 w-28 text-center tabular-nums">{String(tempHour).padStart(2,'0')}</span>
+                        <button onClick={() => setTempHour(h => (h - 1 + 24) % 24)} className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-2xl font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">▼</button>
+                        <p className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">시</p>
+                      </div>
+                      <span className="text-5xl font-black text-neutral-300 dark:text-neutral-600 mb-6">:</span>
+                      <div className="flex flex-col items-center gap-3">
+                        <button onClick={() => setTempMinute(m => (m + 5) % 60)} className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-2xl font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">▲</button>
+                        <span className="text-6xl font-black text-neutral-900 dark:text-neutral-100 w-28 text-center tabular-nums">{String(tempMinute).padStart(2,'0')}</span>
+                        <button onClick={() => setTempMinute(m => (m - 5 + 60) % 60)} className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-2xl font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">▼</button>
+                        <p className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">분</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-4 gap-2">
+                      {['07:00','08:00','09:00','12:00','18:00','20:00','21:00','22:00'].map(t2 => (
+                        <button
+                          key={t2}
+                          onClick={() => { const [h, m] = t2.split(':').map(Number); setTempHour(h); setTempMinute(m); }}
+                          className={`py-2 rounded-xl text-sm font-bold transition-colors ${tempHour === parseInt(t2) && tempMinute === 0 ? 'bg-indigo-600 text-white' : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30'}`}
+                        >{t2}</button>
+                      ))}
                     </div>
                   </div>
-                  <input 
-                    type="time" 
-                    value={settings.notificationTime}
-                    onChange={(e) => saveSettings({ notificationTime: e.target.value })}
-                    className="w-12 h-12 opacity-0 absolute right-12 cursor-pointer"
-                  />
-                  <ChevronRight className="w-5 h-5 text-neutral-300 dark:text-neutral-600" />
+                </div>
+              )}
+
+              {/* ─── 그룹 2: 콘텐츠 ─── */}
+              <section className="space-y-3">
+                <h3 className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">{t('settings.section_content')}</h3>
+                {/* 명언 테마 (단일 선택) */}
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold text-neutral-600 dark:text-neutral-300 px-1">{t('settings.theme')}</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {THEMES.map((theme) => (
+                      <button
+                        key={theme.id}
+                        onClick={() => saveSettings({ theme: theme.id })}
+                        className={`py-3 px-2 rounded-2xl border transition-all flex flex-col items-center gap-1.5 ${
+                          settings.theme === theme.id
+                          ? 'bg-indigo-600 border-indigo-600 text-white shadow-md'
+                          : 'bg-white dark:bg-neutral-900 border-neutral-100 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300 hover:border-indigo-200'
+                        }`}
+                      >
+                        <span className="text-xl">{theme.icon}</span>
+                        <span className="font-bold text-[10px]">{t(theme.labelKey)}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                {/* 선호 테마 (알림용 다중 선택) */}
+                <div className="space-y-2 pt-2">
+                  <p className="text-sm font-semibold text-neutral-600 dark:text-neutral-300 px-1">{t('preferredThemes.title')}</p>
+                  <p className="text-xs text-neutral-400 dark:text-neutral-500 px-1">{t('preferredThemes.description')}</p>
+                  <div className="grid grid-cols-3 gap-2">
+                    {THEMES.map((theme) => {
+                      const isSelected = (settings.preferredThemes || []).includes(theme.id);
+                      return (
+                        <button
+                          key={theme.id}
+                          onClick={() => {
+                            const currentThemes = settings.preferredThemes || ['motivation'];
+                            const isCurrentlySelected = currentThemes.includes(theme.id);
+                            const newThemes = isCurrentlySelected
+                              ? currentThemes.filter(id => id !== theme.id)
+                              : [...currentThemes, theme.id];
+                            if (newThemes.length > 0) saveSettings({ preferredThemes: newThemes });
+                          }}
+                          className={`py-3 px-2 rounded-2xl border transition-all flex flex-col items-center gap-1.5 ${
+                            isSelected
+                            ? 'bg-indigo-600 border-indigo-600 text-white shadow-md'
+                            : 'bg-white dark:bg-neutral-900 border-neutral-100 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300 hover:border-indigo-200'
+                          }`}
+                        >
+                          <span className="text-xl">{theme.icon}</span>
+                          <span className="font-bold text-[10px]">{t(theme.labelKey)}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </section>
 
-              <section className="space-y-4">
-                <h3 className="text-sm font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">{t('settings.visual_theme')}</h3>
-                <div className="bg-white dark:bg-neutral-900 p-2 rounded-3xl border border-neutral-100 dark:border-neutral-800 grid grid-cols-4 gap-1">
-                  <button 
-                    onClick={() => saveSettings({ darkMode: 'light' })}
-                    className={`flex flex-col items-center gap-2 py-4 rounded-2xl transition-all ${settings.darkMode === 'light' ? 'bg-indigo-600 text-white shadow-lg' : 'text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}
-                  >
-                    <Sun className="w-5 h-5" />
-                    <span className="text-[10px] font-bold">{t('settings.light_mode')}</span>
-                  </button>
-                  <button 
-                    onClick={() => saveSettings({ darkMode: 'dark' })}
-                    className={`flex flex-col items-center gap-2 py-4 rounded-2xl transition-all ${settings.darkMode === 'dark' ? 'bg-indigo-600 text-white shadow-lg' : 'text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}
-                  >
-                    <Moon className="w-5 h-5" />
-                    <span className="text-[10px] font-bold">{t('settings.dark_mode')}</span>
-                  </button>
-                  <button 
-                    onClick={() => saveSettings({ darkMode: 'system' })}
-                    className={`flex flex-col items-center gap-2 py-4 rounded-2xl transition-all ${settings.darkMode === 'system' ? 'bg-indigo-600 text-white shadow-lg' : 'text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}
-                  >
-                    <Monitor className="w-5 h-5" />
-                    <span className="text-[10px] font-bold">{t('settings.system_mode')}</span>
-                  </button>
-                  <button 
-                    onClick={() => saveSettings({ darkMode: 'material' })}
-                    className={`flex flex-col items-center gap-2 py-4 rounded-2xl transition-all ${settings.darkMode === 'material' ? 'bg-indigo-600 text-white shadow-lg' : 'text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}
-                  >
-                    <Palette className="w-5 h-5" />
-                    <span className="text-[10px] font-bold">{t('settings.material_mode')}</span>
-                  </button>
+              {/* ─── 그룹 3: 외관 ─── */}
+              <section className="space-y-3">
+                <h3 className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">{t('settings.section_appearance')}</h3>
+                {/* 비주얼 테마 */}
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold text-neutral-600 dark:text-neutral-300 px-1">{t('settings.visual_theme')}</p>
+                  <div className="bg-white dark:bg-neutral-900 p-2 rounded-3xl border border-neutral-100 dark:border-neutral-800 grid grid-cols-4 gap-1">
+                    <button onClick={() => saveSettings({ darkMode: 'light' })} className={`flex flex-col items-center gap-2 py-4 rounded-2xl transition-all ${settings.darkMode === 'light' ? 'bg-indigo-600 text-white shadow-lg' : 'text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}>
+                      <Sun className="w-5 h-5" />
+                      <span className="text-[10px] font-bold">{t('settings.light_mode')}</span>
+                    </button>
+                    <button onClick={() => saveSettings({ darkMode: 'dark' })} className={`flex flex-col items-center gap-2 py-4 rounded-2xl transition-all ${settings.darkMode === 'dark' ? 'bg-indigo-600 text-white shadow-lg' : 'text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}>
+                      <Moon className="w-5 h-5" />
+                      <span className="text-[10px] font-bold">{t('settings.dark_mode')}</span>
+                    </button>
+                    <button onClick={() => saveSettings({ darkMode: 'system' })} className={`flex flex-col items-center gap-2 py-4 rounded-2xl transition-all ${settings.darkMode === 'system' ? 'bg-indigo-600 text-white shadow-lg' : 'text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}>
+                      <Monitor className="w-5 h-5" />
+                      <span className="text-[10px] font-bold">{t('settings.system_mode')}</span>
+                    </button>
+                    <button onClick={() => saveSettings({ darkMode: 'material' })} className={`flex flex-col items-center gap-2 py-4 rounded-2xl transition-all ${settings.darkMode === 'material' ? 'bg-indigo-600 text-white shadow-lg' : 'text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}>
+                      <Palette className="w-5 h-5" />
+                      <span className="text-[10px] font-bold">{t('settings.material_mode')}</span>
+                    </button>
+                  </div>
+                </div>
+                {/* 카드 스타일 */}
+                <div className="space-y-2">
+                  <p className="text-sm font-semibold text-neutral-600 dark:text-neutral-300 px-1">{t('cardStyles.title')}</p>
+                  <div className="bg-white dark:bg-neutral-900 p-2 rounded-3xl border border-neutral-100 dark:border-neutral-800 grid grid-cols-4 gap-1">
+                    {CARD_STYLES.map((style) => (
+                      <button
+                        key={style.id}
+                        onClick={() => saveSettings({ preferredCardStyle: style.id })}
+                        className={`py-3 rounded-2xl transition-all text-xs font-bold ${settings.preferredCardStyle === style.id ? 'bg-indigo-600 text-white shadow-lg' : 'text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}
+                      >
+                        {t(style.labelKey)}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </section>
 
-              <section className="space-y-4">
-                <h3 className="text-sm font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">{t('settings.language')}</h3>
-                <div className="bg-white dark:bg-neutral-900 p-6 rounded-3xl border border-neutral-100 dark:border-neutral-800">
-                  <div className="flex items-center gap-4 mb-4">
-                    <div className="w-12 h-12 bg-purple-50 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center">
-                      <Globe className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+              {/* ─── 그룹 4: 앱 설정 ─── */}
+              <section className="space-y-3">
+                <h3 className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">{t('settings.section_app')}</h3>
+                <div className="bg-white dark:bg-neutral-900 p-5 rounded-3xl border border-neutral-100 dark:border-neutral-800">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-10 h-10 bg-purple-50 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center">
+                      <Globe className="w-5 h-5 text-purple-600 dark:text-purple-400" />
                     </div>
                     <div>
-                      <p className="font-bold text-neutral-800 dark:text-neutral-200">{LANGUAGES.find(l => l.id === settings.language)?.label}</p>
+                      <p className="text-xs text-neutral-400 dark:text-neutral-500">{t('settings.language')}</p>
+                      <p className="font-bold text-neutral-800 dark:text-neutral-200 text-sm">{LANGUAGES.find(l => l.id === settings.language)?.label}</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-2">
@@ -1088,96 +1235,24 @@ export default function App() {
                 </div>
               </section>
 
-              <section className="space-y-4">
-                <h3 className="text-sm font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">{t('cardStyles.title')}</h3>
-                <div className="bg-white dark:bg-neutral-900 p-2 rounded-3xl border border-neutral-100 dark:border-neutral-800 grid grid-cols-2 gap-1">
-                  {CARD_STYLES.map((style) => (
-                    <button 
-                      key={style.id}
-                      onClick={() => saveSettings({ preferredCardStyle: style.id })}
-                      className={`py-3 rounded-2xl transition-all text-xs font-bold ${settings.preferredCardStyle === style.id ? 'bg-indigo-600 text-white shadow-lg' : 'text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}
-                    >
-                      {t(style.labelKey)}
-                    </button>
-                  ))}
-                </div>
-              </section>
-
-              <section className="space-y-4">
-                <h3 className="text-sm font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">{t('preferredThemes.title')}</h3>
-                <p className="text-xs text-neutral-400 dark:text-neutral-500">{t('preferredThemes.description')}</p>
-                <div className="grid grid-cols-3 gap-2">
-                  {THEMES.map((theme) => {
-                    const isSelected = (settings.preferredThemes || []).includes(theme.id);
-                    return (
-                      <button
-                        key={theme.id}
-                        onClick={() => {
-                          const currentThemes = settings.preferredThemes || ['motivation'];
-                          const isCurrentlySelected = currentThemes.includes(theme.id);
-                          const newThemes = isCurrentlySelected 
-                            ? currentThemes.filter(id => id !== theme.id)
-                            : [...currentThemes, theme.id];
-                          
-                          if (newThemes.length > 0) {
-                            saveSettings({ preferredThemes: newThemes });
-                          }
-                        }}
-                        className={`p-3 rounded-2xl border transition-all flex flex-col items-center gap-1 ${
-                          isSelected 
-                          ? 'bg-indigo-600 border-indigo-600 text-white shadow-md' 
-                          : 'bg-white dark:bg-neutral-900 border-neutral-100 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300 hover:border-indigo-200'
-                        }`}
-                      >
-                        <span className="text-lg">{theme.icon}</span>
-                        <span className="font-bold text-[10px]">{t(theme.labelKey)}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </section>
-
-              <section className="space-y-4">
-                <h3 className="text-sm font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">{t('settings.theme')}</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  {THEMES.map((theme) => (
-                    <button
-                      key={theme.id}
-                      onClick={() => saveSettings({ theme: theme.id })}
-                      className={`p-6 rounded-3xl border transition-all flex flex-col items-center gap-3 ${
-                        settings.theme === theme.id 
-                        ? 'bg-indigo-600 border-indigo-600 text-white shadow-lg shadow-indigo-100 dark:shadow-none' 
-                        : 'bg-white dark:bg-neutral-900 border-neutral-100 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300 hover:border-indigo-200'
-                      }`}
-                    >
-                      <span className="text-2xl">{theme.icon}</span>
-                      <span className="font-bold text-sm">{t(theme.labelKey)}</span>
-                    </button>
-                  ))}
-                </div>
-              </section>
-
-              <section className="space-y-4">
-                <h3 className="text-sm font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">{t('settings.status')}</h3>
-                <div className="bg-white dark:bg-neutral-900 p-6 rounded-3xl border border-neutral-100 dark:border-neutral-800 flex items-center justify-between">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${settings.isSubscribed ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
-                      <Bell className={`w-6 h-6 ${settings.isSubscribed ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`} />
-                    </div>
-                    <div>
-                      <p className="font-bold text-neutral-800 dark:text-neutral-200">{settings.isSubscribed ? t('settings.enabled') : t('settings.disabled')}</p>
-                      <p className="text-xs text-neutral-400 dark:text-neutral-500">{t('settings.status_desc')}</p>
-                    </div>
-                  </div>
-                  {!settings.isSubscribed && (
-                    <button 
-                      onClick={handleSubscribe}
-                      className="text-indigo-600 dark:text-indigo-400 font-bold text-sm"
-                    >
-                      {t('settings.turn_on')}
-                    </button>
-                  )}
-                </div>
+              {/* ─── 그룹 5: 지원 ─── */}
+              <section className="space-y-3 pb-4">
+                <h3 className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">{t('settings.section_support')}</h3>
+                <button
+                  onClick={async () => {
+                    const url = 'https://ko-fi.com/jeiel85';
+                    try {
+                      const { Browser } = await import('@capacitor/browser');
+                      await Browser.open({ url });
+                    } catch {
+                      window.open(url, '_blank');
+                    }
+                  }}
+                  className="w-full bg-gradient-to-r from-amber-400 to-orange-400 text-white p-5 rounded-3xl flex items-center justify-center gap-3 font-bold text-base shadow-lg shadow-orange-200 dark:shadow-none hover:from-amber-500 hover:to-orange-500 transition-all active:scale-95"
+                >
+                  <span className="text-2xl">☕</span>
+                  {t('settings.buy_coffee')}
+                </button>
               </section>
             </motion.div>
           )}

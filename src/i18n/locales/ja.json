@@ -5,7 +5,14 @@
     "settings": "設定",
     "logout": "ログアウト",
     "loading": "読み込み中...",
-    "error": "エラーが発生しました。"
+    "error": "エラーが発生しました。",
+    "error_api_key_missing": "Gemini APIキーが設定されていません。設定でAPIキーをご確認ください。",
+    "error_generating_quote": "格言の生成中にエラーが発生しました。しばらくしてからもう一度お試しください。",
+    "error_boundary_title": "エラーが発生しました。",
+    "error_boundary_desc": "アプリで予期しないエラーが発生しました。",
+    "error_boundary_retry": "再試行",
+    "cancel": "キャンセル",
+    "done": "完了"
   },
   "home": {
     "title": "今日の格言",
@@ -14,13 +21,19 @@
     "generate_first": "最初の格言を生成する",
     "refresh": "更新",
     "notification_at": "{{time}} 通知",
+    "generate_card": "格言カードを作成",
+    "download_card": "カードをダウンロード",
+    "regenerate_card": "カードを再生成",
     "subscribe_title": "毎日通知を受け取る",
     "subscribe_desc": "指定した時間に格言をお送りします。",
     "activate": "有効化"
   },
   "history": {
     "title": "過去の格言",
-    "just_now": "たった今"
+    "just_now": "たった今",
+    "no_history": "履歴がありません。",
+    "download": "ダウンロード",
+    "regenerate": "再生成"
   },
   "settings": {
     "title": "設定",
@@ -29,12 +42,22 @@
     "theme": "格言テーマ",
     "language": "言語設定",
     "visual_theme": "ビジュアルテーマ",
+    "dark_mode": "ダークモード",
+    "light_mode": "ライトモード",
+    "system_mode": "システム設定",
     "material_mode": "Material You",
-    "status": "通知ステータ스",
-    "status_desc": "ブラウザプッシュ通知ステータス",
+    "visual_desc": "アプリの外観テーマを変更します。",
+    "status": "通知ステータス",
+    "status_desc": "アプリ通知ステータス",
     "enabled": "有効",
     "disabled": "無効",
-    "turn_on": "オンにする"
+    "turn_on": "オンにする",
+    "section_notification": "通知",
+    "section_content": "コンテンツ",
+    "section_appearance": "外観",
+    "section_app": "アプリ設定",
+    "section_support": "サポート",
+    "buy_coffee": "コーヒーを一杯おごる"
   },
   "auth": {
     "welcome": "Lumina Daily",
@@ -45,6 +68,27 @@
     "motivation": "モチベーション",
     "comfort": "癒やし",
     "humor": "ユーモア",
-    "success": "成功"
+    "success": "成功",
+    "business": "ビジネス",
+    "love": "愛",
+    "philosophy": "哲学",
+    "wisdom": "知恵",
+    "life": "人生"
+  },
+  "cardStyles": {
+    "title": "カードスタイル",
+    "classic": "クラシック",
+    "modern": "モダン",
+    "minimal": "ミニマル",
+    "bold": "ボールド"
+  },
+  "preferredThemes": {
+    "title": "好みのテーマ（通知用）",
+    "description": "毎日の通知で受け取りたいテーマを選択してください。"
+  },
+  "share": {
+    "button": "共有",
+    "success": "共有しました。",
+    "error": "共有中にエラーが発生しました。"
   }
 }

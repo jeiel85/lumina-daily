@@ -5,7 +5,14 @@
     "settings": "设置",
     "logout": "注销",
     "loading": "加载中...",
-    "error": "发生错误。"
+    "error": "发生错误。",
+    "error_api_key_missing": "未设置 Gemini API 密钥，请在设置中确认 API 密钥。",
+    "error_generating_quote": "生成名言时出错，请稍后再试。",
+    "error_boundary_title": "发生错误。",
+    "error_boundary_desc": "应用发生了意外错误。",
+    "error_boundary_retry": "重试",
+    "cancel": "取消",
+    "done": "完成"
   },
   "home": {
     "title": "今日名言",
@@ -14,13 +21,19 @@
     "generate_first": "生成第一条名言",
     "refresh": "刷新",
     "notification_at": "{{time}} 通知",
+    "generate_card": "创建名言卡片",
+    "download_card": "下载卡片",
+    "regenerate_card": "重新生成卡片",
     "subscribe_title": "获取每日通知",
     "subscribe_desc": "在指定时间为您发送名言。",
     "activate": "激活"
   },
   "history": {
     "title": "过去的名言",
-    "just_now": "刚刚"
+    "just_now": "刚刚",
+    "no_history": "暂无记录。",
+    "download": "下载",
+    "regenerate": "重新生成"
   },
   "settings": {
     "title": "设置",
@@ -29,12 +42,22 @@
     "theme": "名言主题",
     "language": "语言设置",
     "visual_theme": "视觉主题",
+    "dark_mode": "深色模式",
+    "light_mode": "浅色模式",
+    "system_mode": "跟随系统",
     "material_mode": "Material You",
+    "visual_desc": "更改应用的视觉主题。",
     "status": "通知状态",
-    "status_desc": "浏览器推送通知状态",
+    "status_desc": "应用通知状态",
     "enabled": "已启用",
     "disabled": "已禁用",
-    "turn_on": "开启"
+    "turn_on": "开启",
+    "section_notification": "通知",
+    "section_content": "内容",
+    "section_appearance": "外观",
+    "section_app": "应用设置",
+    "section_support": "支持",
+    "buy_coffee": "请开发者喝杯咖啡"
   },
   "auth": {
     "welcome": "Lumina Daily",
@@ -45,6 +68,27 @@
     "motivation": "动力",
     "comfort": "慰藉",
     "humor": "幽默",
-    "success": "成功"
+    "success": "成功",
+    "business": "商业",
+    "love": "爱情",
+    "philosophy": "哲学",
+    "wisdom": "智慧",
+    "life": "人生"
+  },
+  "cardStyles": {
+    "title": "卡片样式",
+    "classic": "经典",
+    "modern": "现代",
+    "minimal": "简约",
+    "bold": "粗体"
+  },
+  "preferredThemes": {
+    "title": "偏好主题（通知用）",
+    "description": "请选择您希望每日通知接收的主题。"
+  },
+  "share": {
+    "button": "分享",
+    "success": "已分享。",
+    "error": "分享时发生错误。"
   }
 }
