@@ -55,11 +55,16 @@
     "disabled_desc": "구독하면 매일 나만을 위한 인사이트가 도착합니다.",
     "turn_on": "구독하기",
     "section_notification": "인사이트 구독",
+    "section_theme": "명언 주제",
     "section_content": "콘텐츠",
     "section_appearance": "외관",
     "section_app": "앱 설정",
     "section_support": "지원",
-    "buy_coffee": "개발자에게 커피 한잔"
+    "buy_coffee": "개발자에게 커피 한잔",
+    "custom_keyword": "나만의 키워드",
+    "custom_keyword_desc": "특정 주제나 상황을 직접 입력하면 그에 맞는 명언을 드려요",
+    "custom_keyword_placeholder": "예: 새로운 도전, 실패 극복...",
+    "keyword_blocked": "적절하지 않은 키워드입니다"
   },
   "auth": {
     "welcome": "Lumina Daily",
@@ -67,6 +72,7 @@
     "google_login": "Google로 시작하기"
   },
   "themes": {
+    "random": "랜덤 🎲",
     "motivation": "동기부여",
     "comfort": "위로",
     "humor": "유머",
@@ -86,7 +92,8 @@
   },
   "preferredThemes": {
     "title": "오늘 나에게 필요한 주제",
-    "description": "선택한 주제에서 오늘의 인사이트가 만들어집니다."
+    "description": "인사이트와 알림 모두 이 주제로 생성됩니다",
+    "multi_hint": "복수 선택 가능"
   },
   "share": {
     "button": "공유하기",

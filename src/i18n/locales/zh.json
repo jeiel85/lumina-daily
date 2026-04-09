@@ -55,11 +55,16 @@
     "disabled_desc": "订阅后，每天将有专属于你的洞见送达。",
     "turn_on": "订阅",
     "section_notification": "洞见订阅",
+    "section_theme": "名言主题",
     "section_content": "内容",
     "section_appearance": "外观",
     "section_app": "应用设置",
     "section_support": "支持",
-    "buy_coffee": "请开发者喝杯咖啡"
+    "buy_coffee": "请开发者喝杯咖啡",
+    "custom_keyword": "自定义关键词",
+    "custom_keyword_desc": "输入特定主题或情境，将为您提供相应的名言",
+    "custom_keyword_placeholder": "例如：新的挑战，克服失败...",
+    "keyword_blocked": "此关键词不适当"
   },
   "auth": {
     "welcome": "Lumina Daily",
@@ -67,6 +72,7 @@
     "google_login": "使用 Google 开始"
   },
   "themes": {
+    "random": "随机 🎲",
     "motivation": "动力",
     "comfort": "慰藉",
     "humor": "幽默",
@@ -86,7 +92,8 @@
   },
   "preferredThemes": {
     "title": "今天我需要的主题",
-    "description": "今日洞见将从您选择的主题中诞生。"
+    "description": "洞见和通知都将根据此主题生成",
+    "multi_hint": "可多选"
   },
   "share": {
     "button": "分享",
