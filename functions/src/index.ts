@@ -109,14 +109,36 @@ export const sendDailyNotifications = onSchedule(
         ? `"${quote.text}" — ${quote.author}`
         : FALLBACK_BODIES[lang];
 
+      // 생성된 명언을 Firestore에 먼저 저장 (앱 열었을 때 표시용)
+      let quoteId: string | null = null;
+      if (quote) {
+        try {
+          const quoteData = {
+            text: quote.text,
+            author: quote.author,
+            explanation: '',
+            theme: preferredThemes[Math.floor(Math.random() * preferredThemes.length)] || 'life',
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            uid: doc.id,
+            source: 'notification',
+          };
+          const docRef = await db.collection('users').doc(doc.id).collection('history').add(quoteData);
+          quoteId = docRef.id;
+        } catch (err) {
+          console.error(`[Notification] Firestore 저장 실패 (${doc.id}):`, err);
+        }
+      }
+
       try {
         await admin.messaging().send({
           token: fcmToken as string,
           notification: { title, body },
+          // FCM data payload: 앱에서 quoteId로 해당 명언 로드
+          data: { ...(quoteId ? { quoteId } : {}) },
           webpush: { fcmOptions: { link: appUrl } },
           android: { priority: 'high' },
         });
-        console.log(`[Notification] 발송 완료 (${doc.id})`);
+        console.log(`[Notification] 발송 완료 (${doc.id})${quoteId ? ` quoteId: ${quoteId}` : ''}`);
       } catch (err: unknown) {
         const e = err as { code?: string; message?: string };
         console.error(`[Notification] 발송 실패 (${doc.id}):`, e.message);

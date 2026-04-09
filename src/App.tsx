@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { 
   Bell, 
@@ -194,6 +194,33 @@ export default function App() {
   const [isMobileOrTablet, setIsMobileOrTablet] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [inAppNotification, setInAppNotification] = useState<{ title: string; body: string } | null>(null);
+  const pendingNotifQuoteId = useRef<string | null>(null);
+
+  // Notification tap listener (early mount, before auth)
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return;
+    const setup = async () => {
+      const { FirebaseMessaging } = await import('@capacitor-firebase/messaging');
+      FirebaseMessaging.addListener('notificationActionPerformed', (event) => {
+        const quoteId = event.notification.data?.quoteId as string | undefined;
+        if (quoteId) pendingNotifQuoteId.current = quoteId;
+      });
+    };
+    setup();
+  }, []);
+
+  // When user is available, load pending notification quote
+  useEffect(() => {
+    if (!user || !pendingNotifQuoteId.current) return;
+    const quoteId = pendingNotifQuoteId.current;
+    pendingNotifQuoteId.current = null;
+    getDoc(doc(db, 'users', user.uid, 'history', quoteId)).then((snap) => {
+      if (snap.exists()) {
+        setCurrentQuote({ id: snap.id, ...snap.data() } as Quote);
+        setActiveTab('home');
+      }
+    }).catch(err => console.error('[Notification] Failed to load quote:', err));
+  }, [user]);
 
   // Device & Orientation Listener
   useEffect(() => {
