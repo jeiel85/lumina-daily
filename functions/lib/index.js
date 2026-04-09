@@ -75,14 +75,14 @@ async function generateQuote(themes, language, geminiApiKey) {
         const theme = themes[Math.floor(Math.random() * themes.length)] || 'life';
         const themeName = (_a = THEME_NAMES[theme]) !== null && _a !== void 0 ? _a : theme;
         const langName = (_b = LANG_NAMES[language]) !== null && _b !== void 0 ? _b : 'English';
-        const prompt = `Generate a short, powerful inspirational quote about "${themeName}". Write the quote and author name in ${langName}. Respond only with JSON: {"text": "quote text", "author": "Author Name"}`;
+        const prompt = `Generate a short, powerful inspirational quote about "${themeName}". Write everything in ${langName}. Also write a warm, insightful 2-3 sentence explanation of why this quote matters and how it applies to daily life. Respond only with JSON: {"text": "quote text", "author": "Author Name", "explanation": "explanation text"}`;
         const result = await model.generateContent({
             contents: [{ role: 'user', parts: [{ text: prompt }] }],
             generationConfig: { responseMimeType: 'application/json' },
         });
         const data = JSON.parse(result.response.text());
         if (data.text && data.author)
-            return data;
+            return { text: data.text, author: data.author, explanation: data.explanation || '' };
         return null;
     }
     catch (err) {
@@ -129,7 +129,7 @@ exports.sendDailyNotifications = (0, scheduler_1.onSchedule)({
                 const quoteData = {
                     text: quote.text,
                     author: quote.author,
-                    explanation: '',
+                    explanation: quote.explanation,
                     theme: preferredThemes[Math.floor(Math.random() * preferredThemes.length)] || 'life',
                     createdAt: admin.firestore.FieldValue.serverTimestamp(),
                     uid: doc.id,

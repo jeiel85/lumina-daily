@@ -43,7 +43,7 @@ async function generateQuote(
   themes: string[],
   language: string,
   geminiApiKey: string
-): Promise<{ text: string; author: string } | null> {
+): Promise<{ text: string; author: string; explanation: string } | null> {
   try {
     const genAI = new GoogleGenerativeAI(geminiApiKey);
     const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
@@ -52,7 +52,7 @@ async function generateQuote(
     const themeName = THEME_NAMES[theme] ?? theme;
     const langName = LANG_NAMES[language] ?? 'English';
 
-    const prompt = `Generate a short, powerful inspirational quote about "${themeName}". Write the quote and author name in ${langName}. Respond only with JSON: {"text": "quote text", "author": "Author Name"}`;
+    const prompt = `Generate a short, powerful inspirational quote about "${themeName}". Write everything in ${langName}. Also write a warm, insightful 2-3 sentence explanation of why this quote matters and how it applies to daily life. Respond only with JSON: {"text": "quote text", "author": "Author Name", "explanation": "explanation text"}`;
 
     const result = await model.generateContent({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
@@ -60,7 +60,7 @@ async function generateQuote(
     });
 
     const data = JSON.parse(result.response.text());
-    if (data.text && data.author) return data;
+    if (data.text && data.author) return { text: data.text, author: data.author, explanation: data.explanation || '' };
     return null;
   } catch (err) {
     console.error('[Notification] Gemini 생성 실패:', err);
@@ -116,7 +116,7 @@ export const sendDailyNotifications = onSchedule(
           const quoteData = {
             text: quote.text,
             author: quote.author,
-            explanation: '',
+            explanation: quote.explanation,
             theme: preferredThemes[Math.floor(Math.random() * preferredThemes.length)] || 'life',
             createdAt: admin.firestore.FieldValue.serverTimestamp(),
             uid: doc.id,
