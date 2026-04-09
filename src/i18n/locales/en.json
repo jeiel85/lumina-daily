@@ -55,11 +55,16 @@
     "disabled_desc": "Subscribe to receive a personalized insight every day.",
     "turn_on": "Subscribe",
     "section_notification": "Daily Insights",
+    "section_theme": "Quote Topic",
     "section_content": "Content",
     "section_appearance": "Appearance",
     "section_app": "App Settings",
     "section_support": "Support",
-    "buy_coffee": "Buy me a coffee"
+    "buy_coffee": "Buy me a coffee",
+    "custom_keyword": "Custom Keyword",
+    "custom_keyword_desc": "Enter a specific topic or situation to get a quote tailored just for you",
+    "custom_keyword_placeholder": "e.g. new challenge, overcoming failure...",
+    "keyword_blocked": "This keyword is not appropriate"
   },
   "auth": {
     "welcome": "Lumina Daily",
@@ -67,6 +72,7 @@
     "google_login": "Start with Google"
   },
   "themes": {
+    "random": "Random 🎲",
     "motivation": "Motivation",
     "comfort": "Comfort",
     "humor": "Humor",
@@ -86,7 +92,8 @@
   },
   "preferredThemes": {
     "title": "What speaks to you today",
-    "description": "Your daily insight is crafted from the themes you choose."
+    "description": "Both insights and notifications will be generated from this topic",
+    "multi_hint": "Multi-select"
   },
   "share": {
     "button": "Share",

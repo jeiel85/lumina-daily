@@ -129,8 +129,8 @@ interface UserSettings {
   email: string;
   notificationTime: string;
   notificationTimeUTC?: string;
-  theme: string;
   preferredThemes: string[];
+  customKeyword: string;
   preferredCardStyle: string;
   isSubscribed: boolean;
   language: string;
@@ -141,6 +141,7 @@ interface UserSettings {
 }
 
 const THEMES = [
+  { id: 'random', labelKey: 'themes.random', icon: '🎲' },
   { id: 'motivation', labelKey: 'themes.motivation', icon: '🔥' },
   { id: 'comfort', labelKey: 'themes.comfort', icon: '🌿' },
   { id: 'humor', labelKey: 'themes.humor', icon: '😄' },
@@ -177,8 +178,8 @@ export default function App() {
     uid: '',
     email: '',
     notificationTime: '08:00',
-    theme: 'motivation',
     preferredThemes: ['motivation'],
+    customKeyword: '',
     preferredCardStyle: 'classic',
     isSubscribed: false,
     language: 'ko',
@@ -259,8 +260,8 @@ export default function App() {
               uid: data.uid || firebaseUser.uid,
               email: data.email || firebaseUser.email || '',
               notificationTime: data.notificationTime || '08:00',
-              theme: data.theme || 'motivation',
-              preferredThemes: data.preferredThemes || ['motivation'],
+              preferredThemes: data.preferredThemes || (data.preferredTheme ? [data.preferredTheme] : null) || [(data as any).theme] || ['motivation'],
+              customKeyword: data.customKeyword || '',
               preferredCardStyle: data.preferredCardStyle || 'classic',
               language: data.language || i18n.language || 'ko',
               darkMode: data.darkMode || 'system',
@@ -279,8 +280,8 @@ export default function App() {
               uid: firebaseUser.uid,
               email: firebaseUser.email || '',
               notificationTime: '08:00',
-              theme: 'motivation',
               preferredThemes: ['motivation'],
+              customKeyword: '',
               preferredCardStyle: 'classic',
               language: i18n.language || 'ko',
               darkMode: 'system',
@@ -416,8 +417,33 @@ export default function App() {
         systemInstruction: `당신은 세계 최고의 동기부여 전문가이자 작가입니다. 사용자가 선택한 테마에 맞춰 깊은 통찰력을 담은 명언과 그에 대한 따뜻한 해설을 제공하세요. 모든 응답은 반드시 '${i18n.language}' 언어로 작성해야 합니다.`,
       });
       
-      const themeLabel = THEMES.find(t => t.id === settings.theme)?.labelKey || 'theme_motivation';
-      const prompt = `테마: ${t(themeLabel)}. 다음 JSON 형식으로 응답하세요: { "text": "명언 내용", "author": "저자 이름", "explanation": "해설 내용" }`;
+      // 커스텀 키워드 필터링
+      const BLOCKED_KEYWORDS = ['섹스', '야동', '포르노', 'sex', 'porn', 'nude', 'naked', '씨발', '개새끼', '좆', '보지', '자지', 'fuck', 'shit', 'ass', 'bitch', 'nigger', 'faggot'];
+      if (settings.customKeyword) {
+        const kw = settings.customKeyword.toLowerCase();
+        if (BLOCKED_KEYWORDS.some(b => kw.includes(b))) {
+          alert(t('settings.keyword_blocked'));
+          setIsGenerating(false);
+          return;
+        }
+      }
+
+      // 테마 결정 (다중 선택 중 랜덤 1개)
+      const selectedThemes = (settings.preferredThemes || ['motivation']).filter(id => id !== 'random');
+      const pool = (settings.preferredThemes || []).includes('random') || selectedThemes.length === 0
+        ? THEMES.filter(th => th.id !== 'random').map(th => th.id)
+        : selectedThemes;
+      const resolvedTheme = pool[Math.floor(Math.random() * pool.length)];
+
+      // 프롬프트 생성
+      let promptThemePart: string;
+      if (settings.customKeyword?.trim()) {
+        promptThemePart = `키워드: "${settings.customKeyword.trim()}"`;
+      } else {
+        const themeLabel = THEMES.find(th => th.id === resolvedTheme)?.labelKey || 'themes.motivation';
+        promptThemePart = `테마: ${t(themeLabel)}`;
+      }
+      const prompt = `${promptThemePart}. 다음 JSON 형식으로 응답하세요: { "text": "명언 내용", "author": "저자 이름", "explanation": "해설 내용" }`;
 
       const result = await model.generateContent({
         contents: [{ role: "user", parts: [{ text: prompt }] }],
@@ -428,10 +454,10 @@ export default function App() {
 
       const response = await result.response;
       const data = JSON.parse(response.text());
-      
+
       const newQuoteData: Omit<Quote, 'id'> = {
         ...data,
-        theme: settings.theme,
+        theme: resolvedTheme,
         createdAt: serverTimestamp(),
         uid: user.uid
       };
@@ -1164,32 +1190,16 @@ export default function App() {
                 </div>
               )}
 
-              {/* ─── 그룹 2: 콘텐츠 ─── */}
+              {/* ─── 그룹 2: 테마 ─── */}
               <section className="space-y-3">
-                <h3 className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">{t('settings.section_content')}</h3>
-                {/* 명언 테마 (단일 선택) */}
+                <h3 className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">{t('settings.section_theme')}</h3>
+
+                {/* 통합 테마 선택 (다중 선택) */}
                 <div className="space-y-2">
-                  <p className="text-sm font-semibold text-neutral-600 dark:text-neutral-300 px-1">{t('settings.theme')}</p>
-                  <div className="grid grid-cols-3 gap-2">
-                    {THEMES.map((theme) => (
-                      <button
-                        key={theme.id}
-                        onClick={() => saveSettings({ theme: theme.id })}
-                        className={`py-3 px-2 rounded-2xl border transition-all flex flex-col items-center gap-1.5 ${
-                          settings.theme === theme.id
-                          ? 'bg-indigo-600 border-indigo-600 text-white shadow-md'
-                          : 'bg-white dark:bg-neutral-900 border-neutral-100 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300 hover:border-indigo-200'
-                        }`}
-                      >
-                        <span className="text-xl">{theme.icon}</span>
-                        <span className="font-bold text-[10px]">{t(theme.labelKey)}</span>
-                      </button>
-                    ))}
+                  <div className="flex items-center justify-between px-1">
+                    <p className="text-sm font-semibold text-neutral-600 dark:text-neutral-300">{t('preferredThemes.title')}</p>
+                    <span className="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded-full">{t('preferredThemes.multi_hint')}</span>
                   </div>
-                </div>
-                {/* 선호 테마 (알림용 다중 선택) */}
-                <div className="space-y-2 pt-2">
-                  <p className="text-sm font-semibold text-neutral-600 dark:text-neutral-300 px-1">{t('preferredThemes.title')}</p>
                   <p className="text-xs text-neutral-400 dark:text-neutral-500 px-1">{t('preferredThemes.description')}</p>
                   <div className="grid grid-cols-3 gap-2">
                     {THEMES.map((theme) => {
@@ -1198,12 +1208,11 @@ export default function App() {
                         <button
                           key={theme.id}
                           onClick={() => {
-                            const currentThemes = settings.preferredThemes || ['motivation'];
-                            const isCurrentlySelected = currentThemes.includes(theme.id);
-                            const newThemes = isCurrentlySelected
-                              ? currentThemes.filter(id => id !== theme.id)
-                              : [...currentThemes, theme.id];
-                            if (newThemes.length > 0) saveSettings({ preferredThemes: newThemes });
+                            const current = settings.preferredThemes || ['motivation'];
+                            const next = isSelected
+                              ? current.filter(id => id !== theme.id)
+                              : [...current, theme.id];
+                            if (next.length > 0) saveSettings({ preferredThemes: next });
                           }}
                           className={`py-3 px-2 rounded-2xl border transition-all flex flex-col items-center gap-1.5 ${
                             isSelected
@@ -1216,6 +1225,33 @@ export default function App() {
                         </button>
                       );
                     })}
+                  </div>
+                </div>
+
+                {/* 커스텀 키워드 */}
+                <div className="space-y-2 pt-1">
+                  <p className="text-sm font-semibold text-neutral-600 dark:text-neutral-300 px-1">{t('settings.custom_keyword')}</p>
+                  <p className="text-xs text-neutral-400 dark:text-neutral-500 px-1">{t('settings.custom_keyword_desc')}</p>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      maxLength={30}
+                      value={settings.customKeyword || ''}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const BLOCKED = ['섹스','야동','포르노','sex','porn','nude','naked','씨발','개새끼','좆','보지','자지','fuck','shit'];
+                        const isBlocked = BLOCKED.some(b => val.toLowerCase().includes(b));
+                        if (!isBlocked) saveSettings({ customKeyword: val });
+                      }}
+                      placeholder={t('settings.custom_keyword_placeholder')}
+                      className="w-full bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 rounded-2xl px-4 py-3 text-sm text-neutral-800 dark:text-neutral-200 placeholder-neutral-400 dark:placeholder-neutral-600 focus:outline-none focus:border-indigo-400"
+                    />
+                    {settings.customKeyword && (
+                      <button
+                        onClick={() => saveSettings({ customKeyword: '' })}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
+                      >✕</button>
+                    )}
                   </div>
                 </div>
               </section>

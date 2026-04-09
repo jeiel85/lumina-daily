@@ -55,11 +55,16 @@
     "disabled_desc": "購読すると、毎日あなたのためのインサイトが届きます。",
     "turn_on": "購読する",
     "section_notification": "インサイト購読",
+    "section_theme": "格言テーマ",
     "section_content": "コンテンツ",
     "section_appearance": "外観",
     "section_app": "アプリ設定",
     "section_support": "サポート",
-    "buy_coffee": "コーヒーを一杯おごる"
+    "buy_coffee": "コーヒーを一杯おごる",
+    "custom_keyword": "カスタムキーワード",
+    "custom_keyword_desc": "特定のテーマや状況を入力すると、それに合った格言をお届けします",
+    "custom_keyword_placeholder": "例: 新しい挑戦、失敗を乗り越える...",
+    "keyword_blocked": "このキーワードは適切ではありません"
   },
   "auth": {
     "welcome": "Lumina Daily",
@@ -67,6 +72,7 @@
     "google_login": "Googleで始める"
   },
   "themes": {
+    "random": "ランダム 🎲",
     "motivation": "モチベーション",
     "comfort": "癒やし",
     "humor": "ユーモア",
@@ -86,7 +92,8 @@
   },
   "preferredThemes": {
     "title": "今日の私に必要なテーマ",
-    "description": "選んだテーマから今日のインサイトが生まれます。"
+    "description": "インサイトと通知の両方がこのテーマで生成されます",
+    "multi_hint": "複数選択可"
   },
   "share": {
     "button": "共有",
