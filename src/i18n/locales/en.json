@@ -20,13 +20,13 @@
     "no_quote": "No quotes generated yet.",
     "generate_first": "Generate First Quote",
     "refresh": "Refresh",
-    "notification_at": "Alert at {{time}}",
+    "notification_at": "{{time}}, your daily insight",
     "generate_card": "Create Quote Card",
     "download_card": "Download Card",
     "regenerate_card": "Regenerate Card",
-    "subscribe_title": "Get Daily Alerts",
-    "subscribe_desc": "We'll send a quote at your chosen time.",
-    "activate": "Activate"
+    "subscribe_title": "Subscribe to Daily Insights",
+    "subscribe_desc": "A word written just for you arrives every day.",
+    "activate": "Start Subscription"
   },
   "history": {
     "title": "Past Quotes",
@@ -37,8 +37,8 @@
   },
   "settings": {
     "title": "Settings",
-    "notification_time": "Notification Time",
-    "notification_desc": "Quotes arrive daily at this time.",
+    "notification_time": "Delivery Time",
+    "notification_desc": "A quiet word for today, arriving at this moment.",
     "theme": "Quote Theme",
     "language": "Language",
     "visual_theme": "Visual Theme",
@@ -47,12 +47,14 @@
     "system_mode": "System Setting",
     "material_mode": "Material You",
     "visual_desc": "Change the visual appearance of the app.",
-    "status": "Notification Status",
-    "status_desc": "App notification status",
-    "enabled": "Enabled",
-    "disabled": "Disabled",
-    "turn_on": "Turn On",
-    "section_notification": "Notifications",
+    "status": "Subscription Status",
+    "status_desc": "Notification permission denied. Please enable it in device settings.",
+    "enabled": "Subscribed",
+    "enabled_desc": "Your personal insight arrives every day at this time.",
+    "disabled": "Not yet started",
+    "disabled_desc": "Subscribe to receive a personalized insight every day.",
+    "turn_on": "Subscribe",
+    "section_notification": "Daily Insights",
     "section_content": "Content",
     "section_appearance": "Appearance",
     "section_app": "App Settings",
@@ -83,8 +85,8 @@
     "bold": "Bold"
   },
   "preferredThemes": {
-    "title": "Preferred Themes (for Notifications)",
-    "description": "Select themes you'd like to receive in daily notifications."
+    "title": "What speaks to you today",
+    "description": "Your daily insight is crafted from the themes you choose."
   },
   "share": {
     "button": "Share",
