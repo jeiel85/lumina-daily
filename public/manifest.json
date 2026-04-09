@@ -1,22 +1,22 @@
 {
-  "short_name": "AI Quote",
-  "name": "AI Daily Quote Notifier",
+  "short_name": "Lumina Daily",
+  "name": "Lumina Daily",
   "icons": [
     {
-      "src": "https://picsum.photos/192/192",
+      "src": "/icon-192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "https://picsum.photos/512/512",
+      "src": "/icon-512.png",
       "type": "image/png",
       "sizes": "512x512"
     }
   ],
   "start_url": "/",
-  "background_color": "#ffffff",
+  "background_color": "#4f46e5",
   "display": "standalone",
   "scope": "/",
   "theme_color": "#4f46e5",
-  "description": "Get personalized AI-generated quotes every day via push notifications."
+  "description": "매일 아침, 나만을 위한 AI 명언으로 하루를 시작하세요."
 }
