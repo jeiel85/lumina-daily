@@ -977,7 +977,7 @@ export default function App() {
                         <div className="aspect-square rounded-xl overflow-hidden shadow-inner bg-neutral-100 dark:bg-neutral-800">
                           <img src={quote.imageUrl} alt="Quote Card" className="w-full h-full object-cover" />
                         </div>
-                        <div className="flex gap-2">
+                        <div className="grid grid-cols-3 gap-2">
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -1007,30 +1007,30 @@ export default function App() {
                                 link.click();
                               }
                             }}
-                            className="flex-1 py-2 px-3 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+                            className="py-2.5 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl flex flex-col items-center justify-center gap-1 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
                           >
-                            <Download className="w-3.5 h-3.5" />
-                            {t('history.download')}
+                            <Download className="w-4 h-4" />
+                            <span className="text-[10px] font-semibold">{t('history.download')}</span>
                           </button>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               handleShare(quote);
                             }}
-                            className="flex-1 py-2 px-3 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+                            className="py-2.5 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl flex flex-col items-center justify-center gap-1 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
                           >
-                            <ExternalLink className="w-3.5 h-3.5" />
-                            {t('share.button')}
+                            <ExternalLink className="w-4 h-4" />
+                            <span className="text-[10px] font-semibold">{t('share.button')}</span>
                           </button>
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               generateQuoteCard(quote);
                             }}
-                            className="flex-1 py-2 px-3 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
+                            className="py-2.5 bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 rounded-xl flex flex-col items-center justify-center gap-1 hover:bg-neutral-200 dark:hover:bg-neutral-700 transition-colors"
                           >
-                            <RefreshCw className="w-3.5 h-3.5" />
-                            {t('history.regenerate')}
+                            <RefreshCw className="w-4 h-4" />
+                            <span className="text-[10px] font-semibold">{t('history.regenerate')}</span>
                           </button>
                         </div>
                       </div>
