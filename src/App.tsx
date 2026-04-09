@@ -25,7 +25,8 @@ import {
   Monitor,
   Sun,
   Moon,
-  Palette
+  Palette,
+  X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -35,6 +36,7 @@ import {
   signInWithGoogle, 
   logout, 
   requestNotificationPermission,
+  onForegroundMessage,
   handleFirestoreError,
   OperationType
 } from './firebase';
@@ -126,6 +128,7 @@ interface UserSettings {
   uid: string;
   email: string;
   notificationTime: string;
+  notificationTimeUTC?: string;
   theme: string;
   preferredThemes: string[];
   preferredCardStyle: string;
@@ -190,6 +193,7 @@ export default function App() {
   const [isLandscape, setIsLandscape] = useState(false);
   const [isMobileOrTablet, setIsMobileOrTablet] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [inAppNotification, setInAppNotification] = useState<{ title: string; body: string } | null>(null);
 
   // Device & Orientation Listener
   useEffect(() => {
@@ -449,6 +453,19 @@ export default function App() {
     syncPermission();
   }, [user, settings.isSubscribed]);
 
+  // 포그라운드 메시지 수신 (앱이 열려있을 때)
+  useEffect(() => {
+    if (!user) return;
+    const unsubscribe = onForegroundMessage((payload) => {
+      const title = payload.notification?.title ?? t('settings.section_notification');
+      const body  = payload.notification?.body  ?? '';
+      setInAppNotification({ title, body });
+      // 5초 후 자동 닫기
+      setTimeout(() => setInAppNotification(null), 5000);
+    });
+    return unsubscribe;
+  }, [user]);
+
   const handleSubscribe = async () => {
     if (!user) return;
     const path = `users/${user.uid}`;
@@ -483,9 +500,17 @@ export default function App() {
   const saveSettings = async (updates: Partial<UserSettings>) => {
     if (!user) return;
     const path = `users/${user.uid}`;
-    
+
     console.log('Attempting to save settings:', updates);
-    
+
+    // 알림 시간이 바뀌면 UTC 변환값도 함께 저장 (서버 cron이 이 값으로 발송 대상 조회)
+    if (updates.notificationTime) {
+      const [h, m] = updates.notificationTime.split(':').map(Number);
+      const local = new Date();
+      local.setHours(h, m, 0, 0);
+      updates.notificationTimeUTC = `${String(local.getUTCHours()).padStart(2,'0')}:${String(local.getUTCMinutes()).padStart(2,'0')}`;
+    }
+
     // Optimistic update
     setSettings(prev => {
       const next = { ...prev, ...updates };
@@ -498,9 +523,9 @@ export default function App() {
     }
 
     try {
-      const firestoreUpdate = { 
+      const firestoreUpdate = {
         ...updates,
-        updatedAt: serverTimestamp() 
+        updatedAt: serverTimestamp()
       };
       await setDoc(doc(db, 'users', user.uid), firestoreUpdate, { merge: true });
       console.log('Settings successfully saved to Firestore');
@@ -551,13 +576,20 @@ export default function App() {
 
     try {
       // 1. Picsum Photos로 테마별 배경 이미지 가져오기 (무료, API 키 불필요)
-      const themeSeeds: Record<string, string> = {
-        'motivation': 'mountain-peak',
-        'peace':      'calm-forest',
-        'love':       'golden-sunset',
-        'success':    'city-lights',
+      // 테마당 여러 seed를 정의해 매번 다른 배경이 나오도록 랜덤 선택
+      const THEME_SEED_POOLS: Record<string, string[]> = {
+        motivation:  ['mountain-peak', 'summit-climb', 'sunrise-trail', 'marathon-run', 'endurance-sport'],
+        comfort:     ['calm-forest', 'cozy-morning', 'green-meadow', 'soft-rain', 'warm-cottage'],
+        humor:       ['colorful-confetti', 'playful-balloons', 'bright-carnival', 'fun-festival', 'happy-dog'],
+        success:     ['city-lights', 'trophy-gold', 'office-highrise', 'graduation-day', 'podium-winner'],
+        business:    ['modern-office', 'boardroom-glass', 'city-skyline', 'laptop-desk', 'corporate-tower'],
+        love:        ['golden-sunset', 'red-roses', 'romantic-evening', 'pink-blossom', 'heart-bokeh'],
+        philosophy:  ['ancient-library', 'stone-archway', 'misty-lake', 'greek-temple', 'lone-lighthouse'],
+        wisdom:      ['autumn-leaves', 'old-bookshelf', 'meditation-zen', 'owl-forest', 'wise-elder'],
+        life:        ['nature-sky', 'spring-flowers', 'ocean-horizon', 'forest-path', 'starry-night'],
       };
-      const seed = themeSeeds[quote.theme] || 'nature-sky';
+      const seedPool = THEME_SEED_POOLS[quote.theme] ?? THEME_SEED_POOLS.life;
+      const seed = seedPool[Math.floor(Math.random() * seedPool.length)];
 
       let base64Image = "";
       try {
@@ -1012,25 +1044,26 @@ export default function App() {
               {/* ─── 그룹 1: 알림 ─── */}
               <section className="space-y-3">
                 <h3 className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">{t('settings.section_notification')}</h3>
-                <div className="bg-white dark:bg-neutral-900 rounded-3xl border border-neutral-100 dark:border-neutral-800 divide-y divide-neutral-100 dark:divide-neutral-800 overflow-hidden">
-                  {/* 알림 상태 */}
-                  <div className="p-5 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${settings.isSubscribed ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
-                        <Bell className={`w-5 h-5 ${settings.isSubscribed ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`} />
-                      </div>
-                      <div>
-                        <p className="font-bold text-neutral-800 dark:text-neutral-200 text-sm">{settings.isSubscribed ? t('settings.enabled') : t('settings.disabled')}</p>
-                        <p className="text-xs text-neutral-400 dark:text-neutral-500">{t('settings.status_desc')}</p>
-                      </div>
+                <div className="grid grid-cols-2 gap-3">
+                  {/* 구독 상태 카드 */}
+                  <div className="bg-white dark:bg-neutral-900 rounded-3xl border border-neutral-100 dark:border-neutral-800 p-4 flex flex-col gap-3">
+                    <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${settings.isSubscribed ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
+                      <Bell className={`w-5 h-5 ${settings.isSubscribed ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`} />
+                    </div>
+                    <div className="flex-1">
+                      <p className="font-bold text-neutral-800 dark:text-neutral-200 text-sm leading-tight">{settings.isSubscribed ? t('settings.enabled') : t('settings.disabled')}</p>
+                      <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-1 leading-snug">{settings.isSubscribed ? t('settings.enabled_desc') : t('settings.disabled_desc')}</p>
                     </div>
                     {!settings.isSubscribed && (
-                      <button onClick={handleSubscribe} className="text-indigo-600 dark:text-indigo-400 font-bold text-sm">
+                      <button
+                        onClick={handleSubscribe}
+                        className="w-full py-2.5 bg-indigo-600 text-white rounded-2xl text-xs font-bold"
+                      >
                         {t('settings.turn_on')}
                       </button>
                     )}
                   </div>
-                  {/* 알림 시간 */}
+                  {/* 알림 시간 카드 */}
                   <button
                     onClick={() => {
                       const [h, m] = settings.notificationTime.split(':').map(Number);
@@ -1038,19 +1071,17 @@ export default function App() {
                       setTempMinute(m);
                       setShowTimePicker(true);
                     }}
-                    className="w-full p-5 flex items-center justify-between hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+                    className="bg-white dark:bg-neutral-900 rounded-3xl border border-neutral-100 dark:border-neutral-800 p-4 flex flex-col gap-3 text-left hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center">
-                        <Clock className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
-                      </div>
-                      <div className="text-left">
-                        <p className="font-bold text-neutral-800 dark:text-neutral-200 text-sm">{t('settings.notification_time')}</p>
-                        <p className="text-xs text-neutral-400 dark:text-neutral-500">{t('settings.notification_desc')}</p>
-                      </div>
+                    <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center">
+                      <Clock className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg font-extrabold text-indigo-600 dark:text-indigo-400 tabular-nums">{settings.notificationTime}</span>
+                    <div className="flex-1">
+                      <p className="font-bold text-neutral-800 dark:text-neutral-200 text-sm leading-tight">{t('settings.notification_time')}</p>
+                      <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-1 leading-snug">{t('settings.notification_desc')}</p>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xl font-extrabold text-indigo-600 dark:text-indigo-400 tabular-nums">{settings.notificationTime}</span>
                       <ChevronRight className="w-4 h-4 text-neutral-300 dark:text-neutral-600" />
                     </div>
                   </button>
@@ -1171,19 +1202,19 @@ export default function App() {
                   <div className="bg-white dark:bg-neutral-900 p-2 rounded-3xl border border-neutral-100 dark:border-neutral-800 grid grid-cols-4 gap-1">
                     <button onClick={() => saveSettings({ darkMode: 'light' })} className={`flex flex-col items-center gap-2 py-4 rounded-2xl transition-all ${settings.darkMode === 'light' ? 'bg-indigo-600 text-white shadow-lg' : 'text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}>
                       <Sun className="w-5 h-5" />
-                      <span className="text-[10px] font-bold">{t('settings.light_mode')}</span>
+                      <span className="text-[10px] font-bold leading-tight text-center px-1">{t('settings.light_mode')}</span>
                     </button>
                     <button onClick={() => saveSettings({ darkMode: 'dark' })} className={`flex flex-col items-center gap-2 py-4 rounded-2xl transition-all ${settings.darkMode === 'dark' ? 'bg-indigo-600 text-white shadow-lg' : 'text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}>
                       <Moon className="w-5 h-5" />
-                      <span className="text-[10px] font-bold">{t('settings.dark_mode')}</span>
+                      <span className="text-[10px] font-bold leading-tight text-center px-1">{t('settings.dark_mode')}</span>
                     </button>
                     <button onClick={() => saveSettings({ darkMode: 'system' })} className={`flex flex-col items-center gap-2 py-4 rounded-2xl transition-all ${settings.darkMode === 'system' ? 'bg-indigo-600 text-white shadow-lg' : 'text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}>
                       <Monitor className="w-5 h-5" />
-                      <span className="text-[10px] font-bold">{t('settings.system_mode')}</span>
+                      <span className="text-[10px] font-bold leading-tight text-center px-1">{t('settings.system_mode')}</span>
                     </button>
                     <button onClick={() => saveSettings({ darkMode: 'material' })} className={`flex flex-col items-center gap-2 py-4 rounded-2xl transition-all ${settings.darkMode === 'material' ? 'bg-indigo-600 text-white shadow-lg' : 'text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}>
                       <Palette className="w-5 h-5" />
-                      <span className="text-[10px] font-bold">{t('settings.material_mode')}</span>
+                      <span className="text-[10px] font-bold leading-tight text-center px-1">{t('settings.material_mode')}</span>
                     </button>
                   </div>
                 </div>
@@ -1195,7 +1226,7 @@ export default function App() {
                       <button
                         key={style.id}
                         onClick={() => saveSettings({ preferredCardStyle: style.id })}
-                        className={`py-3 rounded-2xl transition-all text-xs font-bold ${settings.preferredCardStyle === style.id ? 'bg-indigo-600 text-white shadow-lg' : 'text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}
+                        className={`py-3 px-1 rounded-2xl transition-all text-[10px] font-bold leading-tight text-center ${settings.preferredCardStyle === style.id ? 'bg-indigo-600 text-white shadow-lg' : 'text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}
                       >
                         {t(style.labelKey)}
                       </button>
@@ -1288,6 +1319,29 @@ export default function App() {
           <span className="text-[10px] font-bold">{t('common.settings')}</span>
         </button>
       </nav>
+
+      {/* In-App Notification Toast (포그라운드 FCM 수신 시) */}
+      <AnimatePresence>
+        {inAppNotification && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed top-6 left-4 right-4 bg-indigo-600 text-white p-4 rounded-2xl shadow-xl flex items-start gap-3 z-[60]"
+          >
+            <Bell className="w-5 h-5 shrink-0 mt-0.5" />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold leading-tight">{inAppNotification.title}</p>
+              {inAppNotification.body && (
+                <p className="text-xs text-white/80 mt-0.5 leading-snug line-clamp-3">{inAppNotification.body}</p>
+              )}
+            </div>
+            <button onClick={() => setInAppNotification(null)} className="text-white/60 hover:text-white shrink-0">
+              <X className="w-4 h-4" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Error Toast */}
       <AnimatePresence>

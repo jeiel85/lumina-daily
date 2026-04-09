@@ -1,7 +1,8 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, User as FirebaseUser } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithCredential, signOut, User as FirebaseUser } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import { getMessaging, getToken } from 'firebase/messaging';
+import { getMessaging, getToken, onMessage, type NextFn, type MessagePayload } from 'firebase/messaging';
+import { Capacitor } from '@capacitor/core';
 
 // localConfig is now handled via environment variables in .env
 export const localConfig = {} as any;
@@ -66,7 +67,7 @@ const app = isConfigValid
 
 export const auth = getAuth(app);
 // Using the custom database ID 'lumina-daily' as requested
-export const db = getFirestore(app, 'lumina-daily');
+export const db = getFirestore(app, databaseId || '(default)');
 export const messaging = (typeof window !== 'undefined' && isConfigValid) ? getMessaging(app) : null;
 export const googleProvider = new GoogleAuthProvider();
 
@@ -77,6 +78,25 @@ export const signInWithGoogle = async () => {
     alert(error);
     return Promise.reject(new Error(error));
   }
+
+  // 네이티브 앱(Capacitor)에서는 네이티브 Google 로그인 사용
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const { FirebaseAuthentication } = await import('@capacitor-firebase/authentication');
+      const result = await FirebaseAuthentication.signInWithGoogle({ useCredentialManager: true });
+      if (result.credential?.idToken) {
+        const credential = GoogleAuthProvider.credential(result.credential.idToken);
+        return await signInWithCredential(auth, credential);
+      }
+      throw new Error('Google 로그인 토큰을 받지 못했습니다.');
+    } catch (error: any) {
+      if (error.message?.includes('cancelled') || error.message?.includes('canceled')) return;
+      alert(`로그인 중 오류가 발생했습니다: ${error.message}`);
+      throw error;
+    }
+  }
+
+  // 웹에서는 기존 팝업 방식 사용
   try {
     return await signInWithPopup(auth, googleProvider);
   } catch (error: any) {
@@ -150,28 +170,70 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
 }
 
 export const requestNotificationPermission = async () => {
+  // 네이티브 앱에서는 @capacitor-firebase/messaging 사용
+  if (Capacitor.isNativePlatform()) {
+    try {
+      const { FirebaseMessaging } = await import('@capacitor-firebase/messaging');
+      const { receive } = await FirebaseMessaging.requestPermissions();
+      if (receive === 'granted') {
+        const { token } = await FirebaseMessaging.getToken();
+        return token || 'granted_but_no_token';
+      }
+      return null;
+    } catch (error) {
+      console.error('Native FCM error:', error);
+      return 'granted_but_no_token';
+    }
+  }
+
+  // 웹에서는 기존 FCM Web SDK 사용
   if (!messaging || !('Notification' in window)) {
     console.warn('Notifications not supported in this browser.');
     return null;
   }
-  
+
   try {
     const permission = await Notification.requestPermission();
     if (permission === 'granted') {
-      // Note: getToken will fail if VAPID key is not configured in Firebase Console
-      // For now, we attempt to get it, but catch the error gracefully
       try {
+        const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
         const token = await getToken(messaging, {
-          // vapidKey: 'YOUR_VAPID_KEY_HERE' // Replace with your actual VAPID key from Firebase Console
+          ...(vapidKey ? { vapidKey } : {})
         });
         return token;
       } catch (tokenError) {
         console.error('FCM Token error (Check VAPID key):', tokenError);
-        return 'granted_but_no_token'; // Special state to indicate permission is OK but token failed
+        return 'granted_but_no_token';
       }
     }
   } catch (error) {
     console.error('Error requesting notification permission:', error);
   }
   return null;
+};
+
+// 포그라운드 메시지 리스너 (앱이 열려있을 때 FCM 수신)
+// 콜백으로 { title, body } 전달, 구독 해제 함수 반환
+export const onForegroundMessage = (callback: NextFn<MessagePayload>): (() => void) => {
+  // 네이티브(Android)에서는 @capacitor-firebase/messaging 리스너 사용
+  if (Capacitor.isNativePlatform()) {
+    let unsubscribed = false;
+    import('@capacitor-firebase/messaging').then(({ FirebaseMessaging }) => {
+      FirebaseMessaging.addListener('notificationReceived', (event) => {
+        if (unsubscribed) return;
+        // Capacitor 이벤트를 FCM MessagePayload 형태로 변환해 콜백 호출
+        callback({
+          notification: {
+            title: event.notification.title,
+            body: event.notification.body,
+          },
+        } as MessagePayload);
+      });
+    });
+    return () => { unsubscribed = true; };
+  }
+
+  // 웹에서는 Firebase Web SDK onMessage 사용
+  if (!messaging) return () => {};
+  return onMessage(messaging, callback);
 };

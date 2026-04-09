@@ -20,13 +20,13 @@
     "no_quote": "아직 생성된 명언이 없습니다.",
     "generate_first": "첫 명언 생성하기",
     "refresh": "새로고침",
-    "notification_at": "{{time}} 알림",
+    "notification_at": "{{time}}, 오늘의 인사이트",
     "generate_card": "명언 카드 만들기",
     "download_card": "카드 다운로드",
     "regenerate_card": "카드 다시 만들기",
-    "subscribe_title": "매일 알림 받기",
-    "subscribe_desc": "지정한 시간에 명언을 보내드려요.",
-    "activate": "활성화"
+    "subscribe_title": "나만의 인사이트 구독하기",
+    "subscribe_desc": "매일 당신만을 위해 쓰인 한 마디가 도착합니다.",
+    "activate": "구독 시작"
   },
   "history": {
     "title": "지난 명언들",
@@ -37,8 +37,8 @@
   },
   "settings": {
     "title": "설정",
-    "notification_time": "알림 시간",
-    "notification_desc": "매일 이 시간에 명언이 도착합니다.",
+    "notification_time": "인사이트 도착 시간",
+    "notification_desc": "이 시간, 오늘을 위한 한 마디가 조용히 닿아요.",
     "theme": "명언 테마",
     "language": "언어 설정",
     "visual_theme": "비주얼 테마",
@@ -47,12 +47,14 @@
     "system_mode": "시스템 설정",
     "material_mode": "머터리얼 유",
     "visual_desc": "앱의 시각적 테마를 변경합니다.",
-    "status": "알림 상태",
-    "status_desc": "앱 알림 상태",
-    "enabled": "활성화됨",
-    "disabled": "비활성화됨",
-    "turn_on": "켜기",
-    "section_notification": "알림",
+    "status": "구독 상태",
+    "status_desc": "알림 권한이 거부되었습니다. 기기 설정에서 알림을 허용해주세요.",
+    "enabled": "구독 중",
+    "enabled_desc": "매일 이 시간, 나만을 위한 한 마디가 도착해요.",
+    "disabled": "아직 시작 전",
+    "disabled_desc": "구독하면 매일 나만을 위한 인사이트가 도착합니다.",
+    "turn_on": "구독하기",
+    "section_notification": "인사이트 구독",
     "section_content": "콘텐츠",
     "section_appearance": "외관",
     "section_app": "앱 설정",
@@ -83,8 +85,8 @@
     "bold": "볼드"
   },
   "preferredThemes": {
-    "title": "선호하는 주제 (알림용)",
-    "description": "매일 알림으로 받고 싶은 주제를 선택하세요."
+    "title": "오늘 나에게 필요한 주제",
+    "description": "선택한 주제에서 오늘의 인사이트가 만들어집니다."
   },
   "share": {
     "button": "공유하기",

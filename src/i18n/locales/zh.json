@@ -20,13 +20,13 @@
     "no_quote": "尚未生成名言。",
     "generate_first": "生成第一条名言",
     "refresh": "刷新",
-    "notification_at": "{{time}} 通知",
+    "notification_at": "{{time}}，今日洞见",
     "generate_card": "创建名言卡片",
     "download_card": "下载卡片",
     "regenerate_card": "重新生成卡片",
-    "subscribe_title": "获取每日通知",
-    "subscribe_desc": "在指定时间为您发送名言。",
-    "activate": "激活"
+    "subscribe_title": "订阅我的每日洞见",
+    "subscribe_desc": "每天，一句专为你写就的话悄然送达。",
+    "activate": "开始订阅"
   },
   "history": {
     "title": "过去的名言",
@@ -37,8 +37,8 @@
   },
   "settings": {
     "title": "设置",
-    "notification_time": "通知时间",
-    "notification_desc": "名言将在每天此时间到达。",
+    "notification_time": "洞见送达时间",
+    "notification_desc": "在这个时刻，今天的一句话悄悄抵达。",
     "theme": "名言主题",
     "language": "语言设置",
     "visual_theme": "视觉主题",
@@ -47,12 +47,14 @@
     "system_mode": "跟随系统",
     "material_mode": "Material You",
     "visual_desc": "更改应用的视觉主题。",
-    "status": "通知状态",
-    "status_desc": "应用通知状态",
-    "enabled": "已启用",
-    "disabled": "已禁用",
-    "turn_on": "开启",
-    "section_notification": "通知",
+    "status": "订阅状态",
+    "status_desc": "通知权限被拒绝。请在设备设置中允许通知。",
+    "enabled": "订阅中",
+    "enabled_desc": "每天此时，专属于你的一句话悄然抵达。",
+    "disabled": "尚未开始",
+    "disabled_desc": "订阅后，每天将有专属于你的洞见送达。",
+    "turn_on": "订阅",
+    "section_notification": "洞见订阅",
     "section_content": "内容",
     "section_appearance": "外观",
     "section_app": "应用设置",
@@ -83,8 +85,8 @@
     "bold": "粗体"
   },
   "preferredThemes": {
-    "title": "偏好主题（通知用）",
-    "description": "请选择您希望每日通知接收的主题。"
+    "title": "今天我需要的主题",
+    "description": "今日洞见将从您选择的主题中诞生。"
   },
   "share": {
     "button": "分享",

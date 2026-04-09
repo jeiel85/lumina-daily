@@ -20,13 +20,13 @@
     "no_quote": "まだ生成された格言はありません。",
     "generate_first": "最初の格言を生成する",
     "refresh": "更新",
-    "notification_at": "{{time}} 通知",
+    "notification_at": "{{time}}、今日のインサイト",
     "generate_card": "格言カードを作成",
     "download_card": "カードをダウンロード",
     "regenerate_card": "カードを再生成",
-    "subscribe_title": "毎日通知を受け取る",
-    "subscribe_desc": "指定した時間に格言をお送りします。",
-    "activate": "有効化"
+    "subscribe_title": "マイインサイトを購読する",
+    "subscribe_desc": "毎日、あなただけのために書かれた一言が届きます。",
+    "activate": "購読を始める"
   },
   "history": {
     "title": "過去の格言",
@@ -37,8 +37,8 @@
   },
   "settings": {
     "title": "設定",
-    "notification_time": "通知時間",
-    "notification_desc": "毎日この時間に格言が届きます。",
+    "notification_time": "インサイト到着時間",
+    "notification_desc": "この時間、今日のためのひと言が静かに届きます。",
     "theme": "格言テーマ",
     "language": "言語設定",
     "visual_theme": "ビジュアルテーマ",
@@ -47,12 +47,14 @@
     "system_mode": "システム設定",
     "material_mode": "Material You",
     "visual_desc": "アプリの外観テーマを変更します。",
-    "status": "通知ステータス",
-    "status_desc": "アプリ通知ステータス",
-    "enabled": "有効",
-    "disabled": "無効",
-    "turn_on": "オンにする",
-    "section_notification": "通知",
+    "status": "購読ステータス",
+    "status_desc": "通知が拒否されました。デバイス設定で通知を許可してください。",
+    "enabled": "購読中",
+    "enabled_desc": "毎日この時間に、あなただけの一言が届きます。",
+    "disabled": "まだ始まっていません",
+    "disabled_desc": "購読すると、毎日あなたのためのインサイトが届きます。",
+    "turn_on": "購読する",
+    "section_notification": "インサイト購読",
     "section_content": "コンテンツ",
     "section_appearance": "外観",
     "section_app": "アプリ設定",
@@ -83,8 +85,8 @@
     "bold": "ボールド"
   },
   "preferredThemes": {
-    "title": "好みのテーマ（通知用）",
-    "description": "毎日の通知で受け取りたいテーマを選択してください。"
+    "title": "今日の私に必要なテーマ",
+    "description": "選んだテーマから今日のインサイトが生まれます。"
   },
   "share": {
     "button": "共有",
