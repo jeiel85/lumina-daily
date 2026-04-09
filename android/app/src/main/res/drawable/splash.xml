@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 테마에 맞는 배경색 (라이트: #FAFAFA / 다크: #0A0A0A) -->
+    <item>
+        <color android:color="@color/splashBackground" />
+    </item>
+    <!-- 루미나 스파클 아이콘 (중앙, 72dp) -->
+    <item
+        android:width="72dp"
+        android:height="72dp"
+        android:gravity="center">
+        <bitmap android:src="@mipmap/ic_launcher" android:gravity="center" />
+    </item>
+</layer-list>
