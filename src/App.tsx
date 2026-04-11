@@ -29,16 +29,17 @@ import {
   X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  auth, 
-  db, 
+import {
+  auth,
+  db,
   localConfig,
-  signInWithGoogle, 
-  logout, 
+  signInWithGoogle,
+  logout,
   requestNotificationPermission,
   onForegroundMessage,
   handleFirestoreError,
-  OperationType
+  OperationType,
+  trackEvent
 } from './firebase';
 import { 
   onAuthStateChanged, 
@@ -186,6 +187,8 @@ export default function App() {
     darkMode: 'system',
     role: 'client'
   });
+  const [showOnboarding, setShowOnboarding] = useState(() => localStorage.getItem('hasSeenOnboarding') !== 'true');
+  const [onboardingStep, setOnboardingStep] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingCard, setIsGeneratingCard] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
@@ -248,7 +251,8 @@ export default function App() {
 
     const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser);
-      
+      if (firebaseUser) trackEvent('login', { method: 'google' });
+
       if (firebaseUser) {
         // 1. Settings Listener
         const settingsRef = doc(db, 'users', firebaseUser.uid);
@@ -465,6 +469,7 @@ export default function App() {
       // 1. UPDATE UI FIRST (Stop spinning immediately!)
       setCurrentQuote({ ...newQuoteData, id: 'temp-' + Date.now() } as Quote);
       setIsGenerating(false);
+      trackEvent('generate_quote', { theme: resolvedTheme, has_custom_keyword: !!settings.customKeyword });
       console.log('[AI Success] Quote UI updated. Saving to DB in background...');
 
       // 2. BACKGROUND SAVE (Non-blocking)
@@ -532,6 +537,7 @@ export default function App() {
       };
       // Optimistic update
       setSettings(prev => ({ ...prev, isSubscribed: true, fcmToken }));
+      trackEvent('notification_subscribe');
       try {
         await setDoc(doc(db, 'users', user.uid), firestoreUpdate, { merge: true });
         setError(null); // Clear any previous error
@@ -573,6 +579,7 @@ export default function App() {
 
     if (updates.language) {
       i18n.changeLanguage(updates.language);
+      trackEvent('language_change', { language: updates.language });
     }
 
     try {
@@ -607,6 +614,7 @@ export default function App() {
       }
 
       await navigator.share(shareData);
+      trackEvent('share_quote', { has_image: !!quote.imageUrl });
     } catch (err) {
       if (err instanceof Error && err.name !== 'AbortError') {
         console.error('Error sharing:', err);
@@ -785,6 +793,7 @@ export default function App() {
 
       // 4. DOWNLOAD / SHARE IMMEDIATELY
       setIsGeneratingCard(false);
+      trackEvent('generate_card', { card_style: settings.preferredCardStyle });
       if (Capacitor.isNativePlatform()) {
         const { Filesystem, Directory } = await import('@capacitor/filesystem');
         const { Share } = await import('@capacitor/share');
@@ -824,9 +833,121 @@ export default function App() {
   }
 
   if (!user) {
+    const ONBOARDING_THEME_PREVIEWS = ['motivation', 'philosophy', 'comfort', 'success', 'humor', 'wisdom'];
+    const ONBOARDING_STEPS = [
+      {
+        emoji: '✨',
+        titleKey: 'onboarding.step1_title',
+        descKey: 'onboarding.step1_desc',
+      },
+      {
+        emoji: '🎨',
+        titleKey: 'onboarding.step2_title',
+        descKey: 'onboarding.step2_desc',
+      },
+      {
+        emoji: '🚀',
+        titleKey: 'onboarding.step3_title',
+        descKey: 'onboarding.step3_desc',
+      },
+    ];
+    const completeOnboarding = () => {
+      localStorage.setItem('hasSeenOnboarding', 'true');
+      setShowOnboarding(false);
+      trackEvent('onboarding_complete', { steps_seen: onboardingStep + 1 });
+    };
+
+    if (showOnboarding) {
+      const step = ONBOARDING_STEPS[onboardingStep];
+      const isLast = onboardingStep === ONBOARDING_STEPS.length - 1;
+      return (
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6">
+          <div className="max-w-sm w-full flex flex-col items-center">
+            {/* Skip */}
+            <div className="w-full flex justify-end mb-6">
+              <button
+                onClick={() => { trackEvent('onboarding_skip', { step: onboardingStep }); completeOnboarding(); }}
+                className="text-sm text-neutral-400 hover:text-neutral-600 transition-colors"
+              >
+                {t('onboarding.skip')}
+              </button>
+            </div>
+
+            {/* Slide */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={onboardingStep}
+                initial={{ opacity: 0, x: 40 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -40 }}
+                transition={{ duration: 0.25 }}
+                className="w-full flex flex-col items-center text-center"
+              >
+                <div className="text-7xl mb-8">{step.emoji}</div>
+                <h2 className="text-2xl font-extrabold text-neutral-900 mb-4 leading-tight">
+                  {t(step.titleKey)}
+                </h2>
+                <p className="text-neutral-500 leading-relaxed whitespace-pre-line mb-8">
+                  {t(step.descKey)}
+                </p>
+
+                {/* Step 2: theme preview chips */}
+                {onboardingStep === 1 && (
+                  <div className="flex flex-wrap gap-2 justify-center mb-4">
+                    {ONBOARDING_THEME_PREVIEWS.map(id => (
+                      <span
+                        key={id}
+                        className="px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-full text-sm font-medium border border-indigo-100"
+                      >
+                        {t(`themes.${id}`)}
+                      </span>
+                    ))}
+                    <span className="px-3 py-1.5 bg-neutral-50 text-neutral-400 rounded-full text-sm font-medium border border-neutral-100">
+                      +4
+                    </span>
+                  </div>
+                )}
+
+                {/* Step 3: login button */}
+                {isLast && (
+                  <button
+                    onClick={() => { completeOnboarding(); signInWithGoogle(); }}
+                    className="w-full py-4 px-6 bg-indigo-600 text-white rounded-2xl font-semibold flex items-center justify-center gap-3 hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200 mb-3"
+                  >
+                    <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" className="w-5 h-5 bg-white rounded-full p-0.5" alt="Google" />
+                    {t('auth.google_login')}
+                  </button>
+                )}
+              </motion.div>
+            </AnimatePresence>
+
+            {/* Step dots */}
+            <div className="flex gap-2 mt-6">
+              {ONBOARDING_STEPS.map((_, i) => (
+                <div
+                  key={i}
+                  className={`h-2 rounded-full transition-all duration-300 ${i === onboardingStep ? 'w-6 bg-indigo-600' : 'w-2 bg-neutral-200'}`}
+                />
+              ))}
+            </div>
+
+            {/* Next button (hidden on last step since login button serves as CTA) */}
+            {!isLast && (
+              <button
+                onClick={() => setOnboardingStep(s => s + 1)}
+                className="mt-8 w-full py-4 px-6 bg-indigo-600 text-white rounded-2xl font-semibold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200"
+              >
+                {t('onboarding.next')}
+              </button>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-50 p-6 text-center">
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8 border border-neutral-100"
@@ -838,7 +959,7 @@ export default function App() {
           <p className="text-neutral-500 mb-10 leading-relaxed max-w-[280px] mx-auto">
             {t('auth.desc')}
           </p>
-          <button 
+          <button
             onClick={signInWithGoogle}
             className="w-full py-4 px-6 bg-indigo-600 text-white rounded-2xl font-semibold flex items-center justify-center gap-3 hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200"
           >

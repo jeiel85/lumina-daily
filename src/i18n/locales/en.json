@@ -99,5 +99,16 @@
     "button": "Share",
     "success": "Shared successfully.",
     "error": "Error sharing."
+  },
+  "onboarding": {
+    "skip": "Skip",
+    "next": "Next",
+    "start": "Get Started",
+    "step1_title": "A word just for you, every morning",
+    "step1_desc": "AI crafts a personalized quote with a warm explanation\ntailored to your taste every day.",
+    "step2_title": "Choose your theme",
+    "step2_desc": "From motivation to philosophy and comfort,\npick from 10 themes that speak to you.",
+    "step3_title": "Ready to begin?",
+    "step3_desc": "Sign in with Google to save your quote history\nand receive daily notifications."
   }
 }

@@ -2,6 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithCredential, signOut, User as FirebaseUser } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getMessaging, getToken, onMessage, type NextFn, type MessagePayload } from 'firebase/messaging';
+import { getAnalytics, logEvent, type Analytics } from 'firebase/analytics';
 import { Capacitor } from '@capacitor/core';
 
 // localConfig is now handled via environment variables in .env
@@ -71,6 +72,27 @@ export const db = getFirestore(app, databaseId || '(default)');
 export const messaging = (typeof window !== 'undefined' && isConfigValid) ? getMessaging(app) : null;
 export const googleProvider = new GoogleAuthProvider();
 
+// Analytics (web only — Capacitor native doesn't use Web SDK analytics)
+let _analytics: Analytics | null = null;
+if (typeof window !== 'undefined' && isConfigValid && !Capacitor.isNativePlatform()) {
+  try {
+    _analytics = getAnalytics(app);
+  } catch (e) {
+    console.warn('[Analytics] 초기화 실패:', e);
+  }
+}
+export const analytics = _analytics;
+
+/** 핵심 사용자 행동을 Firebase Analytics에 기록 */
+export const trackEvent = (name: string, params?: Record<string, string | number | boolean>) => {
+  if (!_analytics) return;
+  try {
+    logEvent(_analytics, name, params);
+  } catch (e) {
+    console.warn('[Analytics] 이벤트 기록 실패:', name, e);
+  }
+};
+
 export const signInWithGoogle = async () => {
   if (!isConfigValid) {
     const error = '환경 변수가 설정되지 않았습니다. .env 파일을 작성하거나 Firebase 콘솔에서 설정을 확인해 주세요.';
@@ -83,15 +105,49 @@ export const signInWithGoogle = async () => {
   if (Capacitor.isNativePlatform()) {
     try {
       const { FirebaseAuthentication } = await import('@capacitor-firebase/authentication');
-      const result = await FirebaseAuthentication.signInWithGoogle({ useCredentialManager: true });
-      if (result.credential?.idToken) {
+
+      // Credential Manager 방식 시도 → 실패 시 레거시 방식으로 폴백
+      let result;
+      try {
+        result = await FirebaseAuthentication.signInWithGoogle({ useCredentialManager: true });
+      } catch (credentialManagerError: any) {
+        const isCancelled = credentialManagerError.message?.includes('cancelled')
+          || credentialManagerError.message?.includes('canceled')
+          || credentialManagerError.message?.includes('No credentials');
+        if (isCancelled) return;
+
+        console.warn('[Auth] Credential Manager 실패, 레거시 방식으로 재시도:', credentialManagerError.message);
+        try {
+          result = await FirebaseAuthentication.signInWithGoogle({ useCredentialManager: false });
+        } catch (legacyError: any) {
+          // Error 10 = DEVELOPER_ERROR: SHA-1 지문이 Firebase Console에 미등록
+          const isError10 = legacyError.message?.includes('10:')
+            || legacyError.message?.includes('DEVELOPER_ERROR');
+          if (isError10) {
+            const msg = 'Google 로그인 설정 오류 (Error 10)\n\n'
+              + 'Firebase Console → 프로젝트 설정 → Android 앱에\n'
+              + '아래 SHA-1 지문이 등록되어 있는지 확인해주세요.\n\n'
+              + '디버그: ./gradlew signingReport\n'
+              + '릴리즈: keytool -list -v -keystore <keystore파일>';
+            console.error('[Auth] SHA-1 미등록 의심:', msg);
+            alert(msg);
+            throw legacyError;
+          }
+          throw legacyError;
+        }
+      }
+
+      if (result?.credential?.idToken) {
         const credential = GoogleAuthProvider.credential(result.credential.idToken);
         return await signInWithCredential(auth, credential);
       }
       throw new Error('Google 로그인 토큰을 받지 못했습니다.');
     } catch (error: any) {
       if (error.message?.includes('cancelled') || error.message?.includes('canceled')) return;
-      alert(`로그인 중 오류가 발생했습니다: ${error.message}`);
+      // Error 10 오류는 위에서 이미 alert 처리됨
+      if (!error.message?.includes('Error 10') && !error.message?.includes('SHA-1')) {
+        alert(`로그인 중 오류가 발생했습니다: ${error.message}`);
+      }
       throw error;
     }
   }
