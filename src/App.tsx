@@ -206,7 +206,7 @@ export default function App() {
     const setup = async () => {
       const { FirebaseMessaging } = await import('@capacitor-firebase/messaging');
       FirebaseMessaging.addListener('notificationActionPerformed', (event) => {
-        const quoteId = event.notification.data?.quoteId as string | undefined;
+        const quoteId = (event.notification.data as Record<string, string> | undefined)?.quoteId;
         if (quoteId) pendingNotifQuoteId.current = quoteId;
       });
     };
@@ -264,7 +264,7 @@ export default function App() {
               uid: data.uid || firebaseUser.uid,
               email: data.email || firebaseUser.email || '',
               notificationTime: data.notificationTime || '08:00',
-              preferredThemes: data.preferredThemes || (data.preferredTheme ? [data.preferredTheme] : null) || [(data as any).theme] || ['motivation'],
+              preferredThemes: data.preferredThemes || ((data as any).preferredTheme ? [(data as any).preferredTheme] : null) || [(data as any).theme] || ['motivation'],
               customKeyword: data.customKeyword || '',
               preferredCardStyle: data.preferredCardStyle || 'classic',
               language: data.language || i18n.language || 'ko',
