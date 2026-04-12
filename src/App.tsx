@@ -189,6 +189,7 @@ export default function App() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingCard, setIsGeneratingCard] = useState(false);
   const [showTimePicker, setShowTimePicker] = useState(false);
+  const timePickerTouchStartY = useRef<number | null>(null);
   const [tempHour, setTempHour] = useState(8);
   const [tempMinute, setTempMinute] = useState(0);
   const [isLandscape, setIsLandscape] = useState(false);
@@ -505,6 +506,16 @@ export default function App() {
     };
     syncPermission();
   }, [user, settings.isSubscribed]);
+
+  // 모달 열릴 때 배경 스크롤 차단
+  useEffect(() => {
+    if (showTimePicker) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [showTimePicker]);
 
   // 포그라운드 메시지 수신 (앱이 열려있을 때)
   useEffect(() => {
@@ -1143,11 +1154,24 @@ export default function App() {
 
               {/* Time Picker Modal */}
               {showTimePicker && (
-                <div className="fixed inset-0 z-50 flex items-end" onClick={() => setShowTimePicker(false)}>
+                <div
+                  className="fixed inset-0 z-50 flex items-end"
+                  onClick={() => setShowTimePicker(false)}
+                  onWheel={e => e.stopPropagation()}
+                  onTouchMove={e => e.stopPropagation()}
+                >
                   <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
                   <div
-                    className="relative w-full bg-white dark:bg-neutral-900 rounded-t-3xl px-6 pt-6 pb-10 space-y-6"
+                    className="relative w-full bg-white dark:bg-neutral-900 rounded-t-3xl px-6 pt-6 pb-10 space-y-6 overflow-y-auto max-h-[85vh]"
                     onClick={e => e.stopPropagation()}
+                    onTouchStart={e => { timePickerTouchStartY.current = e.touches[0].clientY; }}
+                    onTouchEnd={e => {
+                      if (timePickerTouchStartY.current !== null) {
+                        const deltaY = e.changedTouches[0].clientY - timePickerTouchStartY.current;
+                        if (deltaY > 80) setShowTimePicker(false);
+                        timePickerTouchStartY.current = null;
+                      }
+                    }}
                   >
                     <div className="w-10 h-1 bg-neutral-200 dark:bg-neutral-700 rounded-full mx-auto" />
                     <div className="flex items-center justify-between">
