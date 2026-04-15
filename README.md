@@ -58,6 +58,22 @@ npm run dev
 
 ---
 
+## 🌍 GitHub Pages (docs/)
+
+`docs/` 폴더는 GitHub Pages 전용 정적 파일 폴더입니다.
+
+| 파일 | URL | 용도 |
+|------|-----|------|
+| `docs/index.html` | `/` | 앱 소개 랜딩 페이지 |
+| `docs/privacy-policy.html` | `/privacy-policy.html` | 개인정보처리방침 (앱 스토어 심사용) |
+
+**주의사항**
+- `npm run build` 결과물은 `dist/`에 생성됩니다 (`docs/`와 분리).
+- `docs/`는 빌드 아웃풋이 아니므로 직접 편집해서 관리합니다.
+- `docs/`는 `.gitignore` 대상이 아닙니다 — 변경 시 그냥 `git add` 하면 됩니다.
+
+---
+
 ## 📜 개발 지침 (Guidelines)
 프로젝트의 자세한 개발 철학 및 기술 지침은 [MOBILE_GUIDELINES.md](./MOBILE_GUIDELINES.md)를 참고해 주시기 바랍니다.
 
