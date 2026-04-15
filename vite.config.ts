@@ -11,7 +11,7 @@ export default defineConfig(({mode}) => {
     base: isGithubPages ? '/daily-quote/' : '/',
     plugins: [react(), tailwindcss()],
     build: {
-      outDir: 'docs',
+      outDir: 'dist',
       emptyOutDir: true,
       target: 'esnext',
     },
