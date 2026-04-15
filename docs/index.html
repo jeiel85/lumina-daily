@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lumina Daily - 당신의 하루를 채우는 지혜 한 조각</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f0c29;
+      background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+      color: #f0f0f0;
+      min-height: 100vh;
+      line-height: 1.7;
+    }
+
+    header {
+      text-align: center;
+      padding: 80px 20px 60px;
+    }
+
+    .icon {
+      width: 96px;
+      height: 96px;
+      background: linear-gradient(135deg, #5B3FD4, #F59E0B);
+      border-radius: 24px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      box-shadow: 0 8px 32px rgba(91, 63, 212, 0.4);
+    }
+
+    .icon svg {
+      width: 52px;
+      height: 52px;
+      fill: white;
+    }
+
+    h1 {
+      font-size: 2.6rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(90deg, #fff 0%, #c4b5fd 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 12px;
+    }
+
+    .tagline {
+      font-size: 1.1rem;
+      color: #a5b4fc;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    .features {
+      max-width: 880px;
+      margin: 0 auto;
+      padding: 0 20px 60px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 20px;
+    }
+
+    .feature-card {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 28px 24px;
+      backdrop-filter: blur(10px);
+    }
+
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 12px;
+    }
+
+    .feature-card h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #e2e8f0;
+      margin-bottom: 8px;
+    }
+
+    .feature-card p {
+      font-size: 0.88rem;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+
+    .badge-section {
+      text-align: center;
+      padding: 0 20px 80px;
+    }
+
+    .badge-section p {
+      color: #64748b;
+      font-size: 0.85rem;
+      margin-top: 12px;
+    }
+
+    .google-play-badge {
+      display: inline-block;
+      background: #000;
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 12px;
+      padding: 12px 24px;
+      color: #fff;
+      text-decoration: none;
+      font-size: 0.9rem;
+      transition: opacity 0.2s;
+    }
+
+    .google-play-badge:hover { opacity: 0.8; }
+
+    .google-play-badge strong {
+      display: block;
+      font-size: 1.1rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 32px 20px 48px;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    footer a {
+      color: #818cf8;
+      text-decoration: none;
+      font-size: 0.9rem;
+      margin: 0 12px;
+    }
+
+    footer a:hover { text-decoration: underline; }
+
+    footer .copy {
+      color: #475569;
+      font-size: 0.8rem;
+      margin-top: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="icon">
+      <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 1l2.1 5.9 5.9 2.1-5.9 2.1L12 17l-2.1-5.9L4 9.1l5.9-2.1L12 1zm0 10l1.05 2.95L16 15l-2.95 1.05L12 19l-1.05-2.95L8 15l2.95-1.05L12 11z"/>
+      </svg>
+    </div>
+    <h1>Lumina Daily</h1>
+    <p class="tagline">당신의 하루를 채우는 지혜 한 조각</p>
+  </header>
+
+  <section class="features">
+    <div class="feature-card">
+      <div class="feature-icon">✨</div>
+      <h3>AI 맞춤 명언</h3>
+      <p>Gemini AI가 나의 관심 테마에 맞춰 매일 새로운 명언과 해설을 생성합니다.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔔</div>
+      <h3>스마트 알림</h3>
+      <p>원하는 시간에 맞춤 명언을 푸시 알림으로 받아보세요. 하루의 시작을 지혜롭게.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🎨</div>
+      <h3>다양한 테마</h3>
+      <p>철학, 동기부여, 감성, 유머 등 취향에 맞는 명언 테마를 자유롭게 선택하세요.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📖</div>
+      <h3>명언 기록</h3>
+      <p>마음에 드는 명언을 저장하고, 나만의 지혜 컬렉션을 만들어보세요.</p>
+    </div>
+  </section>
+
+  <section class="badge-section">
+    <p>Google Play에서 무료로 다운로드</p>
+    <br/>
+    <a class="google-play-badge" href="#">
+      <strong>Google Play</strong>
+      에서 다운로드
+    </a>
+    <p>Android 8.0 이상 지원</p>
+  </section>
+
+  <footer>
+    <a href="privacy-policy.html">개인정보처리방침</a>
+    <a href="mailto:pedaiah85@gmail.com">문의하기</a>
+    <p class="copy">&copy; 2026 Lumina Daily. All rights reserved.</p>
+  </footer>
+
+</body>
+</html>
