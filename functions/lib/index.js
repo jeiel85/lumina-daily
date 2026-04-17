@@ -67,22 +67,33 @@ const LANG_NAMES = {
     ko: '한국어', en: 'English', ja: '日本語', zh: '中文',
 };
 // ─── Gemini 명언 생성 ─────────────────────────────────────────────────────────
-async function generateQuote(themes, language, geminiApiKey) {
+async function generateQuote(preferredTheme, customKeyword, language, geminiApiKey) {
     var _a, _b;
     try {
         const genAI = new generative_ai_1.GoogleGenerativeAI(geminiApiKey);
         const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
-        const theme = themes[Math.floor(Math.random() * themes.length)] || 'life';
-        const themeName = (_a = THEME_NAMES[theme]) !== null && _a !== void 0 ? _a : theme;
-        const langName = (_b = LANG_NAMES[language]) !== null && _b !== void 0 ? _b : 'English';
-        const prompt = `Generate a short, powerful inspirational quote about "${themeName}". Write everything in ${langName}. Also write a warm, insightful 2-3 sentence explanation of why this quote matters and how it applies to daily life. Respond only with JSON: {"text": "quote text", "author": "Author Name", "explanation": "explanation text"}`;
+        // 랜덤 처리
+        const ALL_THEMES = Object.keys(THEME_NAMES);
+        let resolvedTheme = preferredTheme === 'random'
+            ? ALL_THEMES[Math.floor(Math.random() * ALL_THEMES.length)]
+            : (THEME_NAMES[preferredTheme] ? preferredTheme : 'life');
+        const langName = (_a = LANG_NAMES[language]) !== null && _a !== void 0 ? _a : 'English';
+        let topicPart;
+        if (customKeyword === null || customKeyword === void 0 ? void 0 : customKeyword.trim()) {
+            topicPart = `keyword: "${customKeyword.trim()}"`;
+        }
+        else {
+            const themeName = (_b = THEME_NAMES[resolvedTheme]) !== null && _b !== void 0 ? _b : resolvedTheme;
+            topicPart = `theme: "${themeName}"`;
+        }
+        const prompt = `Generate a short, powerful inspirational quote about ${topicPart}. Write everything in ${langName}. Also write a warm, insightful 2-3 sentence explanation of why this quote matters and how it applies to daily life. Respond only with JSON: {"text": "quote text", "author": "Author Name", "explanation": "explanation text"}`;
         const result = await model.generateContent({
             contents: [{ role: 'user', parts: [{ text: prompt }] }],
             generationConfig: { responseMimeType: 'application/json' },
         });
         const data = JSON.parse(result.response.text());
         if (data.text && data.author)
-            return { text: data.text, author: data.author, explanation: data.explanation || '' };
+            return { text: data.text, author: data.author, explanation: data.explanation || '', resolvedTheme };
         return null;
     }
     catch (err) {
@@ -113,10 +124,12 @@ exports.sendDailyNotifications = (0, scheduler_1.onSchedule)({
     const geminiApiKey = (_a = process.env.GEMINI_API_KEY) !== null && _a !== void 0 ? _a : '';
     const appUrl = (_b = process.env.APP_URL) !== null && _b !== void 0 ? _b : 'https://lumina-762f8.firebaseapp.com';
     await Promise.allSettled(targets.map(async (doc) => {
-        const { fcmToken, language = 'ko', preferredThemes = ['life'] } = doc.data();
+        const { fcmToken, language = 'ko', preferredTheme, preferredThemes, customKeyword = '' } = doc.data();
+        // 하위 호환: 이전 preferredThemes 데이터도 지원
+        const resolvedPreferredTheme = preferredTheme || (preferredThemes === null || preferredThemes === void 0 ? void 0 : preferredThemes[0]) || 'life';
         const lang = (language in NOTIF_TITLES) ? language : 'ko';
         const quote = geminiApiKey
-            ? await generateQuote(preferredThemes, lang, geminiApiKey)
+            ? await generateQuote(resolvedPreferredTheme, customKeyword, lang, geminiApiKey)
             : null;
         const title = NOTIF_TITLES[lang];
         const body = quote
@@ -130,7 +143,7 @@ exports.sendDailyNotifications = (0, scheduler_1.onSchedule)({
                     text: quote.text,
                     author: quote.author,
                     explanation: quote.explanation,
-                    theme: preferredThemes[Math.floor(Math.random() * preferredThemes.length)] || 'life',
+                    theme: (quote === null || quote === void 0 ? void 0 : quote.resolvedTheme) || resolvedPreferredTheme,
                     createdAt: admin.firestore.FieldValue.serverTimestamp(),
                     uid: doc.id,
                     source: 'notification',
