@@ -8,23 +8,22 @@
 
 ## 🌟 주요 특징 (Key Features)
 
-### 📲 모바일 앱 (Porting Completed)
-- **네이티브 경험**: Expo와 Android Native를 결합한 최고의 퍼포먼스.
+### 📲 모바일 앱 (Capacitor Hybrid)
+- ** Capacitor 기반**: React + Vite로 웹 앱을 native Android로 변환.
 - **오프라인 번들링**: 네트워크 환경과 관계없이 안정적이고 빠른 실행 속도 보장.
 - **프리미엄 UI/UX**: 웹 버전의 감성을 유지하면서 모바일의 편리함(하단 탭, 알림)을 더한 디자인.
-- **맞춤형 빌드 자동화**: 전용 자동 빌드/설치 스크립트(`build_and_install.bat`) 제공.
+- **맞춤형 빌드 자동화**: 전용 자동 빌드/설치 스크립트(`build-and-install.bat`) 제공.
 
 ---
 
 ## 🛠 기술 스택 (Tech Stack)
 
 ### **Frontend & Mobile**
-![React Native](https://img.shields.io/badge/react_native-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
-![Expo](https://img.shields.io/badge/expo-000020?style=for-the-badge&logo=expo&logoColor=white)
-![Next.js](https://img.shields.io/badge/next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white)
+![React](https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB)
+![Vite](https://img.shields.io/badge/vite-%23646CFF.svg?style=for-the-badge&logo=vite&logoColor=%23646CFF)
+![Capacitor](https://img.shields.io/badge/capacitor-%23646CFF.svg?style=for-the-badge&logo=capacitor&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/typescript-%23007ACC.svg?style=for-the-badge&logo=typescript&logoColor=white)
-![JavaScript](https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E)
-![CSS3](https://img.shields.io/badge/css3-%231572B6.svg?style=for-the-badge&logo=css3&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwind-css&logoColor=white)
 
 ### **Backend & Infrastructure**
 ![Firebase](https://img.shields.io/badge/firebase-%23039BE5.svg?style=for-the-badge&logo=firebase)
@@ -47,9 +46,11 @@
 ### **Mobile (Android Build & Install)**
 사용자님의 S24 등 안드로이드 기기가 연결된 상태에서 다음을 실행하세요:
 ```batch
-.\build_and_install.bat
+.\build-and-install.bat
 ```
 *이 명령은 코드 번들링, 에셋 동기화, APK 빌드 및 기기 설치를 한 번에 완료합니다.*
+
+> **APK 수동 빌드**: `android/app/build/outputs/apk/debug/app-debug.apk`
 
 ### **Web Development**
 ```bash
