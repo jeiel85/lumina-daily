@@ -29,6 +29,7 @@ import { THEMES, THEME_SEED_POOLS, BLOCKED_KEYWORDS } from './constants';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { QuoteCard } from './components/QuoteCard';
 import { HistoryItem } from './components/HistoryItem';
+import { HistorySkeleton } from './components/HistorySkeleton';
 import { Header } from './components/Header';
 
 // Import icons
@@ -41,6 +42,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'home' | 'history' | 'settings'>('home');
   const [currentQuote, setCurrentQuote] = useState<Quote | null>(null);
   const [history, setHistory] = useState<Quote[]>([]);
+  const [isHistoryLoading, setIsHistoryLoading] = useState(true);
   const [settings, setSettings] = useState<UserSettings>({
     uid: '',
     email: '',
@@ -57,6 +59,7 @@ export default function App() {
   const [onboardingStep, setOnboardingStep] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isGeneratingCard, setIsGeneratingCard] = useState(false);
+  const [cardProgress, setCardProgress] = useState(0);
   const [showTimePicker, setShowTimePicker] = useState(false);
   const [tempHour, setTempHour] = useState(8);
   const [tempMinute, setTempMinute] = useState(0);
@@ -170,6 +173,7 @@ export default function App() {
             ...doc.data()
           })) as Quote[];
           setHistory(quotes);
+          setIsHistoryLoading(false);
           if (quotes.length > 0 && !currentQuote) {
             setCurrentQuote(quotes[0]);
           }
@@ -185,6 +189,7 @@ export default function App() {
         });
       } else {
         setHistory([]);
+        setIsHistoryLoading(false);
         setCurrentQuote(null);
         setSettings(prev => ({ ...prev, uid: '', email: '' }));
         if (unsubscribeSettings) unsubscribeSettings();
@@ -412,6 +417,7 @@ export default function App() {
   const generateQuoteCard = async (quote: Quote) => {
     if (!user) return;
     setIsGeneratingCard(true);
+    setCardProgress(10);
     setError(null);
 
     const apiKey = localConfig.geminiApiKey || (import.meta.env.VITE_GEMINI_API_KEY as string);
@@ -472,6 +478,7 @@ export default function App() {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
       }
       ctx.fillRect(0, 0, 1024, 1024);
+      setCardProgress(50);
 
       ctx.fillStyle = 'white';
       ctx.textAlign = style === 'modern' ? 'left' : 'center';
@@ -507,6 +514,7 @@ export default function App() {
       ctx.fillText(`— ${quote.author}`, startX, startY + 40);
 
       const finalImageUrl = canvas.toDataURL('image/jpeg', 0.8);
+      setCardProgress(80);
 
       if (quote.id && !quote.id.startsWith('temp-')) {
         setDoc(doc(db, 'users', user.uid, 'history', quote.id), { imageUrl: finalImageUrl }, { merge: true })
@@ -649,6 +657,7 @@ export default function App() {
                     quote={currentQuote}
                     isGenerating={isGenerating}
                     isGeneratingCard={isGeneratingCard}
+                    cardProgress={cardProgress}
                     onGenerateCard={() => currentQuote && generateQuoteCard(currentQuote)}
                     onRefresh={() => generateQuote(true)}
                     onShare={() => currentQuote && handleShare(currentQuote)}
@@ -671,7 +680,9 @@ export default function App() {
               {activeTab === 'history' && (
                 <motion.div key="history" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-4">
                   <h2 className="text-2xl font-bold">{t('history.title')}</h2>
-                  {history.length === 0 ? (
+                  {isHistoryLoading ? (
+                    <HistorySkeleton />
+                  ) : history.length === 0 ? (
                     <p className="text-neutral-400">{t('history.no_history')}</p>
                   ) : (
                     history.map((quote) => (

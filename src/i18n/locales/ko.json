@@ -24,6 +24,8 @@
     "generate_card": "명언 카드 만들기",
     "download_card": "카드 다운로드",
     "regenerate_card": "카드 다시 만들기",
+    "generating": "명언 생성 중...",
+    "generating_card": "카드 생성 중...",
     "subscribe_title": "나만의 인사이트 구독하기",
     "subscribe_desc": "매일 당신만을 위해 쓰인 한 마디가 도착합니다.",
     "activate": "구독 시작"

@@ -24,6 +24,8 @@
     "generate_card": "创建名言卡片",
     "download_card": "下载卡片",
     "regenerate_card": "重新生成卡片",
+    "generating": "正在生成名言...",
+    "generating_card": "正在生成卡片...",
     "subscribe_title": "订阅我的每日洞见",
     "subscribe_desc": "每天，一句专为你写就的话悄然送达。",
     "activate": "开始订阅"
