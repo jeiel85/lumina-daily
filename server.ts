@@ -40,7 +40,6 @@ async function startServer() {
       appId: process.env.VITE_FIREBASE_APP_ID || process.env.FIREBASE_APP_ID || (localConfig as any).appId,
       measurementId: process.env.VITE_FIREBASE_MEASUREMENT_ID || process.env.FIREBASE_MEASUREMENT_ID || (localConfig as any).measurementId,
       firestoreDatabaseId: process.env.VITE_FIREBASE_DATABASE_ID || process.env.FIREBASE_DATABASE_ID || (localConfig as any).firestoreDatabaseId,
-      geminiApiKey: process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY || (localConfig as any).geminiApiKey,
     });
   });
 

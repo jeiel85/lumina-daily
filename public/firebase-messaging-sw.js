@@ -5,16 +5,22 @@ importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compa
 // Initialize the Firebase app in the service worker by passing in
 // your app's Firebase config object.
 // https://firebase.google.com/docs/web/setup#config-object
-// Note: These values should be provided at build time or via environment variables
-// For GitHub security, we use placeholders for sensitive values.
-firebase.initializeApp({
-  apiKey: "AIzaSyDwj48xtxWNK4b2ejOBediztjgHZjJ2iAY",
-  authDomain: "spheric-shield-487302-a2.firebaseapp.com",
-  projectId: "spheric-shield-487302-a2",
-  storageBucket: "spheric-shield-487302-a2.firebasestorage.app",
-  messagingSenderId: "746169091837",
-  appId: "1:746169091837:web:bd4c4af19cd96ab23f6094"
-});
+// NOTE: For security, this file is generated at build time via Vite.
+// Do NOT manually edit this file - see vite.config.ts for configuration.
+// Build-time injected values (fallback to environment variables or .env files)
+const firebaseConfig = {
+  apiKey: "__VITE_FIREBASE_API_KEY__" || "demo-api-key",
+  authDomain: "__VITE_FIREBASE_AUTH_DOMAIN__" || "demo.firebaseapp.com",
+  projectId: "__VITE_FIREBASE_PROJECT_ID__" || "demo",
+  storageBucket: "__VITE_FIREBASE_STORAGE_BUCKET__" || "demo.firebasestorage.app",
+  messagingSenderId: "__VITE_FIREBASE_MESSAGING_SENDER_ID__" || "000000000000",
+  appId: "__VITE_FIREBASE_APP_ID__" || "1:000000000000:web:0000000000000"
+};
+
+// Only initialize if valid config (not placeholder values)
+if (firebaseConfig.apiKey && !firebaseConfig.apiKey.startsWith("demo")) {
+  firebase.initializeApp(firebaseConfig);
+}
 
 // Retrieve an instance of Firebase Messaging so that it can handle background
 // messages.
