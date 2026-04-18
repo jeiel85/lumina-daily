@@ -24,6 +24,8 @@
     "generate_card": "格言カードを作成",
     "download_card": "カードをダウンロード",
     "regenerate_card": "カードを再生成",
+    "generating": "格言を生成中...",
+    "generating_card": "カードを生成中...",
     "subscribe_title": "マイインサイトを購読する",
     "subscribe_desc": "毎日、あなただけのために書かれた一言が届きます。",
     "activate": "購読を始める"

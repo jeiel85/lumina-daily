@@ -24,6 +24,8 @@
     "generate_card": "Create Quote Card",
     "download_card": "Download Card",
     "regenerate_card": "Regenerate Card",
+    "generating": "Generating quote...",
+    "generating_card": "Generating card...",
     "subscribe_title": "Subscribe to Daily Insights",
     "subscribe_desc": "A word written just for you arrives every day.",
     "activate": "Start Subscription"
