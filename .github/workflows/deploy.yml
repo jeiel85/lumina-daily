@@ -122,6 +122,18 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Add Android SDK components
+        run: |
+          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+        env:
+          ANDROID_HOME: /opt/android-sdk
+
+      - name: Install Capacitor CLI
+        run: npm install @capacitor/cli
+
+      - name: Sync Capacitor Android
+        run: npx cap sync android
+
       - name: Build Android APK
         run: |
           cd android
