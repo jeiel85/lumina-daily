@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -17,6 +17,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -49,6 +51,13 @@ jobs:
           VITE_FIREBASE_DATABASE_ID: ${{ secrets.VITE_FIREBASE_DATABASE_ID }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
+      - name: Generate version
+        id: version
+        run: |
+          VERSION="v$(node -p \"require('./package.json').version\")"
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: $VERSION"
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
@@ -59,6 +68,19 @@ jobs:
         with:
           name: lumina-daily-build
           path: ./dist
+          retention-days: 30
+
+      - name: Create dist.zip
+        run: |
+          cd dist
+          zip -r ../dist.zip .
+          mv ../dist.zip .
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-asset
+          path: dist/dist.zip
           retention-days: 30
 
   deploy:
@@ -82,3 +104,34 @@ jobs:
 
       - name: List artifact contents
         run: ls -la
+
+  release:
+    needs: [build, deploy]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download release artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: release-asset
+          path: release
+
+      - name: Get version
+        id: version
+        run: |
+          VERSION=${{ needs.build.outputs.version }}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Release version: $VERSION"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ steps.version.outputs.version }}
+          tag_name: ${{ steps.version.outputs.version }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: release/dist.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
