@@ -122,14 +122,12 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      - name: Sync Capacitor Android
-        run: npx cap sync android
-
       - name: Build Android APK
         run: |
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
+        working-directory: ./android
 
       - name: Generate version
         id: version
