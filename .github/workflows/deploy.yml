@@ -7,11 +7,9 @@ on:
 
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 concurrency:
-  group: pages
+  group: ci
   cancel-in-progress: false
 
 jobs:
@@ -39,7 +37,7 @@ jobs:
         run: npm test
 
       - name: Build
-        run: npm run build -- --base /lumina-daily/
+        run: npm run build
         env:
           VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
           VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
@@ -58,18 +56,6 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Building version: v$VERSION"
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: ./dist
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: lumina-daily-build
-          path: ./dist
-          retention-days: 30
-
       - name: Create dist.zip
         run: |
           cd dist
@@ -82,28 +68,6 @@ jobs:
           name: release-asset
           path: dist/dist.zip
           retention-days: 30
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deploy.outputs.page_url }}
-    steps:
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-
-      - name: Deploy to GitHub Pages
-        id: deploy
-        uses: actions/deploy-pages@v4
-
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: lumina-daily-build
-
-      - name: List artifact contents
-        run: ls -la
 
   build-apk:
     runs-on: ubuntu-latest
@@ -159,7 +123,7 @@ jobs:
           retention-days: 30
 
   release:
-    needs: [build, deploy, build-apk]
+    needs: [build, build-apk]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -175,13 +139,6 @@ jobs:
         with:
           name: lumina-daily-debug-apk
           path: release
-
-      - name: Get version
-        id: version
-        run: |
-          VERSION=${{ needs.build.outputs.version }}
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Release version: $VERSION"
 
       - name: List release files
         run: ls -la release/
