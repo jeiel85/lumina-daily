@@ -120,6 +120,7 @@ jobs:
           java-version: '17'
 
       - name: Setup Android SDK
+        id: setup-android
         uses: android-actions/setup-android@v3
 
       - name: Build Android APK
@@ -127,7 +128,9 @@ jobs:
           cd android
           chmod +x gradlew
           ./gradlew assembleDebug
-        working-directory: ./android
+        env:
+          ANDROID_HOME: ${{ steps.setup-android.outputs.android-home }}
+          ANDROID_SDK_ROOT: ${{ steps.setup-android.outputs.android-home }}
 
       - name: Generate version
         id: version
