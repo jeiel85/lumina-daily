@@ -39,7 +39,7 @@ jobs:
         run: npm test
 
       - name: Build
-        run: npm run build
+        run: npm run build -- --base /lumina-daily/
         env:
           VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
           VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
