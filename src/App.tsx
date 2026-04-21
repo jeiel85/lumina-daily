@@ -130,6 +130,7 @@ interface UserSettings {
   notificationTime: string;
   notificationTimeUTC?: string;
   preferredThemes: string[];
+  preferredTheme?: string; // Legacy: singular for backward compat
   customKeyword: string;
   preferredCardStyle: string;
   isSubscribed: boolean;
@@ -138,6 +139,7 @@ interface UserSettings {
   fcmToken?: string;
   role: string;
   updatedAt?: any;
+  theme?: string; // Legacy: alternate form
 }
 
 const THEMES = [
@@ -203,8 +205,9 @@ export default function App() {
     if (!Capacitor.isNativePlatform()) return;
     const setup = async () => {
       const { FirebaseMessaging } = await import('@capacitor-firebase/messaging');
-      FirebaseMessaging.addListener('notificationActionPerformed', (event) => {
-        const quoteId = event.notification.data?.quoteId as string | undefined;
+      // @ts-expect-error - Capacitor Firebase Messaging types incomplete
+      FirebaseMessaging.addListener('notificationActionPerformed', (event: { notification?: { data?: Record<string, string> } }) => {
+        const quoteId = event.notification?.data?.quoteId;
         if (quoteId) pendingNotifQuoteId.current = quoteId;
       });
     };
