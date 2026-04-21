@@ -54,9 +54,9 @@ jobs:
       - name: Generate version
         id: version
         run: |
-          VERSION="v$(node -p \"require('./package.json').version\")"
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "Building version: $VERSION"
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=v$VERSION" >> $GITHUB_OUTPUT
+          echo "Building version: v$VERSION"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
