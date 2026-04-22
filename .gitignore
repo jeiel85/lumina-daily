@@ -7,6 +7,7 @@ coverage/
 .env*
 !.env.example
 firebase-applet-config.json
+android/app/release.keystore
 build_err.txt
 build_out.txt
 192.168.*
