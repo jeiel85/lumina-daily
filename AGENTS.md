@@ -143,12 +143,21 @@ server: {
 
 1. `package.json`과 `android/app/build.gradle` 버전 수정
 2. 커밋 & `main` 푸시 (빌드 없음)
-3. 태그 생성 & 푸시 → CI가 자동으로 빌드 + 릴리즈 생성
+3. **태그 푸시 전 반드시 버전 일치 확인** (이 단계를 건너뛰지 말 것):
+
+```bash
+node -p "require('./package.json').version"
+grep -E "versionCode|versionName" android/app/build.gradle
+```
+
+4. 두 파일 버전이 일치하면 태그 생성 & 푸시
 
 ```bash
 git tag v1.0.5
 git push origin v1.0.5
 ```
+
+> **주의:** 태그는 반드시 버전 업 커밋 이후에 붙여야 한다. 태그가 버전 업 커밋 이전을 가리키면 릴리즈 이름이 이전 버전으로 생성된다.
 
 4. `gh release edit vX.X.X --notes "..."` 로 릴리즈 노트 직접 작성
 
