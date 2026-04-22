@@ -23,7 +23,7 @@ lumina-daily/
 |------|------|-----------|
 | `jeiel85.github.io/lumina-daily/` | `docs/` (정적 HTML 랜딩 페이지) | GitHub Pages legacy 모드 — `main` 브랜치 `/docs` 폴더 직접 서빙 |
 | Android APK | `dist/` (React 앱 번들) | Capacitor가 `dist/`를 android assets에 복사 |
-| GitHub Release | `app-debug.apk` + `dist.zip` | CI 자동 생성 |
+| GitHub Release | `app-release.apk` + `dist.zip` | 태그 푸시(v*) 시 CI 자동 생성 |
 
 **중요:** GitHub Pages는 React 앱을 서빙하지 않는다. `docs/`의 랜딩 페이지만 서빙한다. React 앱은 오직 APK 안에 번들된다.
 
@@ -43,6 +43,12 @@ VITE_FIREBASE_APP_ID
 VITE_FIREBASE_MEASUREMENT_ID
 VITE_FIREBASE_DATABASE_ID
 GEMINI_API_KEY
+
+# 릴리즈 APK 서명용
+RELEASE_KEYSTORE_BASE64      # release.keystore 파일을 base64 인코딩한 값
+RELEASE_STORE_PASSWORD
+RELEASE_KEY_ALIAS            # lumina-daily-key
+RELEASE_KEY_PASSWORD
 ```
 
 ### 로컬 개발
@@ -54,14 +60,15 @@ VITE_FIREBASE_AUTH_DOMAIN=...
 (나머지 동일)
 ```
 
-### 알려진 이슈 (#25)
-
-APK 실행 시 "환경변수가 설정되지 않았습니다" 오류 발생 중.  
-CI `build-apk` job에서 `VITE_FIREBASE_*` 변수가 Vite 번들에 정상 주입되는지 확인 필요.
-
 ---
 
 ## CI/CD 워크플로우 (`.github/workflows/deploy.yml`)
+
+### 트리거
+
+- **`v*` 태그 푸시** → 빌드 + 릴리즈 생성
+- **`workflow_dispatch`** → GitHub Actions UI에서 수동 실행
+- 일반 `main` 브랜치 푸시는 빌드를 트리거하지 않음
 
 ### Job 구조
 
@@ -78,7 +85,8 @@ build-apk ┘
 
 ### `build-apk` job
 - Node.js 22, Java 21 (Temurin), Android SDK 사용
-- `npm run build` → `npx cap sync android` → `./gradlew assembleDebug`
+- `npm run build` → `npx cap sync android` → `./gradlew assembleRelease`
+- CI에서 `RELEASE_KEYSTORE_BASE64` 시크릿을 base64 디코딩해 `android/app/release.keystore`로 복원 후 서명
 - `gradlew` 실행 전 `chmod +x gradlew` 필수 (CI 환경에서 실행 권한 없음)
 - Gradle이 Maven Central에서 의존성 받다가 일시적 403 오류가 날 수 있음 → `gh run rerun <id> --failed`로 재실행하면 대부분 해결됨
 
@@ -112,8 +120,12 @@ server: {
 
 ### 서명 (`android/app/build.gradle`)
 
-- **debug 빌드**: `android/app/debug.keystore` 고정 사용 — 이 키스토어가 Google 로그인 SHA-1과 연결되어 있으므로 변경하면 구글 로그인 불가
-- **release 빌드**: 환경변수(`RELEASE_STORE_FILE` 등) 또는 `local.properties`에서 읽음. 없으면 `debug.keystore`로 폴백 (CI에서 `file('')` 크래시 방지)
+- **debug 빌드**: `android/app/debug.keystore` 고정 사용
+  - SHA-1: `97:25:5E:13:C9:F6:4D:F7:23:5B:39:88:E7:CA:33:9F:09:1B:1D:92`
+- **release 빌드**: 환경변수(`RELEASE_STORE_FILE` 등)에서 읽음
+  - 키스토어 파일: `android/app/release.keystore` (gitignore됨, CI에서 Secret으로 복원)
+  - SHA-1: `76:D1:EF:4A:8D:99:78:32:7C:F5:2A:6E:DE:F4:B7:A9:26:73:79:E4`
+  - 릴리즈 키스토어 원본은 로컬 PC 및 안전한 곳에 백업 필수 — 분실 시 앱 재등록 필요
 
 ### 버전 올릴 때 수정할 파일 두 곳
 
@@ -127,8 +139,21 @@ server: {
 ### 버전 올리는 순서
 
 1. `package.json`과 `android/app/build.gradle` 버전 수정
-2. 커밋 & 푸시 → CI가 자동으로 릴리즈 생성 및 파일 첨부
-3. `gh release edit vX.X.X --notes "..."` 로 릴리즈 노트 직접 작성 (`generate_release_notes: true` 자동 생성 결과가 부실함)
+2. 커밋 & `main` 푸시 (빌드 없음)
+3. 태그 생성 & 푸시 → CI가 자동으로 빌드 + 릴리즈 생성
+
+```bash
+git tag v1.0.5
+git push origin v1.0.5
+```
+
+4. `gh release edit vX.X.X --notes "..."` 로 릴리즈 노트 직접 작성
+
+### Play Store 출시 관련
+
+- 현재 릴리즈 APK(`assembleRelease`)로 빌드 중 — Play Store 제출 가능
+- Play Store는 APK 대신 **AAB(Android App Bundle)** 권장 → 필요 시 `bundleRelease`로 전환
+- Play App Signing 활성화 시: 지금 키스토어는 "업로드 키" 역할, 실제 배포는 구글 서버 키로 재서명됨
 
 ### 릴리즈 노트 작성 기준
 
@@ -136,14 +161,6 @@ server: {
 - 변경 내용을 카테고리별로 (기능/수정/보안/CI 등)
 - 설치 방법 포함 (APK 다운로드 → 알 수 없는 앱 허용 → 설치)
 - 웹앱 URL 포함
-
----
-
-## 알려진 이슈
-
-| 이슈 | 설명 | 상태 |
-|------|------|------|
-| [#25](https://github.com/jeiel85/lumina-daily/issues/25) | APK 로그인 불가 — 환경변수 미주입 | 미해결 |
 
 ---
 
@@ -158,6 +175,10 @@ npm run build
 npm test
 npm run lint
 
+# 릴리즈 배포
+git tag v1.0.5
+git push origin v1.0.5
+
 # CI 확인
 gh run list --limit 5 --repo jeiel85/lumina-daily
 gh run view <run_id> --log-failed --repo jeiel85/lumina-daily
@@ -165,7 +186,7 @@ gh run rerun <run_id> --failed --repo jeiel85/lumina-daily
 
 # 릴리즈
 gh release list --repo jeiel85/lumina-daily
-gh release edit v1.0.4 --repo jeiel85/lumina-daily --notes "..."
+gh release edit v1.0.5 --repo jeiel85/lumina-daily --notes "..."
 
 # GitHub Pages 설정 확인
 gh api repos/jeiel85/lumina-daily/pages
