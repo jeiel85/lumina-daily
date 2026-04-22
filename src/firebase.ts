@@ -83,7 +83,7 @@ export const signInWithGoogle = async () => {
   if (Capacitor.isNativePlatform()) {
     try {
       const { FirebaseAuthentication } = await import('@capacitor-firebase/authentication');
-      const result = await FirebaseAuthentication.signInWithGoogle({ useCredentialManager: true });
+      const result = await FirebaseAuthentication.signInWithGoogle();
       if (result.credential?.idToken) {
         const credential = GoogleAuthProvider.credential(result.credential.idToken);
         return await signInWithCredential(auth, credential);
