@@ -11,7 +11,8 @@
     "clean": "rm -rf docs",
     "lint": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "release": "node scripts/release.mjs"
   },
   "dependencies": {
     "@capacitor-firebase/authentication": "^8.2.0",
