@@ -57,19 +57,6 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Building version: v$VERSION"
 
-      - name: Create dist.zip
-        run: |
-          cd dist
-          zip -r ../dist.zip .
-          mv ../dist.zip .
-
-      - name: Upload release artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: release-asset
-          path: dist/dist.zip
-          retention-days: 30
-
   build-apk:
     runs-on: ubuntu-latest
     steps:
@@ -138,12 +125,6 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Download web artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: release-asset
-          path: release
-
       - name: Download APK artifact
         uses: actions/download-artifact@v4
         with:
@@ -162,7 +143,6 @@ jobs:
           prerelease: false
           generate_release_notes: true
           files: |
-            release/dist.zip
             release/app-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
