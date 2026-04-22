@@ -132,6 +132,9 @@ server: {
 1. `package.json` → `"version": "x.x.x"`
 2. `android/app/build.gradle` → `versionCode N` (정수, 1씩 증가), `versionName "x.x.x"`
 
+**현재 버전**: `package.json` = `1.0.4`, `versionCode` = `3`, `versionName` = `1.0.4`
+**다음 릴리즈 시**: versionCode를 `4`로, versionName과 package.json을 `1.0.5`로 변경
+
 ---
 
 ## 릴리즈 관리
