@@ -159,7 +159,9 @@ export const signInWithGoogle = async () => {
     console.error('Google Sign-In Error:', error);
     if (error.code === 'auth/unauthorized-domain') {
       const currentDomain = window.location.hostname;
-      const message = `도메인 (${currentDomain})이 Firebase 콘솔에서 승인되지 않았습니다. Firebase Console > Authentication > Settings > Authorized domains 에 추가해 주세요.`;
+      const message = `도메인 (${currentDomain})이 Firebase 콘솔에서 승인되지 않았습니다.\n\n` +
+        `1. Firebase Console > Authentication > Settings > Authorized domains 로 이동\n` +
+        `2. '${currentDomain}'를 리스트에 추가해 주세요.`;
       console.error(message);
       alert(message);
     } else if (error.code === 'auth/popup-closed-by-user') {
