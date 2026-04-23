@@ -24,6 +24,8 @@
     "generate_card": "创建名言卡片",
     "download_card": "下载卡片",
     "regenerate_card": "重新生成卡片",
+    "generating": "正在生成名言...",
+    "generating_card": "正在生成卡片...",
     "subscribe_title": "订阅我的每日洞见",
     "subscribe_desc": "每天，一句专为你写就的话悄然送达。",
     "activate": "开始订阅"
@@ -99,5 +101,16 @@
     "button": "分享",
     "success": "已分享。",
     "error": "分享时发生错误。"
+  },
+  "onboarding": {
+    "skip": "跳过",
+    "next": "下一步",
+    "start": "开始体验",
+    "step1_title": "每天早晨，专属于你的一句话",
+    "step1_desc": "AI 每天为您量身打造名言与温暖解说，\n完全符合您的个人喜好。",
+    "step2_title": "选择你的主题",
+    "step2_desc": "从动力、哲学到慰藉，\n从10种主题中选择最适合你的。",
+    "step3_title": "准备好了吗？",
+    "step3_desc": "使用 Google 账户登录，\n即可保存名言记录并接收每日通知。"
   }
 }

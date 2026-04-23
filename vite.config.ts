@@ -5,7 +5,7 @@ import {defineConfig, loadEnv} from 'vite';
 
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
-  const isGithubPages = mode === 'github-pages';
+  const isGithubPages = mode === 'github-pages' || process.env.NODE_ENV === 'github-pages';
   
   return {
     base: isGithubPages ? '/daily-quote/' : '/',

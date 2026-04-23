@@ -1,0 +1,22 @@
+{
+  "short_name": "Lumina Daily",
+  "name": "Lumina Daily",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#4f46e5",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#4f46e5",
+  "description": "매일 아침, 나만을 위한 AI 명언으로 하루를 시작하세요."
+}

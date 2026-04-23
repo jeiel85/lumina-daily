@@ -1,150 +1,110 @@
-<div align="center">
+# ✨ Lumina Daily: Your Daily Dose of Wisdom
 
-<img src="lumina-icon-512.png" alt="Lumina Daily" width="120" />
+> **"Lumina: 당신의 하루를 채우는 지혜 한 조각"**
 
-# ✨ Lumina Daily
-
-**매일 당신의 하루를 채우는 지혜 한 조각**
-
-[![Build](https://img.shields.io/github/actions/workflow/status/jeiel85/lumina-daily/deploy.yml?style=flat-square&logo=github&label=Build)](https://github.com/jeiel85/lumina-daily/actions)
-[![Release](https://img.shields.io/github/v/release/jeiel85/lumina-daily?style=flat-square&logo=github&color=4f46e5)](https://github.com/jeiel85/lumina-daily/releases/latest)
-[![Platform](https://img.shields.io/badge/platform-Android-3DDC84?style=flat-square&logo=android&logoColor=white)](https://github.com/jeiel85/lumina-daily/releases/latest)
-[![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=flat-square&logo=firebase&logoColor=black)](https://firebase.google.com)
-[![Gemini](https://img.shields.io/badge/Gemini_AI-8E75B2?style=flat-square&logo=googlegemini&logoColor=white)](https://deepmind.google/technologies/gemini/)
-
-[📲 APK 다운로드](#-download) · [🌐 웹앱](https://jeiel85.github.io/lumina-daily/) · [🔒 개인정보처리방침](https://jeiel85.github.io/lumina-daily/privacy-policy.html)
-
-</div>
+Lumina는 AI-powered 명언 및 성찰 앱입니다. Google Gemini로 맞춤형 명언을 생성하고, beautiful한 이미지 카드로 공유할 수 있습니다. 웹과 Android 모두 지원합니다.
 
 ---
 
-## 📖 소개
+## 🌟 주요 특징 (Key Features)
 
-Lumina Daily는 **Google Gemini AI**가 큐레이션한 전 세계의 명언과 지혜를 매일 아름다운 이미지와 함께 전달하는 앱입니다. 단순한 명언 앱을 넘어, AI가 그 속에 담긴 지혜의 깊이를 해설하고 당신의 삶에 적용할 수 있는 성찰을 제공합니다.
+### 📱 모바일 앱 (Capacitor Hybrid)
+- **Capacitor 기반**: React + Vite로 native Android로 변환
+- **오프라인 번들링**: 네트워크 환경과 관계없이 안정적 실행
+- **프리미엄 UI/UX**: 웹 버전의 감성을 모바일에서
+- **맞춤형 빌드 자동화**: `build-and-install.bat`
 
-<br />
+### 🧠 AI-Powered 명언 생성
+- Google Gemini 2.5 Flash로 맞춤형 명언 생성
+- 10개 테마: motivation, comfort, humor, success, business, love, philosophy, wisdom, life
+- 각 명언에 대한 AI 해설 제공
 
-## ✨ 주요 기능
+### 🌍 4개 국어 지원
+- 한국어, English, 日本語, 中文
 
-<table>
-  <tr>
-    <td width="50%">
-      <h3>📖 오늘의 명언</h3>
-      세계 각지의 철학자, 작가, 위인들의 명언을 매일 새롭게 만나보세요.
-    </td>
-    <td width="50%">
-      <h3>🧠 AI 심층 해설</h3>
-      Google Gemini가 명언의 본질을 분석하고 오늘의 삶에 적용하는 방법을 제시합니다.
-    </td>
-  </tr>
-  <tr>
-    <td width="50%">
-      <h3>🎨 감성 배경 이미지</h3>
-      명언의 분위기에 최적화된 이미지가 실시간으로 생성되어 몰입감을 더합니다.
-    </td>
-    <td width="50%">
-      <h3>🔔 매일 알림</h3>
-      매일 정해진 시간에 오늘의 명언 알림을 받아보세요.
-    </td>
-  </tr>
-  <tr>
-    <td width="50%">
-      <h3>🌐 4개 국어 지원</h3>
-      한국어 · English · 日本語 · 中文을 언제든지 전환하여 이용하세요.
-    </td>
-    <td width="50%">
-      <h3>📚 명언 아카이브</h3>
-      지나간 명언을 언제든지 다시 꺼내볼 수 있습니다.
-    </td>
-  </tr>
-</table>
+### 🎨 다크 모드
+- Light / Dark / System / Material You 테마
 
-<br />
+---
 
-## 🛠 기술 스택
+## 🛠 기술 스택 (Tech Stack)
 
-<div align="center">
+### Frontend & Mobile
+![React](https://img.shields.io/badge/react-19-%2320232a?style=flat&logo=react)
+![TypeScript](https://img.shields.io/badge/typescript-5.8-%23007ACC?style=flat)
+![Vite](https://img.shields.io/badge/vite-6-%23646CFF?style=flat)
+![Capacitor](https://img.shields.io/badge/capacitor-8-%23646CFF?style=flat)
+![Tailwind CSS](https://img.shields.io/badge/tailwindcss-4-%2338B2AC?style=flat)
+![Playwright](https://img.shields.io/badge/playwright-%23e34f26?style=flat)
 
-![React](https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
-![Capacitor](https://img.shields.io/badge/Capacitor-119EFF?style=for-the-badge&logo=capacitor&logoColor=white)
+### Backend & Infrastructure
+![Firebase](https://img.shields.io/badge/firebase-12-%23FFCA2D?style=flat)
+![Google Gemini](https://img.shields.io/badge/Gemini-2.5-8E75B2?style=flat)
+![Firebase Functions](https://img.shields.io/badge/Functions-Node_22-%2300B562?style=flat)
 
-![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black)
-![Google Gemini](https://img.shields.io/badge/Gemini_AI-8E75B2?style=for-the-badge&logo=googlegemini&logoColor=white)
-![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
+---
 
-</div>
-
-<br />
-
-## 📲 Download
-
-<div align="center">
-
-최신 릴리즈에서 APK를 다운로드하여 설치하세요.
-
-[![Download APK](https://img.shields.io/github/v/release/jeiel85/lumina-daily?style=for-the-badge&logo=android&label=Download%20APK&color=3DDC84)](https://github.com/jeiel85/lumina-daily/releases/latest)
-
-**설치 방법**
-1. 위 버튼을 눌러 `app-release.apk` 다운로드
-2. 안드로이드 설정 → **알 수 없는 앱 설치** 허용
-3. APK 파일 실행하여 설치
-
-</div>
-
-<br />
-
-## 🚀 로컬 개발
+## 🧪 테스트 (Testing)
 
 ```bash
-# 의존성 설치
-npm install
-
-# 개발 서버 실행
-npm run dev
-
-# 빌드
-npm run build
-
-# 테스트
+# 단위 테스트 (Vitest - 7 tests)
 npm test
+
+# UI 테스트 (Playwright - 10 tests)
+npx playwright test
 ```
 
-### 환경 변수 설정
-
-`.env.example`을 복사하여 `.env` 파일을 생성하고 Firebase 설정값을 입력하세요.
-
-```bash
-cp .env.example .env
-```
-
-<br />
-
-## 📦 릴리즈
-
-버전 태그를 푸시하면 GitHub Actions가 자동으로 릴리즈 APK를 빌드하고 배포합니다.
-
-```bash
-git tag v1.0.6
-git push origin v1.0.6
-```
-
-<br />
-
-## 🌍 링크
-
-| | URL |
-|--|-----|
-| 🌐 랜딩 페이지 | https://jeiel85.github.io/lumina-daily/ |
-| 🔒 개인정보처리방침 | https://jeiel85.github.io/lumina-daily/privacy-policy.html |
-
-<br />
+**테스트 결과:**
+- Vitest: 7 passed ✅
+- Playwright: 10 passed ✅
+- **총계: 17 passed** ✅
 
 ---
 
-<div align="center">
+## 🚀 시작하기 (Getting Started)
 
-© 2026 Lumina Daily. All rights reserved.
+### 개발
+```bash
+npm install
+npm run dev
+```
 
-</div>
+### APK 빌드 (Android)
+```batch
+.\build-and-install.bat
+```
+
+APK 위치: `android\app\build\outputs\apk\debug\app-debug.apk`
+
+---
+
+## 📂 프로젝트 구조
+
+```
+src/
+├── App.tsx              # 메인 앱 (797줄, 리팩토링 완료)
+├── components/          # 분리된 컴포넌트
+│   ├── QuoteCard.tsx
+│   ├── Header.tsx
+│   ├── HistoryItem.tsx
+│   └── ErrorBoundary.tsx
+├── constants/           # 테마, 설정 등
+├── types/               # TypeScript 타입 정의
+├── i18n/               # 다국어 지원
+└── e2e/                # Playwright 테스트
+
+android/                # Capacitor Android 프로젝트
+functions/              # Firebase Functions (Node 22)
+```
+
+---
+
+## 📜 개발 지침
+
+자세한 내용은 [MOBILE_GUIDELINES.md](./MOBILE_GUIDELINES.md)를 참고하세요.
+
+---
+
+## © 라이선스
+
+© 2026 Lumina Project. All rights reserved.
