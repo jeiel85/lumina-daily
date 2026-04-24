@@ -132,8 +132,36 @@ server: {
 1. `package.json` → `"version": "x.x.x"`
 2. `android/app/build.gradle` → `versionCode N` (정수, 1씩 증가), `versionName "x.x.x"`
 
-**현재 버전**: `package.json` = `1.0.4`, `versionCode` = `3`, `versionName` = `1.0.4`
-**다음 릴리즈 시**: versionCode를 `4`로, versionName과 package.json을 `1.0.5`로 변경
+**현재 버전**: `package.json` = `1.2.0`, `versionCode` = `10`, `versionName` = `1.2.0`
+
+---
+
+### ⚠️ 태그 푸시 전 필수 체크리스트 (절대 생략 금지)
+
+태그를 푸시하기 전에 아래 세 값이 **모두 일치**하는지 반드시 확인한다.
+불일치 시 태그 이름과 APK 내부 버전이 달라지는 버그가 발생한다 (실제 발생 사례: v1.1.2 태그인데 APK 안은 1.0.9였음).
+
+```bash
+# 세 값이 모두 같아야 태그 푸시 가능
+node -p "require('./package.json').version"
+grep -E "versionName" android/app/build.gradle
+grep -E "versionCode" android/app/build.gradle
+```
+
+| 파일 | 확인할 값 | 예시 |
+|------|-----------|------|
+| `package.json` | `"version"` | `"1.1.2"` |
+| `android/app/build.gradle` | `versionName` | `"1.1.2"` |
+| `android/app/build.gradle` | `versionCode` | `10` (1씩 단조 증가) |
+
+**체크 통과 후에만 태그 생성:**
+
+```bash
+git tag v1.1.2
+git push origin v1.1.2
+```
+
+> **스크립트 활용:** `scripts/release.mjs`를 사용하면 버전 확인 + 태그 푸시를 자동으로 처리한다.
 
 ---
 
