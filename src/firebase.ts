@@ -106,35 +106,24 @@ export const signInWithGoogle = async () => {
     try {
       const { FirebaseAuthentication } = await import('@capacitor-firebase/authentication');
 
-      // Credential Manager 방식 시도 → 실패 시 레거시 방식으로 폴백
+      // Play Store 미등록 앱은 Credential Manager가 차단되므로 레거시 방식만 사용
       let result;
       try {
-        result = await FirebaseAuthentication.signInWithGoogle({ useCredentialManager: true });
-      } catch (credentialManagerError: any) {
-        const isCancelled = credentialManagerError.message?.includes('cancelled')
-          || credentialManagerError.message?.includes('canceled')
-          || credentialManagerError.message?.includes('No credentials');
-        if (isCancelled) return;
-
-        console.warn('[Auth] Credential Manager 실패, 레거시 방식으로 재시도:', credentialManagerError.message);
-        try {
-          result = await FirebaseAuthentication.signInWithGoogle({ useCredentialManager: false });
-        } catch (legacyError: any) {
-          // Error 10 = DEVELOPER_ERROR: SHA-1 지문이 Firebase Console에 미등록
-          const isError10 = legacyError.message?.includes('10:')
-            || legacyError.message?.includes('DEVELOPER_ERROR');
-          if (isError10) {
-            const msg = 'Google 로그인 설정 오류 (Error 10)\n\n'
-              + 'Firebase Console → 프로젝트 설정 → Android 앱에\n'
-              + '아래 SHA-1 지문이 등록되어 있는지 확인해주세요.\n\n'
-              + '디버그: ./gradlew signingReport\n'
-              + '릴리즈: keytool -list -v -keystore <keystore파일>';
-            console.error('[Auth] SHA-1 미등록 의심:', msg);
-            alert(msg);
-            throw legacyError;
-          }
+        result = await FirebaseAuthentication.signInWithGoogle({ useCredentialManager: false });
+      } catch (legacyError: any) {
+        // Error 10 = DEVELOPER_ERROR: SHA-1 지문이 Firebase Console에 미등록
+        const isError10 = legacyError.message?.includes('10:')
+          || legacyError.message?.includes('DEVELOPER_ERROR');
+        if (isError10) {
+          const msg = 'Google 로그인 설정 오류 (Error 10)\n\n'
+            + 'Firebase Console → 프로젝트 설정 → Android 앱에\n'
+            + '아래 SHA-1 지문이 등록되어 있는지 확인해주세요.\n\n'
+            + '릴리즈 SHA-1: 76:D1:EF:4A:8D:99:78:32:7C:F5:2A:6E:DE:F4:B7:A9:26:73:79:E4';
+          console.error('[Auth] SHA-1 미등록 의심:', msg);
+          alert(msg);
           throw legacyError;
         }
+        throw legacyError;
       }
 
       if (result?.credential?.idToken) {
