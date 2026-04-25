@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.jeiel85.luminadaily",
+    "sha256_cert_fingerprints": [
+      "F8:CC:71:25:D1:25:03:1F:C7:B4:CE:18:69:6A:04:67:A7:78:B7:AF:5C:D6:68:AA:03:10:D6:84:91:E1:16:6B"
+    ]
+  }
+}]
