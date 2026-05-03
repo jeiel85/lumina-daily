@@ -1,12 +1,23 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithCredential, signOut, User as FirebaseUser } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
-import { getMessaging, getToken, onMessage, type NextFn, type MessagePayload } from 'firebase/messaging';
+import { getMessaging, getToken, onMessage, type Messaging, type NextFn, type MessagePayload } from 'firebase/messaging';
 import { getAnalytics, logEvent, type Analytics } from 'firebase/analytics';
 import { Capacitor } from '@capacitor/core';
 
 // localConfig is now handled via environment variables in .env
 export const localConfig = {} as any;
+
+const defaultFirebaseConfig = {
+  apiKey: 'AIzaSyDheunZ-1O-bbAJpFAQ6cqLBoFOq2-CRcw',
+  authDomain: 'lumina-762f8.firebaseapp.com',
+  projectId: 'lumina-762f8',
+  storageBucket: 'lumina-762f8.firebasestorage.app',
+  messagingSenderId: '136746254242',
+  appId: '1:136746254242:web:81954480c2e8b47916bcfb',
+  measurementId: undefined,
+  firestoreDatabaseId: 'lumina-daily',
+};
 
 if (typeof window !== 'undefined') {
   console.log('Current origin:', window.location.origin);
@@ -18,22 +29,32 @@ if (typeof window !== 'undefined') {
 
 // Use environment variables with fallback to local config
 // Ensure we handle empty strings from env vars correctly
-const getCfg = (envVal: string | undefined, localVal: string | undefined) => {
-  if (envVal && envVal !== 'undefined' && envVal !== '""' && envVal !== "''" && envVal !== "") return envVal;
-  return localVal;
+const isUsableCfg = (value: string | undefined) => {
+  if (!value) return false;
+  const trimmed = value.trim();
+  if (!trimmed || trimmed === 'undefined' || trimmed === '""' || trimmed === "''") return false;
+  return !/^(YOUR_|PLACEHOLDER|TODO|demo)/i.test(trimmed);
+};
+
+const getCfg = (...values: (string | undefined)[]) => {
+  return values.find(isUsableCfg);
 };
 
 const firebaseConfig = {
-  apiKey: getCfg(import.meta.env.VITE_FIREBASE_API_KEY, localConfig.apiKey),
-  authDomain: getCfg(import.meta.env.VITE_FIREBASE_AUTH_DOMAIN, localConfig.authDomain),
-  projectId: getCfg(import.meta.env.VITE_FIREBASE_PROJECT_ID, localConfig.projectId),
-  storageBucket: getCfg(import.meta.env.VITE_FIREBASE_STORAGE_BUCKET, localConfig.storageBucket),
-  messagingSenderId: getCfg(import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID, localConfig.messagingSenderId),
-  appId: getCfg(import.meta.env.VITE_FIREBASE_APP_ID, localConfig.appId),
-  measurementId: getCfg(import.meta.env.VITE_FIREBASE_MEASUREMENT_ID, localConfig.measurementId),
+  apiKey: getCfg(import.meta.env.VITE_FIREBASE_API_KEY, localConfig.apiKey, defaultFirebaseConfig.apiKey),
+  authDomain: getCfg(import.meta.env.VITE_FIREBASE_AUTH_DOMAIN, localConfig.authDomain, defaultFirebaseConfig.authDomain),
+  projectId: getCfg(import.meta.env.VITE_FIREBASE_PROJECT_ID, localConfig.projectId, defaultFirebaseConfig.projectId),
+  storageBucket: getCfg(import.meta.env.VITE_FIREBASE_STORAGE_BUCKET, localConfig.storageBucket, defaultFirebaseConfig.storageBucket),
+  messagingSenderId: getCfg(import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID, localConfig.messagingSenderId, defaultFirebaseConfig.messagingSenderId),
+  appId: getCfg(import.meta.env.VITE_FIREBASE_APP_ID, localConfig.appId, defaultFirebaseConfig.appId),
+  measurementId: getCfg(import.meta.env.VITE_FIREBASE_MEASUREMENT_ID, localConfig.measurementId, defaultFirebaseConfig.measurementId),
 };
 
-const databaseId = getCfg(import.meta.env.VITE_FIREBASE_DATABASE_ID, localConfig.firestoreDatabaseId);
+const databaseId = getCfg(
+  import.meta.env.VITE_FIREBASE_DATABASE_ID,
+  localConfig.firestoreDatabaseId,
+  defaultFirebaseConfig.firestoreDatabaseId
+);
 
 // Check if we have the minimum required config
 const isConfigValid = !!(firebaseConfig.apiKey && firebaseConfig.projectId && firebaseConfig.appId && firebaseConfig.apiKey !== 'missing' && firebaseConfig.authDomain);
@@ -69,7 +90,15 @@ const app = isConfigValid
 export const auth = getAuth(app);
 // Using the custom database ID 'lumina-daily' as requested
 export const db = getFirestore(app, databaseId || '(default)');
-export const messaging = (typeof window !== 'undefined' && isConfigValid) ? getMessaging(app) : null;
+let _messaging: Messaging | null = null;
+if (typeof window !== 'undefined' && isConfigValid && !Capacitor.isNativePlatform()) {
+  try {
+    _messaging = getMessaging(app);
+  } catch (e) {
+    console.warn('[Messaging] Web SDK 초기화 실패:', e);
+  }
+}
+export const messaging = _messaging;
 export const googleProvider = new GoogleAuthProvider();
 
 // Analytics (web only — Capacitor native doesn't use Web SDK analytics)
