@@ -25,7 +25,7 @@ import './i18n/config';
 import { Capacitor } from '@capacitor/core';
 
 import { Quote, UserSettings } from './types';
-import { THEMES, THEME_SEED_POOLS, BLOCKED_KEYWORDS } from './constants';
+import { THEMES, THEME_SEED_POOLS, BLOCKED_KEYWORDS, CARD_BACKGROUNDS } from './constants';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { QuoteCard } from './components/QuoteCard';
 import { HistoryItem } from './components/HistoryItem';
@@ -558,9 +558,10 @@ export default function App() {
         await new Promise((resolve, reject) => { bgImg.onload = resolve; bgImg.onerror = reject; });
         ctx.drawImage(bgImg, 0, 0, 1024, 1024);
       } else {
+        const bg = CARD_BACKGROUNDS[Math.floor(Math.random() * CARD_BACKGROUNDS.length)];
         const gradient = ctx.createLinearGradient(0, 0, 1024, 1024);
-        gradient.addColorStop(0, '#312e81');
-        gradient.addColorStop(1, '#1e1b4b');
+        gradient.addColorStop(0, bg.colors[0]);
+        gradient.addColorStop(1, bg.colors[1]);
         ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, 1024, 1024);
       }

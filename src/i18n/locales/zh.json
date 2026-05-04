@@ -102,11 +102,13 @@
     "title": "卡片样式",
     "classic": "经典",
     "modern": "现代",
-    "minimal": "极简",
-    "bold": "粗体",
-    "elegant": "优雅",
-    "nature": "自然",
-    "dark": "暗黑"
+    "minimal": "简约",
+    "bold": "粗体"
+  },
+  "fontSizes": {
+    "small": "小",
+    "medium": "中",
+    "large": "大"
   },
   "preferredThemes": {
     "title": "今天我需要的主题",

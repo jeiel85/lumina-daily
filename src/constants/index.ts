@@ -40,4 +40,19 @@ export const THEME_SEED_POOLS: Record<string, string[]> = {
   life:        ['nature-sky', 'spring-flowers', 'ocean-horizon', 'forest-path', 'starry-night'],
 };
 
-export const BLOCKED_KEYWORDS = ['섹스', '야동', '포르노', 'sex', 'porn', 'nude', 'naked', '씨발', '개새끼', '좆', '보지', '자지', 'fuck', 'shit', 'ass', 'bitch', 'nigger', 'faggot'];
+export const CARD_BACKGROUNDS = [
+  { name: 'indigo-deep', type: 'gradient', colors: ['#312e81', '#1e1b4b'] as [string, string] },
+  { name: 'purple-dream', type: 'gradient', colors: ['#7c3aed', '#4c1d95'] as [string, string] },
+  { name: 'emerald-forest', type: 'gradient', colors: ['#059669', '#064e3b'] as [string, string] },
+  { name: 'crimson-passion', type: 'gradient', colors: ['#b91c1c', '#7f1d1d'] as [string, string] },
+  { name: 'amber-glow', type: 'gradient', colors: ['#d97706', '#92400e'] as [string, string] },
+  { name: 'ocean-blue', type: 'gradient', colors: ['#2563eb', '#1e40af'] as [string, string] },
+  { name: 'pink-blossom', type: 'gradient', colors: ['#db2777', '#9d174d'] as [string, string] },
+  { name: 'cyan-wave', type: 'gradient', colors: ['#0891b2', '#155e75'] as [string, string] },
+  { name: 'slate-midnight', type: 'gradient', colors: ['#0f172a', '#020617'] as [string, string] },
+  { name: 'teal-depth', type: 'gradient', colors: ['#0f766e', '#134e4a'] as [string, string] },
+  { name: 'rose-elegance', type: 'gradient', colors: ['#be123c', '#881337'] as [string, string] },
+  { name: 'lime-fresh', type: 'gradient', colors: ['#65a30d', '#3f6212'] as [string, string] },
+];
+
+export const BLOCKED_KEYWORDS = ['섹스', '야동', '포륭', 'sex', 'porn', 'nude', 'naked', '씨발', '개새끼', '좆', '보지', '자지', 'fuck', 'shit', 'ass', 'bitch', 'nigger', 'faggot'];
