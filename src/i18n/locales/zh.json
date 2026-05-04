@@ -12,7 +12,8 @@
     "error_boundary_desc": "应用发生了意外错误。",
     "error_boundary_retry": "重试",
     "cancel": "取消",
-    "done": "完成"
+    "done": "完成",
+    "now": "现在"
   },
   "home": {
     "title": "今日名言",
@@ -73,6 +74,7 @@
     "section_appearance": "外观",
     "section_app": "应用设置",
     "section_support": "支持",
+    "font_size": "字体大小",
     "buy_coffee": "请开发者喝杯咖啡",
     "custom_keyword": "自定义关键词",
     "custom_keyword_desc": "输入特定主题或情境，将为您提供相应的名言",
@@ -100,8 +102,11 @@
     "title": "卡片样式",
     "classic": "经典",
     "modern": "现代",
-    "minimal": "简约",
-    "bold": "粗体"
+    "minimal": "极简",
+    "bold": "粗体",
+    "elegant": "优雅",
+    "nature": "自然",
+    "dark": "暗黑"
   },
   "preferredThemes": {
     "title": "今天我需要的主题",

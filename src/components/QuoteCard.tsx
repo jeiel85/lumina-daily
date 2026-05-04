@@ -18,6 +18,7 @@ interface QuoteCardProps {
   onSwipeRight?: () => void;
   canSwipeLeft?: boolean;
   canSwipeRight?: boolean;
+  fontSize?: 'small' | 'medium' | 'large';
   t: (key: string) => string;
 }
 
@@ -281,8 +282,14 @@ export function QuoteCard({
   onSwipeRight,
   canSwipeLeft,
   canSwipeRight,
+  fontSize = 'medium',
   t,
 }: QuoteCardProps) {
+  const textSizeClass = {
+    small: 'text-lg',
+    medium: 'text-2xl',
+    large: 'text-3xl',
+  }[fontSize];
   const x = useMotionValue(0);
   const opacity = useTransform(x, [-150, 0, 150], [0.6, 1, 0.6]);
   const rotate = useTransform(x, [-150, 150], [-3, 3]);
@@ -348,7 +355,7 @@ export function QuoteCard({
         <>
           <QuoteIcon className="w-10 h-10 text-indigo-100 dark:text-indigo-900/30 absolute top-8 left-8 -z-0" />
           <div className="relative z-10">
-            <p className="text-2xl font-serif leading-snug text-neutral-800 dark:text-neutral-100 mb-4">
+            <p className={`${textSizeClass} font-serif leading-snug text-neutral-800 dark:text-neutral-100 mb-4`}>
               "{quote.text}"
             </p>
             <p className="text-neutral-500 dark:text-neutral-400 font-medium text-right">— {quote.author}</p>

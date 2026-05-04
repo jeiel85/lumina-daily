@@ -12,7 +12,8 @@
     "error_boundary_desc": "애플리케이션에 예기치 않은 오류가 발생했습니다.",
     "error_boundary_retry": "다시 시도",
     "cancel": "취소",
-    "done": "완료"
+    "done": "완료",
+    "now": "지금"
   },
   "home": {
     "title": "오늘의 명언",
@@ -73,6 +74,7 @@
     "section_appearance": "외관",
     "section_app": "앱 설정",
     "section_support": "지원",
+    "font_size": "글자 크기",
     "buy_coffee": "개발자에게 커피 한잔",
     "custom_keyword": "나만의 키워드",
     "custom_keyword_desc": "특정 주제나 상황을 직접 입력하면 그에 맞는 명언을 드려요",
@@ -102,6 +104,11 @@
     "modern": "모던",
     "minimal": "미니멀",
     "bold": "볼드"
+  },
+  "fontSizes": {
+    "small": "작게",
+    "medium": "보통",
+    "large": "크게"
   },
   "preferredThemes": {
     "title": "오늘 나에게 필요한 주제",

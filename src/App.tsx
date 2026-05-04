@@ -34,7 +34,7 @@ import { Header } from './components/Header';
 import { hapticLight, hapticMedium } from './utils/haptics';
 
 // Import icons
-import { Bell, History as HistoryIcon, Home, Settings as SettingsIcon, Sparkles, RefreshCw, ExternalLink, Download, Image as ImageIcon, ChevronRight, Globe, Palette, BookOpen } from 'lucide-react';
+import { Bell, History as HistoryIcon, Home, Settings as SettingsIcon, Sparkles, RefreshCw, ExternalLink, Download, Image as ImageIcon, ChevronRight, Globe, Palette, BookOpen, Type } from 'lucide-react';
 
 export default function App() {
   const { t, i18n } = useTranslation();
@@ -54,6 +54,7 @@ export default function App() {
     isSubscribed: false,
     language: 'ko',
     darkMode: 'system',
+    fontSize: 'medium',
     role: 'client'
   });
   const [showOnboarding, setShowOnboarding] = useState(() => localStorage.getItem('hasSeenOnboarding') !== 'true');
@@ -135,6 +136,7 @@ export default function App() {
               preferredCardStyle: data.preferredCardStyle || 'classic',
               language: data.language || i18n.language || 'ko',
               darkMode: data.darkMode || 'system',
+              fontSize: data.fontSize || 'medium',
               isSubscribed: data.isSubscribed || false,
               role: data.role || 'client',
               updatedAt: data.updatedAt,
@@ -564,28 +566,65 @@ export default function App() {
       }
 
       const style = settings.preferredCardStyle || 'classic';
+      
+      // Style-specific background overlays
       if (style === 'modern') {
         const gradient = ctx.createLinearGradient(0, 0, 0, 1024);
         gradient.addColorStop(0, 'rgba(0,0,0,0.2)');
         gradient.addColorStop(1, 'rgba(0,0,0,0.7)');
         ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 1024, 1024);
       } else if (style === 'classic') {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        ctx.fillRect(0, 0, 1024, 1024);
+      } else if (style === 'elegant') {
+        // Elegant: subtle gold-tinted overlay
+        const gradient = ctx.createLinearGradient(0, 0, 1024, 1024);
+        gradient.addColorStop(0, 'rgba(139, 119, 101, 0.3)');
+        gradient.addColorStop(0.5, 'rgba(0, 0, 0, 0.2)');
+        gradient.addColorStop(1, 'rgba(139, 119, 101, 0.4)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 1024, 1024);
+        // Add decorative border
+        ctx.strokeStyle = 'rgba(212, 175, 55, 0.6)';
+        ctx.lineWidth = 8;
+        ctx.strokeRect(40, 40, 944, 944);
+      } else if (style === 'nature') {
+        // Nature: green-tinted overlay
+        const gradient = ctx.createLinearGradient(0, 0, 0, 1024);
+        gradient.addColorStop(0, 'rgba(76, 175, 80, 0.25)');
+        gradient.addColorStop(1, 'rgba(27, 94, 32, 0.5)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 1024, 1024);
+      } else if (style === 'dark') {
+        // Dark: heavy dark overlay
+        const gradient = ctx.createLinearGradient(0, 0, 1024, 1024);
+        gradient.addColorStop(0, 'rgba(0, 0, 0, 0.6)');
+        gradient.addColorStop(1, 'rgba(20, 20, 30, 0.85)');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 1024, 1024);
       } else {
         ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        ctx.fillRect(0, 0, 1024, 1024);
       }
-      ctx.fillRect(0, 0, 1024, 1024);
       setCardProgress(50);
 
-      ctx.fillStyle = 'white';
-      ctx.textAlign = style === 'modern' ? 'left' : 'center';
+      // Style-specific text styling
+      const isDarkStyle = style === 'dark';
+      ctx.fillStyle = isDarkStyle ? '#e0e0e0' : 'white';
+      
+      const alignLeft = style === 'modern' || style === 'nature';
+      ctx.textAlign = alignLeft ? 'left' : 'center';
       ctx.textBaseline = 'middle';
-      const fontSize = style === 'bold' ? 64 : 48;
-      const fontName = style === 'classic' ? 'Georgia, serif' : '"Inter", sans-serif';
-      ctx.font = `${style === 'classic' ? 'italic' : 'normal'} ${style === 'bold' ? '800' : '600'} ${fontSize}px ${fontName}`;
+      
+      const fontSize = style === 'bold' ? 64 : style === 'elegant' ? 52 : 48;
+      const fontName = style === 'classic' || style === 'elegant' ? 'Georgia, serif' : '"Inter", sans-serif';
+      const fontWeight = style === 'bold' ? '800' : style === 'elegant' ? '400' : '600';
+      const fontStyle = style === 'classic' || style === 'elegant' ? 'italic' : 'normal';
+      ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontName}`;
 
-      const maxWidth = style === 'modern' ? 700 : 800;
-      const startX = style === 'modern' ? 100 : 512;
+      const maxWidth = alignLeft ? 700 : 800;
+      const startX = alignLeft ? 100 : 512;
       const words = quote.text.split(' ');
       let line = '';
       const lines = [];
@@ -835,6 +874,7 @@ export default function App() {
                     onSwipeRight={() => navigateQuote('prev')}
                     canSwipeLeft={canSwipeLeft}
                     canSwipeRight={canSwipeRight}
+                    fontSize={settings.fontSize}
                     t={t}
                   />
                   <div className="space-y-6">
@@ -934,14 +974,33 @@ export default function App() {
                       <Palette className="w-5 h-5 text-indigo-600" />
                       <span className="font-bold">{t('settings.card_style')}</span>
                     </div>
-                    <div className="flex gap-2">
-                      {['classic', 'modern', 'minimal', 'bold'].map(style => (
+                    <div className="flex flex-wrap gap-2">
+                      {['classic', 'modern', 'minimal', 'bold', 'elegant', 'nature', 'dark'].map(style => (
                         <button
                           key={style}
                           onClick={() => saveSettings({ preferredCardStyle: style })}
                           className={`px-3 py-1.5 rounded-full text-sm ${settings.preferredCardStyle === style ? 'bg-indigo-600 text-white' : 'bg-neutral-100 dark:bg-neutral-800'}`}
                         >
                           {t(`cardStyles.${style}`)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Font Size */}
+                  <div className="bg-white dark:bg-neutral-900 rounded-2xl p-6">
+                    <div className="flex items-center gap-3 mb-3">
+                      <Type className="w-5 h-5 text-indigo-600" />
+                      <span className="font-bold">{t('settings.font_size')}</span>
+                    </div>
+                    <div className="flex gap-2">
+                      {(['small', 'medium', 'large'] as const).map(size => (
+                        <button
+                          key={size}
+                          onClick={() => saveSettings({ fontSize: size })}
+                          className={`flex-1 py-2 px-3 rounded-xl text-sm font-bold ${settings.fontSize === size ? 'bg-indigo-600 text-white' : 'bg-neutral-100 dark:bg-neutral-800'}`}
+                        >
+                          {t(`fontSizes.${size}`)}
                         </button>
                       ))}
                     </div>
@@ -989,26 +1048,52 @@ export default function App() {
           ))}
         </nav>
 
-        {/* In-App Notification Snackbar */}
+        {/* Native-Style In-App Notification */}
         <AnimatePresence>
           {inAppNotification && (
             <motion.div
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 50 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed bottom-24 left-4 right-4 bg-neutral-900 dark:bg-neutral-800 text-white px-4 py-3 rounded-2xl shadow-2xl z-50 flex items-center justify-between"
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.98 }}
+              transition={{ type: 'spring', damping: 30, stiffness: 400 }}
+              className="fixed top-16 left-4 right-4 bg-white/95 dark:bg-neutral-800/95 backdrop-blur-xl rounded-2xl shadow-2xl z-50 overflow-hidden border border-neutral-200/50 dark:border-neutral-700/50"
+              style={{ 
+                boxShadow: '0 10px 40px -10px rgba(0,0,0,0.2), 0 4px 12px rgba(0,0,0,0.1)'
+              }}
             >
-              <div className="flex-1 min-w-0 mr-3">
-                <p className="font-bold text-sm">{inAppNotification.title}</p>
-                <p className="text-xs text-neutral-300 truncate">{inAppNotification.body}</p>
+              {/* Progress bar */}
+              <motion.div
+                initial={{ width: '100%' }}
+                animate={{ width: '0%' }}
+                transition={{ duration: 5, ease: 'linear' }}
+                className="absolute bottom-0 left-0 h-0.5 bg-indigo-500"
+              />
+              
+              <div className="flex items-start gap-3 p-4">
+                {/* App Icon */}
+                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shrink-0 shadow-lg">
+                  <Sparkles className="w-5 h-5 text-white" />
+                </div>
+                
+                {/* Content */}
+                <div className="flex-1 min-w-0 pt-0.5">
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="font-bold text-sm text-neutral-900 dark:text-neutral-100">{inAppNotification.title}</p>
+                    <span className="text-xs text-neutral-400">{t('common.now')}</span>
+                  </div>
+                  <p className="text-sm text-neutral-600 dark:text-neutral-300 leading-snug">{inAppNotification.body}</p>
+                </div>
+                
+                {/* Close button */}
+                <button
+                  onClick={() => setInAppNotification(null)}
+                  className="w-7 h-7 flex items-center justify-center text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-full transition-colors shrink-0"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
-              <button
-                onClick={() => setInAppNotification(null)}
-                className="text-indigo-400 text-sm font-bold px-3 py-1.5 hover:bg-neutral-800 rounded-lg transition-colors shrink-0"
-              >
-                {t('common.done')}
-              </button>
             </motion.div>
           )}
         </AnimatePresence>

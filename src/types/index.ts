@@ -20,6 +20,7 @@ export interface UserSettings {
   isSubscribed: boolean;
   language: string;
   darkMode: 'light' | 'dark' | 'system' | 'material';
+  fontSize?: 'small' | 'medium' | 'large';
   fcmToken?: string;
   role: string;
   updatedAt?: any;

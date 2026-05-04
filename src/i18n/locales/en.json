@@ -12,7 +12,8 @@
     "error_boundary_desc": "An unexpected error occurred in the application.",
     "error_boundary_retry": "Retry",
     "cancel": "Cancel",
-    "done": "Done"
+    "done": "Done",
+    "now": "now"
   },
   "home": {
     "title": "Today's Quote",
@@ -73,6 +74,7 @@
     "section_appearance": "Appearance",
     "section_app": "App Settings",
     "section_support": "Support",
+    "font_size": "Font Size",
     "buy_coffee": "Buy me a coffee",
     "custom_keyword": "Custom Keyword",
     "custom_keyword_desc": "Enter a specific topic or situation to get a quote tailored just for you",
@@ -102,6 +104,11 @@
     "modern": "Modern",
     "minimal": "Minimal",
     "bold": "Bold"
+  },
+  "fontSizes": {
+    "small": "Small",
+    "medium": "Medium",
+    "large": "Large"
   },
   "preferredThemes": {
     "title": "What speaks to you today",

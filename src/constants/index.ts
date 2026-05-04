@@ -16,6 +16,9 @@ export const CARD_STYLES = [
   { id: 'modern', labelKey: 'cardStyles.modern' },
   { id: 'minimal', labelKey: 'cardStyles.minimal' },
   { id: 'bold', labelKey: 'cardStyles.bold' },
+  { id: 'elegant', labelKey: 'cardStyles.elegant' },
+  { id: 'nature', labelKey: 'cardStyles.nature' },
+  { id: 'dark', labelKey: 'cardStyles.dark' },
 ];
 
 export const LANGUAGES = [
