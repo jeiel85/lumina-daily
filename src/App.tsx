@@ -112,12 +112,14 @@ export default function App() {
 
   const useSidebar = isMobileOrTablet && isLandscape;
 
-  // Auth & Data Listener
+  // Auth & Data Listener with optimized subscriptions
   useEffect(() => {
     let unsubscribeSettings: (() => void) | null = null;
     let unsubscribeHistory: (() => void) | null = null;
+    let isSubscribed = true; // Flag to prevent state updates after unmount
 
     const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
+      if (!isSubscribed) return;
       setUser(firebaseUser);
       if (firebaseUser) trackEvent('login', { method: 'google' });
 
@@ -203,6 +205,7 @@ export default function App() {
     });
 
     return () => {
+      isSubscribed = false;
       unsubscribeAuth();
       if (unsubscribeSettings) unsubscribeSettings();
       if (unsubscribeHistory) unsubscribeHistory();

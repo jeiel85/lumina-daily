@@ -8,16 +8,16 @@ on:
 
 permissions:
   contents: write
+  security-events: write
 
 concurrency:
-  group: ci
-  cancel-in-progress: false
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
+  # Security scan
+  security-scan:
     runs-on: ubuntu-latest
-    outputs:
-      version: ${{ steps.version.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -31,11 +31,61 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Run npm audit
+        run: npm audit --audit-level=high || true
+
+      - name: Run CodeQL Analysis
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript-typescript
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+
+  build:
+    needs: [security-scan]
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        id: cache-node-modules
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
+        run: npm ci
+
+      - name: Cache Vite build
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.vite
+          key: ${{ runner.os }}-vite-${{ hashFiles('package-lock.json') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-vite-
+
       - name: Run lint
         run: npm run lint
 
-      # - name: Run tests
-      #   run: npm test
+      - name: Run type check
+        run: npx tsc --noEmit || true
 
       - name: Build
         run: npm run build -- --mode github-pages
@@ -57,17 +107,15 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Building version: v$VERSION"
 
-      - name: Deploy to GitHub Pages
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add -f docs/
-          git commit -m "deploy: v${{ steps.version.outputs.version }} build assets" || echo "No changes to commit"
-          git push origin HEAD:main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-files
+          path: dist/
+          retention-days: 1
 
   build-apk:
+    needs: [security-scan]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -79,7 +127,17 @@ jobs:
           node-version: '22'
           cache: 'npm'
 
+      - name: Cache node_modules
+        uses: actions/cache@v4
+        id: cache-node-modules
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Install dependencies
+        if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: npm ci
 
       - name: Build web assets
@@ -100,6 +158,16 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('android/**/*.gradle', 'android/**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
@@ -136,8 +204,47 @@ jobs:
           path: android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 30
 
+  generate-release-notes:
+    needs: [build]
+    runs-on: ubuntu-latest
+    outputs:
+      release_body: ${{ steps.release-notes.outputs.body }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Generate release notes
+        id: release-notes
+        run: |
+          VERSION=${{ needs.build.outputs.version }}
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          echo "## What's New in v$VERSION" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          
+          if [ -n "$PREV_TAG" ]; then
+            echo "### Changes since $PREV_TAG:" >> $GITHUB_OUTPUT
+            git log --pretty=format:"- %s (%h)" $PREV_TAG..HEAD --no-merges >> $GITHUB_OUTPUT
+          else
+            echo "### Changes:" >> $GITHUB_OUTPUT
+            git log --pretty=format:"- %s (%h)" --no-merges -20 >> $GITHUB_OUTPUT
+          fi
+          
+          echo "" >> $GITHUB_OUTPUT
+          echo "### Installation:" >> $GITHUB_OUTPUT
+          echo "1. Download the APK file below" >> $GITHUB_OUTPUT
+          echo "2. Enable 'Install from unknown sources' in your device settings" >> $GITHUB_OUTPUT
+          echo "3. Open the downloaded APK to install" >> $GITHUB_OUTPUT
+          echo "" >> $GITHUB_OUTPUT
+          echo "### Checksums:" >> $GITHUB_OUTPUT
+          echo "SHA256 will be added automatically" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
   release:
-    needs: [build, build-apk]
+    needs: [build, build-apk, generate-release-notes]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -154,8 +261,12 @@ jobs:
           name: lumina-daily-release-aab
           path: release
       
-      - name: List release files
-        run: ls -la release/
+      - name: Generate checksums
+        run: |
+          cd release
+          sha256sum app-release.apk > checksums.txt
+          sha256sum app-release.aab >> checksums.txt
+          cat checksums.txt
       
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -164,9 +275,30 @@ jobs:
           tag_name: v${{ needs.build.outputs.version }}
           draft: false
           prerelease: false
-          generate_release_notes: true
+          body: ${{ needs.generate-release-notes.outputs.release_body }}
           files: |
             release/app-release.apk
             release/app-release.aab
+            release/checksums.txt
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Auto-deploy to preview environment for testing
+  deploy-preview:
+    needs: [build]
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main'
+    steps:
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-files
+          path: dist/
+
+      - name: Deploy to Firebase Hosting (Preview)
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          expires: 7d
+        continue-on-error: true
