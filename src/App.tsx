@@ -257,6 +257,23 @@ export default function App() {
       return;
     }
 
+    // Daily usage limit check (max 10 per day)
+    try {
+      const today = new Date().toISOString().split('T')[0];
+      const usageRef = doc(db, 'users', user.uid, 'usage', today);
+      const usageSnap = await getDoc(usageRef);
+      const currentCount = usageSnap.exists() ? (usageSnap.data()?.count || 0) : 0;
+      
+      if (currentCount >= 10) {
+        setError(`하루 최대 10회까지 생성 가능합니다. (${currentCount}/10). 내일 다시 시도해주세요.`);
+        setIsGenerating(false);
+        return;
+      }
+    } catch (usageError) {
+      console.error('[Usage Check] Failed to check daily limit:', usageError);
+      // Continue anyway - don't block on usage check failure
+    }
+
     try {
       const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({ 
@@ -310,8 +327,16 @@ export default function App() {
       setIsGenerating(false);
       trackEvent('generate_quote', { theme: resolvedTheme, has_custom_keyword: !!settings.customKeyword });
 
-      // Save to Firestore
+      // Save to Firestore & Update usage count
       try {
+        // Increment daily usage count
+        const today = new Date().toISOString().split('T')[0];
+        const usageRef = doc(db, 'users', user.uid, 'usage', today);
+        const usageSnap = await getDoc(usageRef);
+        const currentCount = usageSnap.exists() ? (usageSnap.data()?.count || 0) : 0;
+        await setDoc(usageRef, { count: currentCount + 1 }, { merge: true });
+
+        // Save quote to history
         const docRef = await addDoc(collection(db, 'users', user.uid, 'history'), newQuoteData);
         setCurrentQuote({ ...newQuoteData, id: docRef.id } as Quote);
       } catch (err) {
