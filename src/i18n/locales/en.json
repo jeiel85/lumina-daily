@@ -103,7 +103,15 @@
     "classic": "Classic",
     "modern": "Modern",
     "minimal": "Minimal",
-    "bold": "Bold"
+    "bold": "Bold",
+    "elegant": "Elegant",
+    "nature": "Nature",
+    "dark": "Dark"
+  },
+  "fontSizes": {
+    "small": "Small",
+    "medium": "Medium",
+    "large": "Large"
   },
   "fontSizes": {
     "small": "Small",

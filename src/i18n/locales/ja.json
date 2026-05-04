@@ -103,7 +103,15 @@
     "classic": "クラシック",
     "modern": "モダン",
     "minimal": "ミニマル",
-    "bold": "ボールド"
+    "bold": "ボールド",
+    "elegant": "エレガント",
+    "nature": "ネイチャー",
+    "dark": "ダーク"
+  },
+  "fontSizes": {
+    "small": "小",
+    "medium": "中",
+    "large": "大"
   },
   "fontSizes": {
     "small": "小",

@@ -253,6 +253,18 @@ export default function App() {
     }
   }, [settings.darkMode]);
 
+  // Sync Font Size
+  useEffect(() => {
+    const html = document.documentElement;
+    html.classList.remove('text-sm', 'text-base', 'text-lg');
+    
+    const fontSizeClass = settings.fontSize === 'small' ? 'text-sm' : 
+                         settings.fontSize === 'large' ? 'text-lg' : 'text-base';
+    html.classList.add(fontSizeClass);
+    html.style.fontSize = settings.fontSize === 'small' ? '14px' : 
+                         settings.fontSize === 'large' ? '18px' : '16px';
+  }, [settings.fontSize]);
+
   // Tab change with haptic feedback
   const handleTabChange = (tab: 'home' | 'history' | 'settings') => {
     hapticLight();
@@ -1035,18 +1047,50 @@ export default function App() {
           </div>
         </main>
 
-        {/* Bottom Navigation */}
-        <nav className={`fixed bottom-0 left-0 right-0 bg-white dark:bg-neutral-900 border-t border-neutral-100 dark:border-neutral-800 px-6 py-3 flex justify-around ${useSidebar ? 'hidden' : ''}`}>
-          {tabs.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => handleTabChange(tab.id as typeof activeTab)}
-              className={`flex flex-col items-center gap-1 ${activeTab === tab.id ? 'text-indigo-600' : 'text-neutral-400'}`}
-            >
-              <tab.icon className="w-6 h-6" />
-              <span className="text-xs">{tab.label}</span>
-            </button>
-          ))}
+        {/* Bottom Navigation with Animation */}
+        <nav className={`fixed bottom-0 left-0 right-0 bg-white dark:bg-neutral-900 border-t border-neutral-100 dark:border-neutral-800 px-6 py-2 flex justify-around ${useSidebar ? 'hidden' : ''}`}>
+          {tabs.map(tab => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => handleTabChange(tab.id as typeof activeTab)}
+                className="relative flex flex-col items-center gap-1 py-1 px-4"
+              >
+                {/* Animated background indicator */}
+                {isActive && (
+                  <motion.div
+                    layoutId="activeTabBg"
+                    className="absolute inset-0 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl"
+                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                  />
+                )}
+                
+                {/* Icon with bounce animation */}
+                <motion.div
+                  animate={isActive ? { scale: [1, 1.2, 1] } : { scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                  className={`relative z-10 ${isActive ? 'text-indigo-600' : 'text-neutral-400'}`}
+                >
+                  <tab.icon className="w-6 h-6" />
+                </motion.div>
+                
+                {/* Label */}
+                <span className={`relative z-10 text-xs font-medium transition-colors ${isActive ? 'text-indigo-600' : 'text-neutral-400'}`}>
+                  {tab.label}
+                </span>
+                
+                {/* Active indicator dot */}
+                {isActive && (
+                  <motion.div
+                    layoutId="activeTabDot"
+                    className="absolute -bottom-1 w-1 h-1 bg-indigo-600 rounded-full"
+                    transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                  />
+                )}
+              </button>
+            );
+          })}
         </nav>
 
         {/* Native-Style In-App Notification */}

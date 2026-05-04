@@ -103,7 +103,15 @@
     "classic": "클래식",
     "modern": "모던",
     "minimal": "미니멀",
-    "bold": "볼드"
+    "bold": "볼드",
+    "elegant": "우아한",
+    "nature": "자연",
+    "dark": "다크"
+  },
+  "fontSizes": {
+    "small": "작게",
+    "medium": "보통",
+    "large": "크게"
   },
   "fontSizes": {
     "small": "작게",
