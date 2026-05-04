@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Quote } from '../types';
 import { Download, ExternalLink, RefreshCw } from 'lucide-react';
 import { Timestamp } from 'firebase/firestore';
@@ -12,7 +13,7 @@ interface HistoryItemProps {
   t: (key: string) => string;
 }
 
-export function HistoryItem({
+export const HistoryItem = memo(function HistoryItem({
   quote,
   onSelect,
   onDownload,
@@ -103,4 +104,4 @@ export function HistoryItem({
       </div>
     </div>
   );
-}
+});

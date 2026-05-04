@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Quote } from '../types';
 import { motion, useMotionValue, useTransform, PanInfo } from 'motion/react';
 import { Quote as QuoteIcon, Image as ImageIcon, RefreshCw, ExternalLink, Sparkles, Loader2, ChevronLeft, ChevronRight, Volume2, VolumeX } from 'lucide-react';
@@ -267,7 +268,7 @@ function CardGenerationSkeleton({ t, progress }: { t: (key: string) => string; p
   );
 }
 
-export function QuoteCard({
+export const QuoteCard = memo(function QuoteCard({
   quote,
   isGenerating,
   isGeneratingCard,
@@ -415,4 +416,4 @@ export function QuoteCard({
       )}
     </motion.div>
   );
-}
+});
