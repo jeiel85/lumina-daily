@@ -115,6 +115,7 @@
   },
   "onboarding": {
     "skip": "跳过",
+    "has_account": "已有账户？",
     "next": "下一步",
     "start": "开始体验",
     "step1_title": "每天早晨，专属于你的一句话",

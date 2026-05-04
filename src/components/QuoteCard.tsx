@@ -1,6 +1,7 @@
 import { Quote } from '../types';
 import { motion, useMotionValue, useTransform, PanInfo } from 'motion/react';
 import { Quote as QuoteIcon, Image as ImageIcon, RefreshCw, ExternalLink, Sparkles, Loader2, ChevronLeft, ChevronRight, Volume2, VolumeX } from 'lucide-react';
+import { hapticLight, hapticMedium } from '../utils/haptics';
 
 interface QuoteCardProps {
   quote: Quote | null;
@@ -362,7 +363,7 @@ export function QuoteCard({
 
           <div className="pt-4 flex flex-col gap-2">
             <button
-              onClick={onGenerateCard}
+              onClick={() => { hapticMedium(); onGenerateCard(); }}
               disabled={isGeneratingCard || isGenerating}
               className="w-full py-3 px-4 bg-indigo-600 text-white rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-indigo-700 disabled:opacity-50 transition-all"
             >
@@ -371,7 +372,7 @@ export function QuoteCard({
             </button>
             <div className="flex gap-2">
               <button
-                onClick={onRefresh}
+                onClick={() => { hapticLight(); onRefresh(); }}
                 disabled={isGenerating}
                 className="flex-1 py-3 px-2 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border border-neutral-100 dark:border-neutral-700 rounded-xl text-xs font-bold flex items-center justify-center gap-1 hover:bg-neutral-50 dark:hover:bg-neutral-700 disabled:opacity-50 transition-all"
               >
@@ -380,7 +381,7 @@ export function QuoteCard({
               </button>
               {onSpeak && (
                 <button
-                  onClick={onSpeak}
+                  onClick={() => { hapticLight(); onSpeak(); }}
                   className={`flex-1 py-3 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all ${isSpeaking ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800' : 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border border-neutral-100 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700'}`}
                 >
                   {isSpeaking ? <VolumeX className="w-4 h-4 text-indigo-600 dark:text-indigo-400" /> : <Volume2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />}
@@ -388,7 +389,7 @@ export function QuoteCard({
                 </button>
               )}
               <button
-                onClick={onShare}
+                onClick={() => { hapticLight(); onShare(); }}
                 className="flex-1 py-3 px-2 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border border-neutral-100 dark:border-neutral-700 rounded-xl text-xs font-bold flex items-center justify-center gap-1 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all"
               >
                 <ExternalLink className="w-4 h-4" />

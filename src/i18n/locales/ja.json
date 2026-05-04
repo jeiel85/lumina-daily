@@ -115,6 +115,7 @@
   },
   "onboarding": {
     "skip": "スキップ",
+    "has_account": "すでにアカウントをお持ちですか？",
     "next": "次へ",
     "start": "始める",
     "step1_title": "毎朝、あなただけの一言",

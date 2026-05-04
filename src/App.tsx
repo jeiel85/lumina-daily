@@ -621,6 +621,7 @@ export default function App() {
 
       setIsGeneratingCard(false);
       trackEvent('generate_card', { card_style: settings.preferredCardStyle });
+      hapticMedium();
 
       if (Capacitor.isNativePlatform()) {
         const { Filesystem, Directory } = await import('@capacitor/filesystem');
@@ -711,7 +712,10 @@ export default function App() {
       const isLast = onboardingStep === ONBOARDING_STEPS.length - 1;
       return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6">
-          <div className="w-full flex justify-end mb-6">
+          <div className="w-full flex justify-between mb-6">
+            <button onClick={() => { trackEvent('onboarding_has_account', { step: onboardingStep }); completeOnboarding(); signInWithGoogle(); }} className="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
+              {t('onboarding.has_account')}
+            </button>
             <button onClick={() => { trackEvent('onboarding_skip', { step: onboardingStep }); completeOnboarding(); }} className="text-sm text-neutral-400 hover:text-neutral-600">
               {t('onboarding.skip')}
             </button>
@@ -735,7 +739,7 @@ export default function App() {
                 </div>
               )}
               {isLast && (
-                <button onClick={() => { completeOnboarding(); signInWithGoogle(); }} className="w-full py-4 px-6 bg-indigo-600 text-white rounded-2xl font-semibold flex items-center justify-center gap-3">
+                <button onClick={() => { hapticMedium(); completeOnboarding(); signInWithGoogle(); }} className="w-full py-4 px-6 bg-indigo-600 text-white rounded-2xl font-semibold flex items-center justify-center gap-3">
                   <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" className="w-5 h-5 bg-white rounded-full" alt="Google" />
                   {t('auth.google_login')}
                 </button>
@@ -748,7 +752,7 @@ export default function App() {
             ))}
           </div>
           {!isLast && (
-            <button onClick={() => setOnboardingStep(s => s + 1)} className="mt-8 w-full py-4 px-6 bg-indigo-600 text-white rounded-2xl font-semibold">
+            <button onClick={() => { hapticLight(); setOnboardingStep(s => s + 1); }} className="mt-8 w-full py-4 px-6 bg-indigo-600 text-white rounded-2xl font-semibold">
               {t('onboarding.next')}
             </button>
           )}
@@ -764,7 +768,7 @@ export default function App() {
           </div>
           <h1 className="text-4xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-3">{t('auth.welcome')}</h1>
           <p className="text-neutral-500 mb-10">{t('auth.desc')}</p>
-          <button onClick={signInWithGoogle} className="w-full py-4 px-6 bg-indigo-600 text-white rounded-2xl font-semibold flex items-center justify-center gap-3">
+          <button onClick={() => { hapticMedium(); signInWithGoogle(); }} className="w-full py-4 px-6 bg-indigo-600 text-white rounded-2xl font-semibold flex items-center justify-center gap-3">
             <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" className="w-5 h-5 bg-white rounded-full" alt="Google" />
             {t('auth.google_login')}
           </button>

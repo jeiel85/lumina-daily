@@ -115,6 +115,7 @@
   },
   "onboarding": {
     "skip": "Skip",
+    "has_account": "Already have an account?",
     "next": "Next",
     "start": "Get Started",
     "step1_title": "A word just for you, every morning",
