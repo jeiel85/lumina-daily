@@ -9,7 +9,7 @@ import { Capacitor } from '@capacitor/core';
 export const localConfig = {} as any;
 
 const defaultFirebaseConfig = {
-  apiKey: '***REMOVED***',
+  apiKey: undefined,
   authDomain: 'lumina-762f8.firebaseapp.com',
   projectId: 'lumina-762f8',
   storageBucket: 'lumina-762f8.firebasestorage.app',
