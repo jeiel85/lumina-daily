@@ -31,6 +31,7 @@ import { QuoteCard } from './components/QuoteCard';
 import { HistoryItem } from './components/HistoryItem';
 import { HistorySkeleton } from './components/HistorySkeleton';
 import { Header } from './components/Header';
+import { hapticLight, hapticMedium } from './utils/haptics';
 
 // Import icons
 import { Bell, History as HistoryIcon, Home, Settings as SettingsIcon, Sparkles, RefreshCw, ExternalLink, Download, Image as ImageIcon, ChevronRight, Globe, Palette, BookOpen } from 'lucide-react';
@@ -91,7 +92,7 @@ export default function App() {
     getDoc(doc(db, 'users', user.uid, 'history', quoteId)).then((snap) => {
       if (snap.exists()) {
         setCurrentQuote({ id: snap.id, ...snap.data() } as Quote);
-        setActiveTab('home');
+        handleTabChange('home');
       }
     }).catch(err => console.error('[Notification] Failed to load quote:', err));
   }, [user]);
@@ -250,6 +251,12 @@ export default function App() {
     }
   }, [settings.darkMode]);
 
+  // Tab change with haptic feedback
+  const handleTabChange = (tab: 'home' | 'history' | 'settings') => {
+    hapticLight();
+    setActiveTab(tab);
+  };
+
   // Quote Navigation via swipe
   const navigateQuote = (direction: 'prev' | 'next') => {
     if (!currentQuote || history.length === 0) return;
@@ -258,8 +265,10 @@ export default function App() {
 
     if (direction === 'prev' && currentIndex > 0) {
       setCurrentQuote(history[currentIndex - 1]);
+      hapticLight();
     } else if (direction === 'next' && currentIndex < history.length - 1) {
       setCurrentQuote(history[currentIndex + 1]);
+      hapticLight();
     }
   };
 
@@ -385,6 +394,7 @@ export default function App() {
       setCurrentQuote({ ...newQuoteData, id: 'temp-' + Date.now() } as Quote);
       setIsGenerating(false);
       trackEvent('generate_quote', { theme: resolvedTheme, has_custom_keyword: !!settings.customKeyword });
+      hapticMedium();
 
       // Save to Firestore & Update usage count
       try {
@@ -463,10 +473,12 @@ export default function App() {
     if (updates.language) {
       i18n.changeLanguage(updates.language);
       trackEvent('language_change', { language: updates.language });
+      hapticLight();
     }
 
     try {
       await setDoc(doc(db, 'users', user.uid), { ...updates, updatedAt: serverTimestamp() }, { merge: true });
+      hapticLight();
     } catch (err) {
       handleFirestoreError(err, OperationType.UPDATE, `users/${user.uid}`, user);
     }
@@ -491,6 +503,7 @@ export default function App() {
 
       await navigator.share(shareData);
       trackEvent('share_quote', { has_image: !!quote.imageUrl });
+      hapticLight();
     } catch (err) {
       if (err instanceof Error && err.name !== 'AbortError') {
         setError(t('share.error'));
@@ -822,7 +835,7 @@ export default function App() {
                       </div>
                       <motion.button
                         whileTap={{ scale: 0.97 }}
-                        onClick={() => { setActiveTab('home'); generateQuote(true); }}
+                        onClick={() => { handleTabChange('home'); generateQuote(true); }}
                         className="px-6 py-3 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-all"
                       >
                         {t('home.generate_first')}
@@ -833,7 +846,7 @@ export default function App() {
                       <HistoryItem
                         key={quote.id}
                         quote={quote}
-                        onSelect={() => { setCurrentQuote(quote); setActiveTab('home'); }}
+                        onSelect={() => { setCurrentQuote(quote); handleTabChange('home'); }}
                         onDownload={() => {}}
                         onShare={() => handleShare(quote)}
                         onRegenerate={() => generateQuoteCard(quote)}
@@ -930,7 +943,7 @@ export default function App() {
           {tabs.map(tab => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as typeof activeTab)}
+              onClick={() => handleTabChange(tab.id as typeof activeTab)}
               className={`flex flex-col items-center gap-1 ${activeTab === tab.id ? 'text-indigo-600' : 'text-neutral-400'}`}
             >
               <tab.icon className="w-6 h-6" />
