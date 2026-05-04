@@ -114,7 +114,8 @@
     "error": "공유 중 오류가 발생했습니다."
   },
   "onboarding": {
-    "skip": "건너뛰기",
+    "skip": "걸너뛰기",
+    "has_account": "이미 계정이 있어요",
     "next": "다음",
     "start": "시작하기",
     "step1_title": "매일 아침, 나를 위한 한 마디",

@@ -710,15 +710,48 @@ export default function App() {
     if (showOnboarding) {
       const step = ONBOARDING_STEPS[onboardingStep];
       const isLast = onboardingStep === ONBOARDING_STEPS.length - 1;
+      
+      const handleSkip = () => {
+        hapticLight();
+        trackEvent('onboarding_skip', { step: onboardingStep });
+        completeOnboarding();
+      };
+      
+      const handleLater = () => {
+        hapticLight();
+        trackEvent('onboarding_later', { step: onboardingStep });
+        // Don't mark as completed, just hide for this session
+        setShowOnboarding(false);
+      };
+      
       return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6">
-          <div className="w-full flex justify-between mb-6">
-            <button onClick={() => { trackEvent('onboarding_has_account', { step: onboardingStep }); completeOnboarding(); signInWithGoogle(); }} className="text-sm text-indigo-600 hover:text-indigo-800 font-medium">
+          <div className="w-full flex justify-between items-center mb-6">
+            <button 
+              onClick={() => { hapticLight(); trackEvent('onboarding_has_account', { step: onboardingStep }); completeOnboarding(); signInWithGoogle(); }} 
+              className="text-sm text-indigo-600 hover:text-indigo-800 font-medium px-3 py-1.5 rounded-lg hover:bg-indigo-50 transition-colors"
+            >
               {t('onboarding.has_account')}
             </button>
-            <button onClick={() => { trackEvent('onboarding_skip', { step: onboardingStep }); completeOnboarding(); }} className="text-sm text-neutral-400 hover:text-neutral-600">
-              {t('onboarding.skip')}
-            </button>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={handleLater}
+                className="text-sm text-neutral-500 hover:text-neutral-700 px-3 py-1.5 rounded-lg hover:bg-neutral-100 transition-colors"
+                title={t('onboarding.later_tooltip')}
+              >
+                {t('onboarding.later')}
+              </button>
+              <div className="w-px h-4 bg-neutral-300" />
+              <button 
+                onClick={handleSkip}
+                className="text-sm font-medium text-neutral-400 hover:text-neutral-600 px-3 py-1.5 rounded-lg hover:bg-neutral-100 transition-colors flex items-center gap-1"
+              >
+                <span>{t('onboarding.skip')}</span>
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+            </div>
           </div>
           <AnimatePresence mode="wait">
             <motion.div
@@ -956,13 +989,29 @@ export default function App() {
           ))}
         </nav>
 
-        {/* In-App Notification Toast */}
-        {inAppNotification && (
-          <div className="fixed top-20 left-1/2 -translate-x-1/2 bg-neutral-900 text-white px-4 py-2 rounded-xl shadow-lg z-50">
-            <p className="font-bold">{inAppNotification.title}</p>
-            <p className="text-sm">{inAppNotification.body}</p>
-          </div>
-        )}
+        {/* In-App Notification Snackbar */}
+        <AnimatePresence>
+          {inAppNotification && (
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 50 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              className="fixed bottom-24 left-4 right-4 bg-neutral-900 dark:bg-neutral-800 text-white px-4 py-3 rounded-2xl shadow-2xl z-50 flex items-center justify-between"
+            >
+              <div className="flex-1 min-w-0 mr-3">
+                <p className="font-bold text-sm">{inAppNotification.title}</p>
+                <p className="text-xs text-neutral-300 truncate">{inAppNotification.body}</p>
+              </div>
+              <button
+                onClick={() => setInAppNotification(null)}
+                className="text-indigo-400 text-sm font-bold px-3 py-1.5 hover:bg-neutral-800 rounded-lg transition-colors shrink-0"
+              >
+                {t('common.done')}
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </ErrorBoundary>
   );

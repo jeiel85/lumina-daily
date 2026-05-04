@@ -115,14 +115,15 @@
   },
   "onboarding": {
     "skip": "Skip",
-    "has_account": "Already have an account?",
     "next": "Next",
     "start": "Get Started",
-    "step1_title": "A word just for you, every morning",
-    "step1_desc": "AI crafts a personalized quote with a warm explanation\ntailored to your taste every day.",
-    "step2_title": "Choose your theme",
-    "step2_desc": "From motivation to philosophy and comfort,\npick from 10 themes that speak to you.",
-    "step3_title": "Ready to begin?",
-    "step3_desc": "Sign in with Google to save your quote history\nand receive daily notifications."
+    "later": "Later",
+    "later_tooltip": "Go to login screen (you can see this again later)",
+    "step1_title": "A Daily Dose of Wisdom",
+    "step1_desc": "AI creates personalized quotes and warm explanations\ntailored to your taste, every day.",
+    "step2_title": "Choose Your Theme",
+    "step2_desc": "From motivation to philosophy and comfort,\nchoose from 10 different themes.",
+    "step3_title": "Ready to Start?",
+    "step3_desc": "Sign in with Google to save your quotes\nand receive daily notifications."
   }
 }
