@@ -108,7 +108,7 @@ jobs:
           echo "Building version: v$VERSION"
 
       - name: Upload dist artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: dist-files
           path: dist/
@@ -191,14 +191,14 @@ jobs:
           ./gradlew assembleRelease bundleRelease
       
       - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: lumina-daily-release-apk
           path: android/app/build/outputs/apk/release/app-release.apk
           retention-days: 30
       
       - name: Upload AAB artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: lumina-daily-release-aab
           path: android/app/build/outputs/bundle/release/app-release.aab
