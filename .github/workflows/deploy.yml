@@ -111,7 +111,7 @@ jobs:
         run: |
           echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 -d > android/app/release.keystore
 
-      - name: Build release APK
+      - name: Build release AAB
         working-directory: android
         env:
           RELEASE_STORE_FILE: release.keystore
@@ -120,13 +120,13 @@ jobs:
           RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
         run: |
           chmod +x gradlew
-          ./gradlew assembleRelease
-
-      - name: Upload APK artifact
+          ./gradlew bundleRelease
+      
+      - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
         with:
-          name: lumina-daily-release-apk
-          path: android/app/build/outputs/apk/release/app-release.apk
+          name: lumina-daily-release-aab
+          path: android/app/build/outputs/bundle/release/app-release.aab
           retention-days: 30
 
   release:
@@ -135,15 +135,15 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Download APK artifact
+      - name: Download AAB artifact
         uses: actions/download-artifact@v4
         with:
-          name: lumina-daily-release-apk
+          name: lumina-daily-release-aab
           path: release
-
+      
       - name: List release files
         run: ls -la release/
-
+      
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
@@ -153,6 +153,6 @@ jobs:
           prerelease: false
           generate_release_notes: true
           files: |
-            release/app-release.apk
+            release/app-release.aab
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
