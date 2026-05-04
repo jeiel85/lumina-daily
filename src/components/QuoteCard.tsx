@@ -1,5 +1,6 @@
 import { Quote } from '../types';
-import { Quote as QuoteIcon, Image as ImageIcon, RefreshCw, ExternalLink, Sparkles, Loader2 } from 'lucide-react';
+import { motion, useMotionValue, useTransform, PanInfo } from 'motion/react';
+import { Quote as QuoteIcon, Image as ImageIcon, RefreshCw, ExternalLink, Sparkles, Loader2, ChevronLeft, ChevronRight, Volume2, VolumeX } from 'lucide-react';
 
 interface QuoteCardProps {
   quote: Quote | null;
@@ -10,6 +11,12 @@ interface QuoteCardProps {
   onGenerateCard: () => void;
   onRefresh: () => void;
   onShare: () => void;
+  onSpeak?: () => void;
+  isSpeaking?: boolean;
+  onSwipeLeft?: () => void;
+  onSwipeRight?: () => void;
+  canSwipeLeft?: boolean;
+  canSwipeRight?: boolean;
   t: (key: string) => string;
 }
 
@@ -143,8 +150,29 @@ export function QuoteCard({
   onGenerateCard,
   onRefresh,
   onShare,
+  onSpeak,
+  isSpeaking,
+  onSwipeLeft,
+  onSwipeRight,
+  canSwipeLeft,
+  canSwipeRight,
   t,
 }: QuoteCardProps) {
+  const x = useMotionValue(0);
+  const opacity = useTransform(x, [-150, 0, 150], [0.6, 1, 0.6]);
+  const rotate = useTransform(x, [-150, 150], [-3, 3]);
+  const hintOpacityLeft = useTransform(x, [-150, -40, 0], [1, 0.5, 0]);
+  const hintOpacityRight = useTransform(x, [0, 40, 150], [0, 0.5, 1]);
+
+  const handleDragEnd = (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    const threshold = 80;
+    if (info.offset.x < -threshold && onSwipeLeft) {
+      onSwipeLeft();
+    } else if (info.offset.x > threshold && onSwipeRight) {
+      onSwipeRight();
+    }
+  };
+
   // Show skeleton during quote generation
   if (isGenerating) {
     return <QuoteSkeleton t={t} />;
@@ -161,8 +189,35 @@ export function QuoteCard({
   }
 
   return (
-    <div className="relative bg-white dark:bg-neutral-900 rounded-[2rem] p-8 shadow-sm border border-neutral-100 dark:border-neutral-800 overflow-hidden min-h-[400px] flex flex-col justify-center transition-colors">
+    <motion.div
+      style={{ x, opacity, rotate }}
+      drag="x"
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={0.15}
+      onDragEnd={handleDragEnd}
+      className="relative bg-white dark:bg-neutral-900 rounded-[2rem] p-8 shadow-sm border border-neutral-100 dark:border-neutral-800 overflow-hidden min-h-[400px] flex flex-col justify-center transition-colors select-none"
+    >
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 to-purple-500" />
+
+      {/* Swipe hints */}
+      {canSwipeRight && (
+        <motion.div
+          style={{ opacity: hintOpacityRight }}
+          className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-1 text-indigo-600 dark:text-indigo-400 pointer-events-none"
+        >
+          <ChevronLeft className="w-6 h-6" />
+          <span className="text-xs font-medium">{t('home.prev_quote')}</span>
+        </motion.div>
+      )}
+      {canSwipeLeft && (
+        <motion.div
+          style={{ opacity: hintOpacityLeft }}
+          className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-1 text-indigo-600 dark:text-indigo-400 pointer-events-none"
+        >
+          <span className="text-xs font-medium">{t('home.next_quote')}</span>
+          <ChevronRight className="w-6 h-6" />
+        </motion.div>
+      )}
 
       {quote ? (
         <>
@@ -194,14 +249,23 @@ export function QuoteCard({
               <button
                 onClick={onRefresh}
                 disabled={isGenerating}
-                className="flex-1 py-3 px-4 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border border-neutral-100 dark:border-neutral-700 rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-neutral-50 dark:hover:bg-neutral-700 disabled:opacity-50 transition-all"
+                className="flex-1 py-3 px-2 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border border-neutral-100 dark:border-neutral-700 rounded-xl text-xs font-bold flex items-center justify-center gap-1 hover:bg-neutral-50 dark:hover:bg-neutral-700 disabled:opacity-50 transition-all"
               >
                 <RefreshCw className={`w-4 h-4 text-indigo-600 dark:text-indigo-400 ${isGenerating ? 'animate-spin' : ''}`} />
                 {t('home.refresh')}
               </button>
+              {onSpeak && (
+                <button
+                  onClick={onSpeak}
+                  className={`flex-1 py-3 px-2 rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-all ${isSpeaking ? 'bg-indigo-100 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800' : 'bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border border-neutral-100 dark:border-neutral-700 hover:bg-neutral-50 dark:hover:bg-neutral-700'}`}
+                >
+                  {isSpeaking ? <VolumeX className="w-4 h-4 text-indigo-600 dark:text-indigo-400" /> : <Volume2 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />}
+                  {t('home.speak')}
+                </button>
+              )}
               <button
                 onClick={onShare}
-                className="flex-1 py-3 px-4 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border border-neutral-100 dark:border-neutral-700 rounded-xl text-sm font-bold flex items-center justify-center gap-2 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all"
+                className="flex-1 py-3 px-2 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 border border-neutral-100 dark:border-neutral-700 rounded-xl text-xs font-bold flex items-center justify-center gap-1 hover:bg-neutral-50 dark:hover:bg-neutral-700 transition-all"
               >
                 <ExternalLink className="w-4 h-4" />
                 {t('share.button')}
@@ -217,6 +281,6 @@ export function QuoteCard({
           <p className="text-neutral-400 dark:text-neutral-500">{t('home.no_quote')}</p>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

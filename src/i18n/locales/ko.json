@@ -26,6 +26,9 @@
     "regenerate_card": "카드 다시 만들기",
     "generating": "명언 생성 중...",
     "generating_card": "카드 생성 중...",
+    "speak": "읽어주기",
+    "prev_quote": "이전 명언",
+    "next_quote": "다음 명언",
     "subscribe_title": "나만의 인사이트 구독하기",
     "subscribe_desc": "매일 당신만을 위해 쓰인 한 마디가 도착합니다.",
     "activate": "구독 시작"
@@ -34,6 +37,8 @@
     "title": "지난 명언들",
     "just_now": "방금 전",
     "no_history": "기록이 없습니다.",
+    "empty_title": "아직 기록이 없어요",
+    "empty_desc": "첫 번째 명언을 생성하고 특별한 한 마디를 남겨보세요.",
     "download": "다운로드",
     "regenerate": "다시 만들기"
   },

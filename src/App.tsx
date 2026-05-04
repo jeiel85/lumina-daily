@@ -33,7 +33,7 @@ import { HistorySkeleton } from './components/HistorySkeleton';
 import { Header } from './components/Header';
 
 // Import icons
-import { Bell, History as HistoryIcon, Home, Settings as SettingsIcon, Sparkles, RefreshCw, ExternalLink, Download, Image as ImageIcon, ChevronRight, Globe, Palette } from 'lucide-react';
+import { Bell, History as HistoryIcon, Home, Settings as SettingsIcon, Sparkles, RefreshCw, ExternalLink, Download, Image as ImageIcon, ChevronRight, Globe, Palette, BookOpen } from 'lucide-react';
 
 export default function App() {
   const { t, i18n } = useTranslation();
@@ -67,6 +67,7 @@ export default function App() {
   const [isMobileOrTablet, setIsMobileOrTablet] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [inAppNotification, setInAppNotification] = useState<{ title: string; body: string } | null>(null);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const pendingNotifQuoteId = useRef<string | null>(null);
 
   // Notification tap listener (early mount, before auth)
@@ -205,6 +206,11 @@ export default function App() {
     };
   }, []);
 
+  // Sync HTML lang attribute with i18n
+  useEffect(() => {
+    document.documentElement.lang = i18n.language;
+  }, [i18n.language]);
+
   // Sync Dark Mode class
   useEffect(() => {
     const applyTheme = () => {
@@ -243,6 +249,59 @@ export default function App() {
       return () => mediaQuery.removeEventListener('change', handleChange);
     }
   }, [settings.darkMode]);
+
+  // Quote Navigation via swipe
+  const navigateQuote = (direction: 'prev' | 'next') => {
+    if (!currentQuote || history.length === 0) return;
+    const currentIndex = history.findIndex(q => q.id === currentQuote.id);
+    if (currentIndex === -1) return;
+
+    if (direction === 'prev' && currentIndex > 0) {
+      setCurrentQuote(history[currentIndex - 1]);
+    } else if (direction === 'next' && currentIndex < history.length - 1) {
+      setCurrentQuote(history[currentIndex + 1]);
+    }
+  };
+
+  const currentQuoteIndex = currentQuote ? history.findIndex(q => q.id === currentQuote.id) : -1;
+  const canSwipeLeft = currentQuoteIndex >= 0 && currentQuoteIndex < history.length - 1;
+  const canSwipeRight = currentQuoteIndex > 0;
+
+  // Text-to-Speech
+  const speakQuote = (quote: Quote) => {
+    if (!window.speechSynthesis) return;
+    if (window.speechSynthesis.speaking) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+      return;
+    }
+
+    const text = `${quote.text}. ${quote.author}. ${t('home.ai_explanation')}: ${quote.explanation}`;
+    const utterance = new SpeechSynthesisUtterance(text);
+
+    const langMap: Record<string, string> = {
+      ko: 'ko-KR',
+      en: 'en-US',
+      ja: 'ja-JP',
+      zh: 'zh-CN',
+    };
+    utterance.lang = langMap[i18n.language] || 'en-US';
+    utterance.rate = 0.9;
+
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+
+    window.speechSynthesis.speak(utterance);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
 
   // Quote Generation
   const generateQuote = async (manualRetry = false) => {
@@ -581,8 +640,41 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-neutral-50 dark:bg-neutral-950">
-        <RefreshCw className="w-8 h-8 animate-spin text-indigo-600 dark:text-indigo-400" />
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-neutral-950 dark:via-neutral-900 dark:to-indigo-950">
+        <motion.div
+          initial={{ scale: 0.5, opacity: 0, rotate: -10 }}
+          animate={{ scale: 1, opacity: 1, rotate: 0 }}
+          transition={{ duration: 0.7, ease: [0.34, 1.56, 0.64, 1] }}
+          className="w-24 h-24 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-3xl flex items-center justify-center mb-6 shadow-xl shadow-indigo-200 dark:shadow-indigo-900/30"
+        >
+          <Sparkles className="w-12 h-12 text-white" />
+        </motion.div>
+        <motion.h1
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25, duration: 0.6, ease: 'easeOut' }}
+          className="text-3xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2"
+        >
+          Lumina Daily
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.45, duration: 0.5 }}
+          className="text-sm text-neutral-500 dark:text-neutral-400 mb-8"
+        >
+          {t('auth.desc')}
+        </motion.p>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.65, duration: 0.4 }}
+          className="flex items-center gap-2"
+        >
+          <div className="w-1.5 h-1.5 bg-indigo-600 dark:bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+          <div className="w-1.5 h-1.5 bg-indigo-600 dark:bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+          <div className="w-1.5 h-1.5 bg-indigo-600 dark:bg-indigo-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+        </motion.div>
       </div>
     );
   }
@@ -679,6 +771,7 @@ export default function App() {
               {activeTab === 'home' && (
                 <motion.div key="home" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className={`space-y-6 ${useSidebar ? 'grid grid-cols-2 gap-8' : ''}`}>
                   <QuoteCard
+                    key={currentQuote?.id}
                     quote={currentQuote}
                     isGenerating={isGenerating}
                     isGeneratingCard={isGeneratingCard}
@@ -686,6 +779,12 @@ export default function App() {
                     onGenerateCard={() => currentQuote && generateQuoteCard(currentQuote)}
                     onRefresh={() => generateQuote(true)}
                     onShare={() => currentQuote && handleShare(currentQuote)}
+                    onSpeak={() => currentQuote && speakQuote(currentQuote)}
+                    isSpeaking={isSpeaking}
+                    onSwipeLeft={() => navigateQuote('next')}
+                    onSwipeRight={() => navigateQuote('prev')}
+                    canSwipeLeft={canSwipeLeft}
+                    canSwipeRight={canSwipeRight}
                     t={t}
                   />
                   <div className="space-y-6">
@@ -708,7 +807,27 @@ export default function App() {
                   {isHistoryLoading ? (
                     <HistorySkeleton />
                   ) : history.length === 0 ? (
-                    <p className="text-neutral-400">{t('history.no_history')}</p>
+                    <div className="text-center py-16 space-y-6">
+                      <motion.div
+                        initial={{ scale: 0.8, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.5 }}
+                        className="w-24 h-24 bg-indigo-50 dark:bg-indigo-900/20 rounded-full flex items-center justify-center mx-auto"
+                      >
+                        <BookOpen className="w-12 h-12 text-indigo-300 dark:text-indigo-700" />
+                      </motion.div>
+                      <div className="space-y-2">
+                        <p className="text-lg font-semibold text-neutral-700 dark:text-neutral-300">{t('history.empty_title')}</p>
+                        <p className="text-sm text-neutral-400 dark:text-neutral-500">{t('history.empty_desc')}</p>
+                      </div>
+                      <motion.button
+                        whileTap={{ scale: 0.97 }}
+                        onClick={() => { setActiveTab('home'); generateQuote(true); }}
+                        className="px-6 py-3 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-all"
+                      >
+                        {t('home.generate_first')}
+                      </motion.button>
+                    </div>
                   ) : (
                     history.map((quote) => (
                       <HistoryItem

@@ -26,6 +26,9 @@
     "regenerate_card": "Regenerate Card",
     "generating": "Generating quote...",
     "generating_card": "Generating card...",
+    "speak": "Listen",
+    "prev_quote": "Previous",
+    "next_quote": "Next",
     "subscribe_title": "Subscribe to Daily Insights",
     "subscribe_desc": "A word written just for you arrives every day.",
     "activate": "Start Subscription"
@@ -34,6 +37,8 @@
     "title": "Past Quotes",
     "just_now": "Just now",
     "no_history": "No history yet.",
+    "empty_title": "No quotes yet",
+    "empty_desc": "Create your first quote and start your journey of wisdom.",
     "download": "Download",
     "regenerate": "Regenerate"
   },

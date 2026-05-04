@@ -26,6 +26,9 @@
     "regenerate_card": "重新生成卡片",
     "generating": "正在生成名言...",
     "generating_card": "正在生成卡片...",
+    "speak": "朗读",
+    "prev_quote": "上一条",
+    "next_quote": "下一条",
     "subscribe_title": "订阅我的每日洞见",
     "subscribe_desc": "每天，一句专为你写就的话悄然送达。",
     "activate": "开始订阅"
@@ -34,6 +37,8 @@
     "title": "过去的名言",
     "just_now": "刚刚",
     "no_history": "暂无记录。",
+    "empty_title": "暂无记录",
+    "empty_desc": "生成第一条名言，留下特别的一句话吧。",
     "download": "下载",
     "regenerate": "重新生成"
   },
