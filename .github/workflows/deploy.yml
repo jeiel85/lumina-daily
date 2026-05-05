@@ -100,6 +100,21 @@ jobs:
           VITE_FIREBASE_DATABASE_ID: ${{ secrets.VITE_FIREBASE_DATABASE_ID }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
+      - name: Verify app starts (preview)
+        run: |
+          npm run preview -- --host 127.0.0.1 --port 4173 >/tmp/preview.log 2>&1 &
+          PREVIEW_PID=$!
+          trap 'kill $PREVIEW_PID' EXIT
+
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173 >/tmp/preview.html; then
+              break
+            fi
+            sleep 1
+          done
+
+          grep -qi '<!doctype html>' /tmp/preview.html
+
       - name: Generate version
         id: version
         run: |
