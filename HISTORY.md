@@ -1,6 +1,16 @@
 # HISTORY.md
 
 ## 2026-05-06
+- 작업: 로딩 화면 정렬/가독성 개선 및 릴리즈 배포 (v1.3.3)
+- 변경 파일:
+  - src/App.tsx: 로딩 화면 텍스트 정렬 및 다크모드 텍스트 대비 수정
+  - package.json: 버전 업데이트 (1.3.2 -> 1.3.3)
+  - android/app/build.gradle: versionCode (22 -> 23), versionName ("1.3.2" -> "1.3.3") 업데이트
+  - CHANGELOG.md: v1.3.3 추가
+  - HISTORY.md: 작업 내역 기록
+- 결과: 진행 중 (CI 모니터링)
+
+## 2026-05-06
 - 작업: GitHub 릴리즈 버전 범프 및 태그 배포 (v1.3.2)
 - 변경 파일:
   - package.json: 버전 업데이트 (1.3.1 -> 1.3.2)

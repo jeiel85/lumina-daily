@@ -762,7 +762,7 @@ setCurrentQuote({ ...newQuoteData, id: 'temp-' + Date.now() } as Quote);
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-neutral-900 dark:via-neutral-800 dark:to-indigo-900">
+      <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-neutral-900 dark:via-neutral-800 dark:to-indigo-900">
         <motion.div
           initial={{ scale: 0.5, opacity: 0, rotate: -10 }}
           animate={{ scale: 1, opacity: 1, rotate: 0 }}
@@ -775,7 +775,7 @@ setCurrentQuote({ ...newQuoteData, id: 'temp-' + Date.now() } as Quote);
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.25, duration: 0.6, ease: 'easeOut' }}
-          className="text-3xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-2"
+          className="text-3xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-300 dark:to-fuchsia-300 bg-clip-text text-transparent mb-2"
         >
           Lumina Daily
         </motion.h1>
@@ -783,7 +783,7 @@ setCurrentQuote({ ...newQuoteData, id: 'temp-' + Date.now() } as Quote);
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.45, duration: 0.5 }}
-          className="text-sm text-neutral-500 dark:text-neutral-300 mb-8"
+          className="max-w-sm text-sm text-neutral-600 dark:text-neutral-100 mb-8"
         >
           {t('auth.desc')}
         </motion.p>
