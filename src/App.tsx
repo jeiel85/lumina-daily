@@ -1079,10 +1079,10 @@ setCurrentQuote({ ...newQuoteData, id: 'temp-' + Date.now() } as Quote);
                   <div className="bg-white dark:bg-neutral-900 rounded-2xl p-6">
                     <div className="flex items-center gap-3 mb-3">
                       <span className="font-bold text-indigo-600">🎁</span>
-                      <span className="font-bold">{t('settings.referral_title' || '초대 리워드')}</span>
+                      <span className="font-bold">{t('settings.referral_title', '초대 리워드')}</span>
                     </div>
                     <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-3">
-                      {t('settings.referral_desc' || '친구에게 앱을 공유하고 리워드를 받으세요!')}
+                      {t('settings.referral_desc', '친구에게 앱을 공유하고 리워드를 받으세요!')}
                     </p>
                     {settings.referralCode && (
                       <div className="flex items-center gap-2 mb-3">
@@ -1096,12 +1096,12 @@ setCurrentQuote({ ...newQuoteData, id: 'temp-' + Date.now() } as Quote);
                           }}
                           className="px-3 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700"
                         >
-                          {t('settings.copy' || '복사')}
+                          {t('settings.copy', '복사')}
                         </button>
                       </div>
                     )}
                     <p className="text-xs text-neutral-400">
-                      {t('settings.referral_count' || `초대 횟수: ${settings.referralCount || 0}`)}
+                      {t('settings.referral_count', `초대 횟수: ${settings.referralCount || 0}`)}
                     </p>
                   </div>
 
