@@ -25,7 +25,7 @@ import './i18n/config';
 import { Capacitor } from '@capacitor/core';
 
 import { Quote, UserSettings } from './types';
-import { THEMES, THEME_SEED_TOOLS, BLOCKED_KEYWORDS, CARD_BACKGROUNDS } from './constants';
+import { THEMES, THEME_SEED_POOLS, BLOCKED_KEYWORDS, CARD_BACKGROUNDS } from './constants';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { QuoteCard } from './components/QuoteCard';
 import { HistoryItem } from './components/HistoryItem';
@@ -510,7 +510,7 @@ setCurrentQuote({ ...newQuoteData, id: 'temp-' + Date.now() } as Quote);
        if (Capacitor.isNativePlatform()) {
          try {
            await LocalNotifications.requestPermissions();
-           await LocalNotifications.cancelAll();
+           await LocalNotifications.cancel({ notifications: [{ id: 1 }] });
            const [hour, minute] = updates.notificationTime.split(':').map(Number);
            await LocalNotifications.schedule({
              notifications: [
