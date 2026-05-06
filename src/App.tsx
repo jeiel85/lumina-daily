@@ -67,6 +67,7 @@ export default function App() {
   const [tempMinute, setTempMinute] = useState(0);
   const [isLandscape, setIsLandscape] = useState(false);
   const [isMobileOrTablet, setIsMobileOrTablet] = useState(false);
+  const [isTabletViewport, setIsTabletViewport] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [inAppNotification, setInAppNotification] = useState<{ title: string; body: string } | null>(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
@@ -104,13 +105,14 @@ export default function App() {
       const isTouch = window.matchMedia("(pointer: coarse)").matches;
       setIsMobileOrTablet(isTouch);
       setIsLandscape(window.innerWidth > window.innerHeight);
+      setIsTabletViewport(window.innerWidth >= 768 && window.innerWidth <= 1024);
     };
     checkDeviceAndOrientation();
     window.addEventListener('resize', checkDeviceAndOrientation);
     return () => window.removeEventListener('resize', checkDeviceAndOrientation);
   }, []);
 
-  const useSidebar = isMobileOrTablet && isLandscape;
+  const useSidebar = isMobileOrTablet && isLandscape || isTabletViewport;
 
   // Auth & Data Listener with optimized subscriptions
   useEffect(() => {
@@ -869,12 +871,12 @@ export default function App() {
     <ErrorBoundary t={t}>
       <div className={`min-h-screen bg-neutral-50 dark:bg-neutral-950 transition-colors ${useSidebar ? 'flex flex-row-reverse' : 'flex flex-col'}`}>
         <Header isLoggedIn onLogout={logout} />
-        
+
         <main className={`flex-1 p-6 ${useSidebar ? 'mr-20' : 'pb-24'}`}>
-          <div className={useSidebar ? 'max-w-6xl mx-auto' : 'max-w-md mx-auto'}>
+          <div className={`mx-auto ${useSidebar ? 'max-w-6xl' : 'max-w-md'}`}>
             <AnimatePresence mode="wait">
               {activeTab === 'home' && (
-                <motion.div key="home" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className={`space-y-6 ${useSidebar ? 'grid grid-cols-2 gap-8' : ''}`}>
+                <motion.div key="home" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className={`space-y-6 ${useSidebar ? 'grid grid-cols-1 md:grid-cols-2 gap-8' : ''}`}>
                   <QuoteCard
                     key={currentQuote?.id}
                     quote={currentQuote}
