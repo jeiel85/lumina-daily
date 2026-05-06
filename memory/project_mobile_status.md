@@ -1,6 +1,6 @@
 # Lumina Daily — 프로젝트 현황
 
-> 마지막 업데이트: 2026-04-17
+> 마지막 업데이트: 2026-05-06
 
 ---
 
@@ -55,6 +55,6 @@ npx playwright test  # UI 테스트
 
 ## GitHub
 
-- 브랜치: `refactor/components`
-- 릴리즈: v1.0.2-refactor
+- 브랜치: `main`
+- 릴리즈: v1.3.1
 - URL: https://github.com/jeiel85/lumina-daily

@@ -1,5 +1,15 @@
 # HISTORY.md
 
+## 2026-05-06
+- 작업: 최신 소스 동기화 및 버전 범프 (v1.3.1)
+- 변경 파일:
+  - package.json: 버전 업데이트 (1.3.0 -> 1.3.1)
+  - android/app/build.gradle: versionCode (20 -> 21), versionName ("1.3.0" -> "1.3.1") 업데이트
+  - CHANGELOG.md: v1.3.1 추가
+  - HISTORY.md: 작업 내역 기록
+  - memory/project_mobile_status.md: 최신 버전 정보 업데이트
+- 결과: 성공
+
 ## 2026-05-04
 - 작업: .templates/ MD 파일 통합 및 프로젝트 루트 문서 정비 (Issue #26)
 - 변경 파일:
