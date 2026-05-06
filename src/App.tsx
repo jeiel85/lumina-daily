@@ -172,7 +172,7 @@ export default function App() {
           } else {
             // Generate referral code for new user
             const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-            const referralCode = 'REF-' + Array.from({length: 6}, () => chars[Math.floor(Math.random() * chars.length]).join('');
+            const referralCode = 'REF-' + Array.from({length: 6}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
             
             const initialSettings = {
               uid: firebaseUser.uid,
