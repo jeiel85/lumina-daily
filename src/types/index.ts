@@ -24,4 +24,7 @@ export interface UserSettings {
   fcmToken?: string;
   role: string;
   updatedAt?: any;
+  referralCode?: string;
+  referralCount?: number;
+  rewards?: { type: string; earnedAt: any; message: string }[];
 }

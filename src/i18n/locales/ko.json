@@ -79,7 +79,13 @@
     "custom_keyword": "나만의 키워드",
     "custom_keyword_desc": "특정 주제나 상황을 직접 입력하면 그에 맞는 명언을 드려요",
     "custom_keyword_placeholder": "예: 새로운 도전, 실패 극복...",
-    "keyword_blocked": "적절하지 않은 키워드입니다"
+    "keyword_blocked": "적절하지 않은 키워드입니다",
+    "referral_title": "초대 리워드",
+    "referral_desc": "친구에게 앱을 공유하고 리워드를 받으세요!",
+    "referral_code": "나의 리워드 코드",
+    "referral_copy": "복사",
+    "referral_count": "초대한 친구",
+    "referral_reward": "리워드 적립"
   },
   "auth": {
     "welcome": "Lumina Daily",

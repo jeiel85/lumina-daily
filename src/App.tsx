@@ -170,6 +170,10 @@ export default function App() {
               i18n.changeLanguage(mergedSettings.language);
             }
           } else {
+            // Generate referral code for new user
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            const referralCode = 'REF-' + Array.from({length: 6}, () => chars[Math.floor(Math.random() * chars.length]).join('');
+            
             const initialSettings = {
               uid: firebaseUser.uid,
               email: firebaseUser.email || '',
@@ -181,7 +185,10 @@ export default function App() {
               darkMode: 'system',
               isSubscribed: false,
               updatedAt: serverTimestamp(),
-              role: 'client'
+              role: 'client',
+              referralCode: referralCode,
+              referralCount: 0,
+              rewards: []
             };
             setDoc(settingsRef, initialSettings).catch(err => 
               handleFirestoreError(err, OperationType.CREATE, `users/${firebaseUser.uid}`, firebaseUser)
@@ -1066,6 +1073,36 @@ setCurrentQuote({ ...newQuoteData, id: 'temp-' + Date.now() } as Quote);
                         </button>
                       ))}
                     </div>
+                  </div>
+
+                  {/* Referral Code */}
+                  <div className="bg-white dark:bg-neutral-900 rounded-2xl p-6">
+                    <div className="flex items-center gap-3 mb-3">
+                      <span className="font-bold text-indigo-600">🎁</span>
+                      <span className="font-bold">{t('settings.referral_title' || '초대 리워드')}</span>
+                    </div>
+                    <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-3">
+                      {t('settings.referral_desc' || '친구에게 앱을 공유하고 리워드를 받으세요!')}
+                    </p>
+                    {settings.referralCode && (
+                      <div className="flex items-center gap-2 mb-3">
+                        <code className="flex-1 bg-neutral-100 dark:bg-neutral-800 px-3 py-2 rounded-lg text-sm font-mono">
+                          {settings.referralCode}
+                        </code>
+                        <button
+                          onClick={() => {
+                            navigator.clipboard.writeText(`https://jeiel85.github.io/lumina-daily/?ref=${settings.referralCode}`);
+                            hapticLight();
+                          }}
+                          className="px-3 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700"
+                        >
+                          {t('settings.copy' || '복사')}
+                        </button>
+                      </div>
+                    )}
+                    <p className="text-xs text-neutral-400">
+                      {t('settings.referral_count' || `초대 횟수: ${settings.referralCount || 0}`)}
+                    </p>
                   </div>
 
                   {/* Language */}
