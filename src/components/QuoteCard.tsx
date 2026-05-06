@@ -101,7 +101,7 @@ function QuoteSkeleton({
   step?: 'quote' | 'explanation' | 'card';
 }) {
   return (
-    <div className="relative bg-white dark:bg-neutral-900 rounded-[2rem] p-8 shadow-sm border border-neutral-100 dark:border-neutral-800 overflow-hidden min-h-[400px] flex flex-col">
+    <div className="relative bg-white dark:bg-neutral-800 rounded-[2rem] p-8 shadow-sm border border-neutral-100 dark:border-neutral-700 overflow-hidden min-h-[400px] flex flex-col">
       {/* Animated top gradient line */}
       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 animate-shimmer bg-[length:200%_100%]" />
       
@@ -175,7 +175,7 @@ function QuoteSkeleton({
         </div>
         
         {/* Step description */}
-        <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-2 text-center">
+        <p className="text-xs text-neutral-500 dark:text-neutral-300 mt-2 text-center">
           {step === 'quote' && t('home.generating_quote_desc')}
           {step === 'explanation' && t('home.generating_explanation_desc')}
           {step === 'card' && t('home.generating_card_desc')}
@@ -359,12 +359,12 @@ export const QuoteCard = memo(function QuoteCard({
             <p className={`${textSizeClass} font-serif leading-snug text-neutral-800 dark:text-neutral-100 mb-4`}>
               "{quote.text}"
             </p>
-            <p className="text-neutral-500 dark:text-neutral-400 font-medium text-right">— {quote.author}</p>
+            <p className="text-neutral-500 dark:text-neutral-300 font-medium text-right">— {quote.author}</p>
           </div>
 
           <div className="pt-6 border-t border-neutral-50 dark:border-neutral-800">
             <h4 className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider mb-2">{t('home.ai_explanation')}</h4>
-            <p className="text-neutral-600 dark:text-neutral-400 leading-relaxed text-sm">
+<p className="text-neutral-600 dark:text-neutral-300 leading-relaxed text-sm">
               {quote.explanation}
             </p>
           </div>

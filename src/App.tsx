@@ -25,7 +25,7 @@ import './i18n/config';
 import { Capacitor } from '@capacitor/core';
 
 import { Quote, UserSettings } from './types';
-import { THEMES, THEME_SEED_POOLS, BLOCKED_KEYWORDS, CARD_BACKGROUNDS } from './constants';
+import { THEMES, THEME_SEED_TOOLS, BLOCKED_KEYWORDS, CARD_BACKGROUNDS } from './constants';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { QuoteCard } from './components/QuoteCard';
 import { HistoryItem } from './components/HistoryItem';
@@ -33,8 +33,27 @@ import { HistorySkeleton } from './components/HistorySkeleton';
 import { Header } from './components/Header';
 import { hapticLight, hapticMedium } from './utils/haptics';
 
+// In-App Review helper
+let actionCount = parseInt(localStorage.getItem('actionCount') || '0', 10);
+const trackActionForReview = async () => {
+  if (!Capacitor.isNativePlatform()) return;
+  actionCount += 1;
+  localStorage.setItem('actionCount', String(actionCount));
+  if (actionCount >= 3) {
+    try {
+      const { InAppReview } = await import('@capacitor-community/in-app-review');
+      await InAppReview.requestReview();
+      actionCount = 0;
+      localStorage.setItem('actionCount', '0');
+    } catch (e) {
+      console.warn('[InAppReview] Failed:', e);
+    }
+  }
+};
+
 // Import icons
 import { Bell, History as HistoryIcon, Home, Settings as SettingsIcon, Sparkles, RefreshCw, ExternalLink, Download, Image as ImageIcon, ChevronRight, Globe, Palette, BookOpen, Type } from 'lucide-react';
+import { LocalNotifications } from '@capacitor/local-notifications';
 
 export default function App() {
   const { t, i18n } = useTranslation();
@@ -410,10 +429,11 @@ export default function App() {
         uid: user.uid
       };
 
-      setCurrentQuote({ ...newQuoteData, id: 'temp-' + Date.now() } as Quote);
-      setIsGenerating(false);
-      trackEvent('generate_quote', { theme: resolvedTheme, has_custom_keyword: !!settings.customKeyword });
-      hapticMedium();
+setCurrentQuote({ ...newQuoteData, id: 'temp-' + Date.now() } as Quote);
+       setIsGenerating(false);
+       trackEvent('generate_quote', { theme: resolvedTheme, has_custom_keyword: !!settings.customKeyword });
+       hapticMedium();
+       trackActionForReview();
 
       // Save to Firestore & Update usage count
       try {
@@ -481,10 +501,33 @@ export default function App() {
     if (!user) return;
 
     if (updates.notificationTime) {
-      const [h, m] = updates.notificationTime.split(':').map(Number);
-      const local = new Date();
-      local.setHours(h, m, 0, 0);
-      updates.notificationTimeUTC = `${String(local.getUTCHours()).padStart(2,'0')}:${String(local.getUTCMinutes()).padStart(2,'0')}`;
+       const [h, m] = updates.notificationTime.split(':').map(Number);
+       const local = new Date();
+       local.setHours(h, m, 0, 0);
+       updates.notificationTimeUTC = `${String(local.getUTCHours()).padStart(2,'0')}:${String(local.getUTCMinutes()).padStart(2,'0')}`;
+       
+       // Schedule local notification (native only)
+       if (Capacitor.isNativePlatform()) {
+         try {
+           await LocalNotifications.requestPermissions();
+           await LocalNotifications.cancelAll();
+           const [hour, minute] = updates.notificationTime.split(':').map(Number);
+           await LocalNotifications.schedule({
+             notifications: [
+               {
+                 title: t('settings.notification_title') || 'Lumina Daily',
+                 body: t('settings.notification_body') || 'Your daily quote is ready!',
+                 id: 1,
+                 schedule: { on: { hour, minute } },
+                 sound: 'beep.wav',
+                 smallIcon: 'ic_stat_icon_config_sample',
+               }
+             ]
+           });
+         } catch (e) {
+           console.warn('[LocalNotif] Schedule failed:', e);
+         }
+       }
     }
 
     setSettings(prev => ({ ...prev, ...updates }));
@@ -521,8 +564,9 @@ export default function App() {
       }
 
       await navigator.share(shareData);
-      trackEvent('share_quote', { has_image: !!quote.imageUrl });
-      hapticLight();
+       trackEvent('share_quote', { has_image: !!quote.imageUrl });
+       hapticLight();
+       trackActionForReview();
     } catch (err) {
       if (err instanceof Error && err.name !== 'AbortError') {
         setError(t('share.error'));
@@ -711,7 +755,7 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-neutral-950 dark:via-neutral-900 dark:to-indigo-950">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-neutral-900 dark:via-neutral-800 dark:to-indigo-900">
         <motion.div
           initial={{ scale: 0.5, opacity: 0, rotate: -10 }}
           animate={{ scale: 1, opacity: 1, rotate: 0 }}
@@ -732,7 +776,7 @@ export default function App() {
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.45, duration: 0.5 }}
-          className="text-sm text-neutral-500 dark:text-neutral-400 mb-8"
+          className="text-sm text-neutral-500 dark:text-neutral-300 mb-8"
         >
           {t('auth.desc')}
         </motion.p>
@@ -922,11 +966,11 @@ export default function App() {
                         transition={{ duration: 0.5 }}
                         className="w-24 h-24 bg-indigo-50 dark:bg-indigo-900/20 rounded-full flex items-center justify-center mx-auto"
                       >
-                        <BookOpen className="w-12 h-12 text-indigo-300 dark:text-indigo-700" />
+                        <BookOpen className="w-12 h-12 text-indigo-300 dark:text-indigo-400" />
                       </motion.div>
                       <div className="space-y-2">
-                        <p className="text-lg font-semibold text-neutral-700 dark:text-neutral-300">{t('history.empty_title')}</p>
-                        <p className="text-sm text-neutral-400 dark:text-neutral-500">{t('history.empty_desc')}</p>
+<p className="text-lg font-semibold text-neutral-700 dark:text-neutral-200">{t('history.empty_title')}</p>
+                         <p className="text-sm text-neutral-400 dark:text-neutral-300">{t('history.empty_desc')}</p>
                       </div>
                       <motion.button
                         whileTap={{ scale: 0.97 }}
@@ -1131,13 +1175,13 @@ export default function App() {
                     <p className="font-bold text-sm text-neutral-900 dark:text-neutral-100">{inAppNotification.title}</p>
                     <span className="text-xs text-neutral-400">{t('common.now')}</span>
                   </div>
-                  <p className="text-sm text-neutral-600 dark:text-neutral-300 leading-snug">{inAppNotification.body}</p>
+                  <p className="text-sm text-neutral-600 dark:text-neutral-200 leading-snug">{inAppNotification.body}</p>
                 </div>
                 
                 {/* Close button */}
                 <button
                   onClick={() => setInAppNotification(null)}
-                  className="w-7 h-7 flex items-center justify-center text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-full transition-colors shrink-0"
+                  className="w-7 h-7 flex items-center justify-center text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-full transition-colors shrink-0"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

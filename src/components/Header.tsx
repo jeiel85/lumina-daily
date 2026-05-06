@@ -18,12 +18,12 @@ export function Header({ isLoggedIn = true, onLogout }: HeaderProps) {
           <span className="font-extrabold text-xl tracking-tight leading-none bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
             Lumina
           </span>
-          <span className="text-[10px] font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-widest mt-1">
+          <span className="text-[10px] font-bold text-neutral-400 dark:text-neutral-300 uppercase tracking-widest mt-1">
             Daily Wisdom
           </span>
         </div>
       </div>
-      <button onClick={onLogout} className="p-2.5 bg-neutral-50 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-500 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all">
+      <button onClick={onLogout} className="p-2.5 bg-neutral-50 dark:bg-neutral-800 text-neutral-400 dark:text-neutral-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all">
         <LogOut className="w-5 h-5" />
       </button>
     </header>

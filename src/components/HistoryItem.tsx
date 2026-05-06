@@ -99,8 +99,8 @@ export const HistoryItem = memo(function HistoryItem({
       )}
 
       <div onClick={onSelect} className="cursor-pointer">
-        <p className="text-neutral-800 dark:text-neutral-200 font-medium line-clamp-2">"{quote.text}"</p>
-        <p className="text-xs text-neutral-500 dark:text-neutral-400">— {quote.author}</p>
+<p className="text-neutral-800 dark:text-neutral-100 font-medium line-clamp-2">"{quote.text}"</p>
+                         <p className="text-xs text-neutral-500 dark:text-neutral-300">— {quote.author}</p>
       </div>
     </div>
   );
