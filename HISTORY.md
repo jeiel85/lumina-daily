@@ -1,6 +1,15 @@
 # HISTORY.md
 
 ## 2026-05-06
+- 작업: GitHub 릴리즈 버전 범프 및 태그 배포 (v1.3.2)
+- 변경 파일:
+  - package.json: 버전 업데이트 (1.3.1 -> 1.3.2)
+  - android/app/build.gradle: versionCode (21 -> 22), versionName ("1.3.1" -> "1.3.2") 업데이트
+  - CHANGELOG.md: v1.3.2 추가
+  - HISTORY.md: 작업 내역 기록
+- 결과: 진행 중 (CI 모니터링)
+
+## 2026-05-06
 - 작업: 최신 소스 동기화 및 버전 범프 (v1.3.1)
 - 변경 파일:
   - package.json: 버전 업데이트 (1.3.0 -> 1.3.1)
