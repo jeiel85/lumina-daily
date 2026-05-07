@@ -15,6 +15,11 @@
     "done": "完成",
     "now": "现在"
   },
+  "nav": {
+    "home": "首页",
+    "history": "历史",
+    "settings": "设置"
+  },
   "home": {
     "title": "今日名言",
     "ai_explanation": "AI 解说",

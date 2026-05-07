@@ -15,6 +15,11 @@
     "done": "완료",
     "now": "지금"
   },
+  "nav": {
+    "home": "홈",
+    "history": "기록",
+    "settings": "설정"
+  },
   "home": {
     "title": "오늘의 명언",
     "ai_explanation": "해설",

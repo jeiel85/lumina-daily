@@ -15,6 +15,11 @@
     "done": "Done",
     "now": "now"
   },
+  "nav": {
+    "home": "Home",
+    "history": "History",
+    "settings": "Settings"
+  },
   "home": {
     "title": "Today's Quote",
     "ai_explanation": "Explanation",

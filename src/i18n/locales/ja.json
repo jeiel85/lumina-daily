@@ -15,6 +15,11 @@
     "done": "完了",
     "now": "今"
   },
+  "nav": {
+    "home": "ホーム",
+    "history": "履歴",
+    "settings": "設定"
+  },
   "home": {
     "title": "今日の格言",
     "ai_explanation": "AI解説",
