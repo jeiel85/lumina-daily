@@ -13,3 +13,7 @@ build_out.txt
 192.168.*
 test-api.ts
 .claude/
+
+# Local dev / debug artifacts
+tmp_*
+.firebase/

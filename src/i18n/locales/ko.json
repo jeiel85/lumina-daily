@@ -13,7 +13,9 @@
     "error_boundary_retry": "다시 시도",
     "cancel": "취소",
     "done": "완료",
-    "now": "지금"
+    "now": "지금",
+    "hour": "시",
+    "minute": "분"
   },
   "nav": {
     "home": "홈",
@@ -90,7 +92,9 @@
     "referral_code": "나의 리워드 코드",
     "referral_copy": "복사",
     "referral_count": "초대한 친구",
-    "referral_reward": "리워드 적립"
+    "referral_reward": "리워드 적립",
+    "referral_section": "초대 리워드",
+    "copy": "복사"
   },
   "auth": {
     "welcome": "Lumina Daily",
@@ -118,11 +122,6 @@
     "elegant": "우아한",
     "nature": "자연",
     "dark": "다크"
-  },
-  "fontSizes": {
-    "small": "작게",
-    "medium": "보통",
-    "large": "크게"
   },
   "fontSizes": {
     "small": "작게",

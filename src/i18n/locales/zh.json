@@ -13,7 +13,9 @@
     "error_boundary_retry": "重试",
     "cancel": "取消",
     "done": "完成",
-    "now": "现在"
+    "now": "现在",
+    "hour": "时",
+    "minute": "分"
   },
   "nav": {
     "home": "首页",
@@ -84,7 +86,12 @@
     "custom_keyword": "自定义关键词",
     "custom_keyword_desc": "输入特定主题或情境，将为您提供相应的名言",
     "custom_keyword_placeholder": "例如：新的挑战，克服失败...",
-    "keyword_blocked": "此关键词不适当"
+    "keyword_blocked": "此关键词不适当",
+    "referral_title": "邀请奖励",
+    "referral_desc": "与朋友分享应用并赢取奖励！",
+    "referral_section": "邀请奖励",
+    "referral_count": "邀请的朋友: {{count}}",
+    "copy": "复制"
   },
   "auth": {
     "welcome": "Lumina Daily",
@@ -112,11 +119,6 @@
     "elegant": "优雅",
     "nature": "自然",
     "dark": "暗黑"
-  },
-  "fontSizes": {
-    "small": "小",
-    "medium": "中",
-    "large": "大"
   },
   "fontSizes": {
     "small": "小",

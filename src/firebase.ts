@@ -245,7 +245,6 @@ export function handleFirestoreError(error: unknown, operationType: OperationTyp
         providerId: provider.providerId,
         displayName: provider.displayName,
         email: provider.email,
-        model: "gemini-pro",
         photoUrl: provider.photoURL
       })) || []
     },

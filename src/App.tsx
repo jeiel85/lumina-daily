@@ -25,7 +25,7 @@ import './i18n/config';
 import { Capacitor } from '@capacitor/core';
 
 import { Quote, UserSettings } from './types';
-import { THEMES, THEME_SEED_POOLS, BLOCKED_KEYWORDS, CARD_BACKGROUNDS } from './constants';
+import { THEMES, THEME_SEED_POOLS, BLOCKED_KEYWORDS, CARD_BACKGROUNDS, CARD_STYLES, LANGUAGES } from './constants';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { QuoteCard } from './components/QuoteCard';
 import { HistoryItem } from './components/HistoryItem';
@@ -52,7 +52,7 @@ const trackActionForReview = async () => {
 };
 
 // Import icons
-import { Bell, History as HistoryIcon, Home, Settings as SettingsIcon, Sparkles, RefreshCw, ExternalLink, Download, Image as ImageIcon, ChevronRight, Globe, Palette, BookOpen, Type } from 'lucide-react';
+import { Bell, Clock, History as HistoryIcon, Home, Settings as SettingsIcon, Sparkles, RefreshCw, ExternalLink, Download, Image as ImageIcon, ChevronRight, Globe, Palette, BookOpen, Type, Sun, Moon, Monitor, X } from 'lucide-react';
 import { LocalNotifications } from '@capacitor/local-notifications';
 
 export default function App() {
@@ -436,11 +436,11 @@ export default function App() {
         uid: user.uid
       };
 
-setCurrentQuote({ ...newQuoteData, id: 'temp-' + Date.now() } as Quote);
-       setIsGenerating(false);
-       trackEvent('generate_quote', { theme: resolvedTheme, has_custom_keyword: !!settings.customKeyword });
-       hapticMedium();
-       trackActionForReview();
+      setCurrentQuote({ ...newQuoteData, id: 'temp-' + Date.now() } as Quote);
+      setIsGenerating(false);
+      trackEvent('generate_quote', { theme: resolvedTheme, has_custom_keyword: !!settings.customKeyword });
+      hapticMedium();
+      trackActionForReview();
 
       // Save to Firestore & Update usage count
       try {
@@ -508,33 +508,33 @@ setCurrentQuote({ ...newQuoteData, id: 'temp-' + Date.now() } as Quote);
     if (!user) return;
 
     if (updates.notificationTime) {
-       const [h, m] = updates.notificationTime.split(':').map(Number);
-       const local = new Date();
-       local.setHours(h, m, 0, 0);
-       updates.notificationTimeUTC = `${String(local.getUTCHours()).padStart(2,'0')}:${String(local.getUTCMinutes()).padStart(2,'0')}`;
-       
-       // Schedule local notification (native only)
-       if (Capacitor.isNativePlatform()) {
-         try {
-           await LocalNotifications.requestPermissions();
-           await LocalNotifications.cancel({ notifications: [{ id: 1 }] });
-           const [hour, minute] = updates.notificationTime.split(':').map(Number);
-           await LocalNotifications.schedule({
-             notifications: [
-               {
-                 title: t('settings.notification_title') || 'Lumina Daily',
-                 body: t('settings.notification_body') || 'Your daily quote is ready!',
-                 id: 1,
-                 schedule: { on: { hour, minute } },
-                 sound: 'beep.wav',
-                 smallIcon: 'ic_stat_icon_config_sample',
-               }
-             ]
-           });
-         } catch (e) {
-           console.warn('[LocalNotif] Schedule failed:', e);
-         }
-       }
+      const [h, m] = updates.notificationTime.split(':').map(Number);
+      const local = new Date();
+      local.setHours(h, m, 0, 0);
+      updates.notificationTimeUTC = `${String(local.getUTCHours()).padStart(2, '0')}:${String(local.getUTCMinutes()).padStart(2, '0')}`;
+
+      // Schedule local notification (native only)
+      if (Capacitor.isNativePlatform()) {
+        try {
+          await LocalNotifications.requestPermissions();
+          await LocalNotifications.cancel({ notifications: [{ id: 1 }] });
+          const [hour, minute] = updates.notificationTime.split(':').map(Number);
+          await LocalNotifications.schedule({
+            notifications: [
+              {
+                title: t('home.subscribe_title'),
+                body: t('home.subscribe_desc'),
+                id: 1,
+                schedule: { on: { hour, minute } },
+                sound: 'beep.wav',
+                smallIcon: 'ic_stat_icon_config_sample',
+              }
+            ]
+          });
+        } catch (e) {
+          console.warn('[LocalNotif] Schedule failed:', e);
+        }
+      }
     }
 
     setSettings(prev => ({ ...prev, ...updates }));
@@ -571,9 +571,9 @@ setCurrentQuote({ ...newQuoteData, id: 'temp-' + Date.now() } as Quote);
       }
 
       await navigator.share(shareData);
-       trackEvent('share_quote', { has_image: !!quote.imageUrl });
-       hapticLight();
-       trackActionForReview();
+      trackEvent('share_quote', { has_image: !!quote.imageUrl });
+      hapticLight();
+      trackActionForReview();
     } catch (err) {
       if (err instanceof Error && err.name !== 'AbortError') {
         setError(t('share.error'));
@@ -762,7 +762,7 @@ setCurrentQuote({ ...newQuoteData, id: 'temp-' + Date.now() } as Quote);
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-neutral-900 dark:via-neutral-800 dark:to-indigo-900">
+      <div className="flex flex-col items-center justify-center min-h-screen px-6 text-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-neutral-950 dark:via-neutral-900 dark:to-indigo-950">
         <motion.div
           initial={{ scale: 0.5, opacity: 0, rotate: -10 }}
           animate={{ scale: 1, opacity: 1, rotate: 0 }}
@@ -783,7 +783,7 @@ setCurrentQuote({ ...newQuoteData, id: 'temp-' + Date.now() } as Quote);
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.45, duration: 0.5 }}
-          className="max-w-sm text-sm text-neutral-600 dark:text-neutral-100 mb-8"
+          className="max-w-sm text-sm text-neutral-500 dark:text-neutral-400 mb-8"
         >
           {t('auth.desc')}
         </motion.p>
@@ -833,10 +833,10 @@ setCurrentQuote({ ...newQuoteData, id: 'temp-' + Date.now() } as Quote);
       };
       
       return (
-        <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6">
+        <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 dark:from-neutral-950 dark:via-neutral-900 dark:to-indigo-950 p-6">
           <div className="w-full flex justify-between items-center mb-6">
-            <button 
-              onClick={() => { hapticLight(); trackEvent('onboarding_has_account', { step: onboardingStep }); completeOnboarding(); signInWithGoogle(); }} 
+            <button
+              onClick={() => { hapticLight(); trackEvent('onboarding_has_account', { step: onboardingStep }); completeOnboarding(); signInWithGoogle(); }}
               className="text-sm text-indigo-600 hover:text-indigo-800 font-medium px-3 py-1.5 rounded-lg hover:bg-indigo-50 transition-colors"
             >
               {t('onboarding.has_account')}
@@ -870,12 +870,12 @@ setCurrentQuote({ ...newQuoteData, id: 'temp-' + Date.now() } as Quote);
               className="w-full flex flex-col items-center text-center"
             >
               <div className="text-7xl mb-8">{step.emoji}</div>
-              <h2 className="text-2xl font-extrabold text-neutral-900 mb-4">{t(step.titleKey)}</h2>
-              <p className="text-neutral-500 mb-8">{t(step.descKey)}</p>
+              <h2 className="text-2xl font-extrabold text-neutral-900 dark:text-neutral-100 mb-4">{t(step.titleKey)}</h2>
+              <p className="text-neutral-500 dark:text-neutral-400 mb-8">{t(step.descKey)}</p>
               {onboardingStep === 1 && (
                 <div className="flex flex-wrap gap-2 justify-center mb-4">
                   {ONBOARDING_THEME_PREVIEWS.map(id => (
-                    <span key={id} className="px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-full text-sm">{t(`themes.${id}`)}</span>
+                    <span key={id} className="px-3 py-1.5 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 rounded-full text-sm">{t(`themes.${id}`)}</span>
                   ))}
                 </div>
               )}
@@ -889,7 +889,7 @@ setCurrentQuote({ ...newQuoteData, id: 'temp-' + Date.now() } as Quote);
           </AnimatePresence>
           <div className="flex gap-2 mt-6">
             {ONBOARDING_STEPS.map((_, i) => (
-              <div key={i} className={`h-2 rounded-full ${i === onboardingStep ? 'w-6 bg-indigo-600' : 'w-2 bg-neutral-200'}`} />
+              <div key={i} className={`h-2 rounded-full ${i === onboardingStep ? 'w-6 bg-indigo-600' : 'w-2 bg-neutral-200 dark:bg-neutral-700'}`} />
             ))}
           </div>
           {!isLast && (
@@ -902,13 +902,13 @@ setCurrentQuote({ ...newQuoteData, id: 'temp-' + Date.now() } as Quote);
     }
 
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-50 p-6 text-center">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-md w-full bg-white rounded-3xl shadow-xl p-8">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-50 dark:bg-neutral-950 p-6 text-center">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-md w-full bg-white dark:bg-neutral-900 rounded-3xl shadow-xl p-8">
           <div className="w-24 h-24 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-8">
             <Sparkles className="w-12 h-12 text-white" />
           </div>
           <h1 className="text-4xl font-extrabold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-3">{t('auth.welcome')}</h1>
-          <p className="text-neutral-500 mb-10">{t('auth.desc')}</p>
+          <p className="text-neutral-500 dark:text-neutral-400 mb-10">{t('auth.desc')}</p>
           <button onClick={() => { hapticMedium(); signInWithGoogle(); }} className="w-full py-4 px-6 bg-indigo-600 text-white rounded-2xl font-semibold flex items-center justify-center gap-3">
             <img src="https://www.gstatic.com/images/branding/product/1x/gsa_512dp.png" className="w-5 h-5 bg-white rounded-full" alt="Google" />
             {t('auth.google_login')}
@@ -973,11 +973,11 @@ setCurrentQuote({ ...newQuoteData, id: 'temp-' + Date.now() } as Quote);
                         transition={{ duration: 0.5 }}
                         className="w-24 h-24 bg-indigo-50 dark:bg-indigo-900/20 rounded-full flex items-center justify-center mx-auto"
                       >
-                        <BookOpen className="w-12 h-12 text-indigo-300 dark:text-indigo-400" />
+                        <BookOpen className="w-12 h-12 text-indigo-300 dark:text-indigo-700" />
                       </motion.div>
                       <div className="space-y-2">
-<p className="text-lg font-semibold text-neutral-700 dark:text-neutral-200">{t('history.empty_title')}</p>
-                         <p className="text-sm text-neutral-400 dark:text-neutral-300">{t('history.empty_desc')}</p>
+                        <p className="text-lg font-semibold text-neutral-700 dark:text-neutral-300">{t('history.empty_title')}</p>
+                        <p className="text-sm text-neutral-400 dark:text-neutral-500">{t('history.empty_desc')}</p>
                       </div>
                       <motion.button
                         whileTap={{ scale: 0.97 }}
@@ -1004,129 +1004,313 @@ setCurrentQuote({ ...newQuoteData, id: 'temp-' + Date.now() } as Quote);
               )}
 
               {activeTab === 'settings' && (
-                <motion.div key="settings" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-6">
-                  <h2 className="text-2xl font-bold">{t('settings.title')}</h2>
-                  
-                  {/* Notification */}
-                  <div className="bg-white dark:bg-neutral-900 rounded-2xl p-6">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <Bell className="w-5 h-5 text-indigo-600" />
-                        <span>{t('settings.notification')}</span>
+                <motion.div key="settings" initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }} className="space-y-8">
+                  <h2 className="text-2xl font-bold text-neutral-900 dark:text-neutral-100">{t('settings.title')}</h2>
+
+                  {/* ─── 그룹 1: 알림 ─── */}
+                  <section className="space-y-3">
+                    <h3 className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">{t('settings.section_notification')}</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      {/* 구독 상태 카드 */}
+                      <div className="bg-white dark:bg-neutral-900 rounded-3xl border border-neutral-100 dark:border-neutral-800 p-4 flex flex-col gap-3">
+                        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${settings.isSubscribed ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
+                          <Bell className={`w-5 h-5 ${settings.isSubscribed ? 'text-green-600 dark:text-green-400' : 'text-red-500 dark:text-red-400'}`} />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-bold text-neutral-800 dark:text-neutral-200 text-sm leading-tight">{settings.isSubscribed ? t('settings.enabled') : t('settings.disabled')}</p>
+                          <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-1 leading-snug">{settings.isSubscribed ? t('settings.enabled_desc') : t('settings.disabled_desc')}</p>
+                        </div>
+                        {!settings.isSubscribed && (
+                          <button
+                            onClick={handleSubscribe}
+                            className="w-full py-2.5 bg-indigo-600 text-white rounded-2xl text-xs font-bold"
+                          >
+                            {t('settings.turn_on')}
+                          </button>
+                        )}
                       </div>
-                      <button onClick={() => setShowTimePicker(true)} className="text-sm text-neutral-500">{settings.notificationTime}</button>
+                      {/* 알림 시간 카드 */}
+                      <button
+                        onClick={() => {
+                          const [h, m] = settings.notificationTime.split(':').map(Number);
+                          setTempHour(h);
+                          setTempMinute(m);
+                          setShowTimePicker(true);
+                        }}
+                        className="bg-white dark:bg-neutral-900 rounded-3xl border border-neutral-100 dark:border-neutral-800 p-4 flex flex-col gap-3 text-left hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors"
+                      >
+                        <div className="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center">
+                          <Clock className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-bold text-neutral-800 dark:text-neutral-200 text-sm leading-tight">{t('settings.notification_time')}</p>
+                          <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-1 leading-snug">{t('settings.notification_desc')}</p>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-xl font-extrabold text-indigo-600 dark:text-indigo-400 tabular-nums">{settings.notificationTime}</span>
+                          <ChevronRight className="w-4 h-4 text-neutral-300 dark:text-neutral-600" />
+                        </div>
+                      </button>
                     </div>
-                  </div>
+                  </section>
 
-                  {/* Theme */}
-                  <div className="bg-white dark:bg-neutral-900 rounded-2xl p-6">
-                    <div className="flex items-center gap-3 mb-3">
-                      <Sparkles className="w-5 h-5 text-indigo-600" />
-                      <span className="font-bold">{t('settings.section_content')}</span>
+                  {/* Time Picker Modal */}
+                  {showTimePicker && (
+                    <div className="fixed inset-0 z-50 flex items-end" onClick={() => setShowTimePicker(false)}>
+                      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
+                      <div
+                        className="relative w-full bg-white dark:bg-neutral-900 rounded-t-3xl px-6 pt-6 pb-10 space-y-6"
+                        onClick={e => e.stopPropagation()}
+                      >
+                        <div className="w-10 h-1 bg-neutral-200 dark:bg-neutral-700 rounded-full mx-auto" />
+                        <div className="flex items-center justify-between">
+                          <button onClick={() => setShowTimePicker(false)} className="text-sm text-neutral-400 dark:text-neutral-500 font-semibold px-2 py-1">{t('common.cancel')}</button>
+                          <h3 className="text-base font-extrabold text-neutral-900 dark:text-neutral-100">{t('settings.notification_time')}</h3>
+                          <button
+                            onClick={() => {
+                              const time = `${String(tempHour).padStart(2, '0')}:${String(tempMinute).padStart(2, '0')}`;
+                              saveSettings({ notificationTime: time });
+                              setShowTimePicker(false);
+                            }}
+                            className="text-sm text-indigo-600 dark:text-indigo-400 font-bold px-2 py-1"
+                          >{t('common.done')}</button>
+                        </div>
+                        <div className="flex items-center justify-center gap-3 py-2">
+                          <div className="flex flex-col items-center gap-3">
+                            <button onClick={() => setTempHour(h => (h + 1) % 24)} className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-2xl font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">▲</button>
+                            <span className="text-6xl font-black text-neutral-900 dark:text-neutral-100 w-28 text-center tabular-nums">{String(tempHour).padStart(2, '0')}</span>
+                            <button onClick={() => setTempHour(h => (h - 1 + 24) % 24)} className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-2xl font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">▼</button>
+                            <p className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">{t('common.hour')}</p>
+                          </div>
+                          <span className="text-5xl font-black text-neutral-300 dark:text-neutral-600 mb-6">:</span>
+                          <div className="flex flex-col items-center gap-3">
+                            <button onClick={() => setTempMinute(m => (m + 5) % 60)} className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-2xl font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">▲</button>
+                            <span className="text-6xl font-black text-neutral-900 dark:text-neutral-100 w-28 text-center tabular-nums">{String(tempMinute).padStart(2, '0')}</span>
+                            <button onClick={() => setTempMinute(m => (m - 5 + 60) % 60)} className="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600 dark:text-indigo-400 text-2xl font-bold hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors">▼</button>
+                            <p className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">{t('common.minute')}</p>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-4 gap-2">
+                          {['07:00', '08:00', '09:00', '12:00', '18:00', '20:00', '21:00', '22:00'].map(t2 => (
+                            <button
+                              key={t2}
+                              onClick={() => { const [h, m] = t2.split(':').map(Number); setTempHour(h); setTempMinute(m); }}
+                              className={`py-2 rounded-xl text-sm font-bold transition-colors ${tempHour === parseInt(t2) && tempMinute === 0 ? 'bg-indigo-600 text-white' : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30'}`}
+                            >{t2}</button>
+                          ))}
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex flex-wrap gap-2">
-                      {THEMES.filter(t => t.id !== 'random').map(theme => (
-                        <button
-                          key={theme.id}
-                          onClick={() => saveSettings({ preferredThemes: [theme.id] })}
-                          className={`px-3 py-1.5 rounded-full text-sm ${settings.preferredThemes.includes(theme.id) ? 'bg-indigo-600 text-white' : 'bg-neutral-100 dark:bg-neutral-800'}`}
-                        >
-                          {t(theme.labelKey)}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  )}
 
-                  {/* Card Style */}
-                  <div className="bg-white dark:bg-neutral-900 rounded-2xl p-6">
-                    <div className="flex items-center gap-3 mb-3">
-                      <Palette className="w-5 h-5 text-indigo-600" />
-                      <span className="font-bold">{t('settings.card_style')}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {['classic', 'modern', 'minimal', 'bold', 'elegant', 'nature', 'dark'].map(style => (
-                        <button
-                          key={style}
-                          onClick={() => saveSettings({ preferredCardStyle: style })}
-                          className={`px-3 py-1.5 rounded-full text-sm ${settings.preferredCardStyle === style ? 'bg-indigo-600 text-white' : 'bg-neutral-100 dark:bg-neutral-800'}`}
-                        >
-                          {t(`cardStyles.${style}`)}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  {/* ─── 그룹 2: 테마 ─── */}
+                  <section className="space-y-3">
+                    <h3 className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">{t('settings.section_theme')}</h3>
 
-                  {/* Font Size */}
-                  <div className="bg-white dark:bg-neutral-900 rounded-2xl p-6">
-                    <div className="flex items-center gap-3 mb-3">
-                      <Type className="w-5 h-5 text-indigo-600" />
-                      <span className="font-bold">{t('settings.font_size')}</span>
+                    {/* 통합 테마 선택 (다중 선택) */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between px-1">
+                        <p className="text-sm font-semibold text-neutral-600 dark:text-neutral-300">{t('preferredThemes.title')}</p>
+                        <span className="text-[10px] font-bold text-indigo-500 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-0.5 rounded-full">{t('preferredThemes.multi_hint')}</span>
+                      </div>
+                      <p className="text-xs text-neutral-400 dark:text-neutral-500 px-1">{t('preferredThemes.description')}</p>
+                      <div className="grid grid-cols-3 gap-2">
+                        {THEMES.map((theme) => {
+                          const isSelected = (settings.preferredThemes || []).includes(theme.id);
+                          return (
+                            <button
+                              key={theme.id}
+                              onClick={() => {
+                                const current = settings.preferredThemes || ['motivation'];
+                                const next = isSelected
+                                  ? current.filter(id => id !== theme.id)
+                                  : [...current, theme.id];
+                                if (next.length > 0) saveSettings({ preferredThemes: next });
+                              }}
+                              className={`py-3 px-2 rounded-2xl border transition-all flex flex-col items-center gap-1.5 ${
+                                isSelected
+                                  ? 'bg-indigo-600 border-indigo-600 text-white shadow-md'
+                                  : 'bg-white dark:bg-neutral-900 border-neutral-100 dark:border-neutral-800 text-neutral-600 dark:text-neutral-300 hover:border-indigo-200'
+                              }`}
+                            >
+                              <span className="text-xl">{theme.icon}</span>
+                              <span className="font-bold text-[10px]">{t(theme.labelKey)}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
                     </div>
-                    <div className="flex gap-2">
-                      {(['small', 'medium', 'large'] as const).map(size => (
-                        <button
-                          key={size}
-                          onClick={() => saveSettings({ fontSize: size })}
-                          className={`flex-1 py-2 px-3 rounded-xl text-sm font-bold ${settings.fontSize === size ? 'bg-indigo-600 text-white' : 'bg-neutral-100 dark:bg-neutral-800'}`}
-                        >
-                          {t(`fontSizes.${size}`)}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
 
-                  {/* Referral Code */}
-                  <div className="bg-white dark:bg-neutral-900 rounded-2xl p-6">
-                    <div className="flex items-center gap-3 mb-3">
-                      <span className="font-bold text-indigo-600">🎁</span>
-                      <span className="font-bold">{t('settings.referral_title', '초대 리워드')}</span>
-                    </div>
-                    <p className="text-sm text-neutral-500 dark:text-neutral-400 mb-3">
-                      {t('settings.referral_desc', '친구에게 앱을 공유하고 리워드를 받으세요!')}
-                    </p>
-                    {settings.referralCode && (
-                      <div className="flex items-center gap-2 mb-3">
-                        <code className="flex-1 bg-neutral-100 dark:bg-neutral-800 px-3 py-2 rounded-lg text-sm font-mono">
-                          {settings.referralCode}
-                        </code>
-                        <button
-                          onClick={() => {
-                            navigator.clipboard.writeText(`https://jeiel85.github.io/lumina-daily/?ref=${settings.referralCode}`);
-                            hapticLight();
+                    {/* 커스텀 키워드 */}
+                    <div className="space-y-2 pt-1">
+                      <p className="text-sm font-semibold text-neutral-600 dark:text-neutral-300 px-1">{t('settings.custom_keyword')}</p>
+                      <p className="text-xs text-neutral-400 dark:text-neutral-500 px-1">{t('settings.custom_keyword_desc')}</p>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          maxLength={30}
+                          value={settings.customKeyword || ''}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            const isBlocked = BLOCKED_KEYWORDS.some(b => val.toLowerCase().includes(b));
+                            if (!isBlocked) saveSettings({ customKeyword: val });
                           }}
-                          className="px-3 py-2 bg-indigo-600 text-white rounded-lg text-sm font-bold hover:bg-indigo-700"
-                        >
-                          {t('settings.copy', '복사')}
+                          placeholder={t('settings.custom_keyword_placeholder')}
+                          className="w-full bg-white dark:bg-neutral-900 border border-neutral-100 dark:border-neutral-800 rounded-2xl px-4 py-3 text-sm text-neutral-800 dark:text-neutral-200 placeholder-neutral-400 dark:placeholder-neutral-600 focus:outline-none focus:border-indigo-400"
+                        />
+                        {settings.customKeyword && (
+                          <button
+                            onClick={() => saveSettings({ customKeyword: '' })}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
+                          >✕</button>
+                        )}
+                      </div>
+                    </div>
+                  </section>
+
+                  {/* ─── 그룹 3: 외관 ─── */}
+                  <section className="space-y-3">
+                    <h3 className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">{t('settings.section_appearance')}</h3>
+                    {/* 비주얼 테마 */}
+                    <div className="space-y-2">
+                      <p className="text-sm font-semibold text-neutral-600 dark:text-neutral-300 px-1">{t('settings.visual_theme')}</p>
+                      <div className="bg-white dark:bg-neutral-900 p-2 rounded-3xl border border-neutral-100 dark:border-neutral-800 grid grid-cols-4 gap-1">
+                        <button onClick={() => saveSettings({ darkMode: 'light' })} className={`flex flex-col items-center gap-2 py-4 rounded-2xl transition-all ${settings.darkMode === 'light' ? 'bg-indigo-600 text-white shadow-lg' : 'text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}>
+                          <Sun className="w-5 h-5" />
+                          <span className="text-[10px] font-bold leading-tight text-center px-1">{t('settings.light_mode')}</span>
+                        </button>
+                        <button onClick={() => saveSettings({ darkMode: 'dark' })} className={`flex flex-col items-center gap-2 py-4 rounded-2xl transition-all ${settings.darkMode === 'dark' ? 'bg-indigo-600 text-white shadow-lg' : 'text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}>
+                          <Moon className="w-5 h-5" />
+                          <span className="text-[10px] font-bold leading-tight text-center px-1">{t('settings.dark_mode')}</span>
+                        </button>
+                        <button onClick={() => saveSettings({ darkMode: 'system' })} className={`flex flex-col items-center gap-2 py-4 rounded-2xl transition-all ${settings.darkMode === 'system' ? 'bg-indigo-600 text-white shadow-lg' : 'text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}>
+                          <Monitor className="w-5 h-5" />
+                          <span className="text-[10px] font-bold leading-tight text-center px-1">{t('settings.system_mode')}</span>
+                        </button>
+                        <button onClick={() => saveSettings({ darkMode: 'material' })} className={`flex flex-col items-center gap-2 py-4 rounded-2xl transition-all ${settings.darkMode === 'material' ? 'bg-indigo-600 text-white shadow-lg' : 'text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}>
+                          <Palette className="w-5 h-5" />
+                          <span className="text-[10px] font-bold leading-tight text-center px-1">{t('settings.material_mode')}</span>
                         </button>
                       </div>
-                    )}
-                    <p className="text-xs text-neutral-400">
-                      {t('settings.referral_count', `초대 횟수: ${settings.referralCount || 0}`)}
-                    </p>
-                  </div>
-
-                  {/* Language */}
-                  <div className="bg-white dark:bg-neutral-900 rounded-2xl p-6">
-                    <div className="flex items-center gap-3 mb-3">
-                      <Globe className="w-5 h-5 text-indigo-600" />
-                      <span className="font-bold">{t('settings.section_app')}</span>
                     </div>
-                    <div className="flex gap-2">
-                      {settings.language && (
-                        <button
-                          onClick={() => {
-                            const langs = ['ko', 'en', 'ja', 'zh'];
-                            const currentIdx = langs.indexOf(settings.language);
-                            const nextLang = langs[(currentIdx + 1) % langs.length];
-                            saveSettings({ language: nextLang });
-                          }}
-                          className="px-3 py-1.5 rounded-full text-sm bg-neutral-100 dark:bg-neutral-800"
-                        >
-                          {settings.language.toUpperCase()}
-                        </button>
+                    {/* 카드 스타일 */}
+                    <div className="space-y-2">
+                      <p className="text-sm font-semibold text-neutral-600 dark:text-neutral-300 px-1">{t('cardStyles.title')}</p>
+                      <div className="bg-white dark:bg-neutral-900 p-2 rounded-3xl border border-neutral-100 dark:border-neutral-800 grid grid-cols-4 gap-1">
+                        {CARD_STYLES.map((style) => (
+                          <button
+                            key={style.id}
+                            onClick={() => saveSettings({ preferredCardStyle: style.id })}
+                            className={`py-3 px-1 rounded-2xl transition-all text-[10px] font-bold leading-tight text-center ${settings.preferredCardStyle === style.id ? 'bg-indigo-600 text-white shadow-lg' : 'text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}
+                          >
+                            {t(style.labelKey)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    {/* 글자 크기 */}
+                    <div className="space-y-2">
+                      <p className="text-sm font-semibold text-neutral-600 dark:text-neutral-300 px-1">{t('settings.font_size')}</p>
+                      <div className="bg-white dark:bg-neutral-900 p-2 rounded-3xl border border-neutral-100 dark:border-neutral-800 grid grid-cols-3 gap-1">
+                        {(['small', 'medium', 'large'] as const).map(size => (
+                          <button
+                            key={size}
+                            onClick={() => saveSettings({ fontSize: size })}
+                            className={`py-3 rounded-2xl flex flex-col items-center gap-1 transition-all ${settings.fontSize === size ? 'bg-indigo-600 text-white shadow-lg' : 'text-neutral-500 hover:bg-neutral-50 dark:hover:bg-neutral-800'}`}
+                          >
+                            <Type className={`${size === 'small' ? 'w-3.5 h-3.5' : size === 'large' ? 'w-6 h-6' : 'w-5 h-5'}`} />
+                            <span className="text-[10px] font-bold">{t(`fontSizes.${size}`)}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </section>
+
+                  {/* ─── 그룹 4: 앱 설정 ─── */}
+                  <section className="space-y-3">
+                    <h3 className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">{t('settings.section_app')}</h3>
+                    <div className="bg-white dark:bg-neutral-900 p-5 rounded-3xl border border-neutral-100 dark:border-neutral-800">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 bg-purple-50 dark:bg-purple-900/30 rounded-2xl flex items-center justify-center">
+                          <Globe className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <div>
+                          <p className="text-xs text-neutral-400 dark:text-neutral-500">{t('settings.language')}</p>
+                          <p className="font-bold text-neutral-800 dark:text-neutral-200 text-sm">{LANGUAGES.find(l => l.id === settings.language)?.label}</p>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {LANGUAGES.map((lang) => (
+                          <button
+                            key={lang.id}
+                            onClick={() => saveSettings({ language: lang.id })}
+                            className={`py-2 px-4 rounded-xl text-sm font-medium border transition-colors ${
+                              settings.language === lang.id
+                                ? 'bg-indigo-600 border-indigo-600 text-white'
+                                : 'bg-white dark:bg-neutral-800 border-neutral-100 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 hover:border-indigo-200'
+                            }`}
+                          >
+                            {lang.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </section>
+
+                  {/* ─── 그룹 5: 추천 코드 ─── */}
+                  <section className="space-y-3">
+                    <h3 className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">{t('settings.referral_section', '초대 리워드')}</h3>
+                    <div className="bg-white dark:bg-neutral-900 p-5 rounded-3xl border border-neutral-100 dark:border-neutral-800">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-10 h-10 bg-amber-50 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center">
+                          <span className="text-xl">🎁</span>
+                        </div>
+                        <div>
+                          <p className="font-bold text-neutral-800 dark:text-neutral-200 text-sm">{t('settings.referral_title', '초대 리워드')}</p>
+                          <p className="text-xs text-neutral-400 dark:text-neutral-500 mt-0.5">{t('settings.referral_desc', '친구에게 앱을 공유하고 리워드를 받으세요!')}</p>
+                        </div>
+                      </div>
+                      {settings.referralCode && (
+                        <div className="flex items-center gap-2 mb-3">
+                          <code className="flex-1 bg-neutral-100 dark:bg-neutral-800 px-3 py-2 rounded-xl text-sm font-mono text-neutral-800 dark:text-neutral-200">
+                            {settings.referralCode}
+                          </code>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(`https://jeiel85.github.io/lumina-daily/?ref=${settings.referralCode}`);
+                              hapticLight();
+                            }}
+                            className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700"
+                          >
+                            {t('settings.copy', '복사')}
+                          </button>
+                        </div>
                       )}
+                      <p className="text-xs text-neutral-400 dark:text-neutral-500">
+                        {t('settings.referral_count', `초대 횟수: ${settings.referralCount || 0}`)}
+                      </p>
                     </div>
-                  </div>
+                  </section>
+
+                  {/* ─── 그룹 6: 지원 ─── */}
+                  <section className="space-y-3 pb-4">
+                    <h3 className="text-xs font-bold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">{t('settings.section_support')}</h3>
+                    <button
+                      onClick={async () => {
+                        const url = 'https://ko-fi.com/jeiel85';
+                        try {
+                          const { Browser } = await import('@capacitor/browser');
+                          await Browser.open({ url });
+                        } catch {
+                          window.open(url, '_blank');
+                        }
+                      }}
+                      className="w-full bg-gradient-to-r from-amber-400 to-orange-400 text-white p-5 rounded-3xl flex items-center justify-center gap-3 font-bold text-base shadow-lg shadow-orange-200 dark:shadow-none hover:from-amber-500 hover:to-orange-500 transition-all active:scale-95"
+                    >
+                      <span className="text-2xl">☕</span>
+                      {t('settings.buy_coffee')}
+                    </button>
+                  </section>
                 </motion.div>
               )}
             </AnimatePresence>

@@ -13,7 +13,9 @@
     "error_boundary_retry": "Retry",
     "cancel": "Cancel",
     "done": "Done",
-    "now": "now"
+    "now": "now",
+    "hour": "Hour",
+    "minute": "Min"
   },
   "nav": {
     "home": "Home",
@@ -84,7 +86,12 @@
     "custom_keyword": "Custom Keyword",
     "custom_keyword_desc": "Enter a specific topic or situation to get a quote tailored just for you",
     "custom_keyword_placeholder": "e.g. new challenge, overcoming failure...",
-    "keyword_blocked": "This keyword is not appropriate"
+    "keyword_blocked": "This keyword is not appropriate",
+    "referral_title": "Invite Rewards",
+    "referral_desc": "Share the app with friends and earn rewards!",
+    "referral_section": "Invite Rewards",
+    "referral_count": "Friends invited: {{count}}",
+    "copy": "Copy"
   },
   "auth": {
     "welcome": "Lumina Daily",
@@ -112,11 +119,6 @@
     "elegant": "Elegant",
     "nature": "Nature",
     "dark": "Dark"
-  },
-  "fontSizes": {
-    "small": "Small",
-    "medium": "Medium",
-    "large": "Large"
   },
   "fontSizes": {
     "small": "Small",

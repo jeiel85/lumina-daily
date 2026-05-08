@@ -13,7 +13,9 @@
     "error_boundary_retry": "再試行",
     "cancel": "キャンセル",
     "done": "完了",
-    "now": "今"
+    "now": "今",
+    "hour": "時",
+    "minute": "分"
   },
   "nav": {
     "home": "ホーム",
@@ -84,7 +86,12 @@
     "custom_keyword": "カスタムキーワード",
     "custom_keyword_desc": "特定のテーマや状況を入力すると、それに合った格言をお届けします",
     "custom_keyword_placeholder": "例: 新しい挑戦、失敗を乗り越える...",
-    "keyword_blocked": "このキーワードは適切ではありません"
+    "keyword_blocked": "このキーワードは適切ではありません",
+    "referral_title": "招待リワード",
+    "referral_desc": "アプリを友達と共有してリワードをゲット！",
+    "referral_section": "招待リワード",
+    "referral_count": "招待した友達: {{count}}",
+    "copy": "コピー"
   },
   "auth": {
     "welcome": "Lumina Daily",
@@ -112,11 +119,6 @@
     "elegant": "エレガント",
     "nature": "ネイチャー",
     "dark": "ダーク"
-  },
-  "fontSizes": {
-    "small": "小",
-    "medium": "中",
-    "large": "大"
   },
   "fontSizes": {
     "small": "小",
