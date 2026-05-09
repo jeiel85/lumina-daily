@@ -156,8 +156,8 @@ export const signInWithGoogle = async () => {
             const msg = 'Google 로그인 설정 오류 (Error 10)\n\n'
               + 'Firebase Console → 프로젝트 설정 → Android 앱에\n'
               + '아래 지문이 등록되어 있는지 확인해주세요.\n\n'
-              + 'SHA-1:   76:D1:EF:4A:8D:99:78:32:7C:F5:2A:6E:DE:F4:B7:A9:26:73:79:E4\n'
-              + 'SHA-256: F8:CC:71:25:D1:25:03:1F:C7:B4:CE:18:69:6A:04:67:A7:78:B7:AF:5C:D6:68:AA:03:10:D6:84:91:E1:16:6B';
+              + 'SHA-1:   39:64:39:BF:65:1D:ED:F4:CC:4C:B9:82:58:1A:29:52:CC:AF:1D:9F\n'
+              + 'SHA-256: 94:69:60:11:A3:72:2A:1D:12:A7:5F:2E:C9:FA:C7:AD:94:F5:53:26:3D:18:81:71:B6:98:6E:0E:57:E8:40:C4';
             console.error('[Auth] SHA 지문 미등록 의심:', msg);
             alert(msg);
             throw legacyError;
