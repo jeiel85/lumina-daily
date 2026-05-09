@@ -17,3 +17,9 @@ test-api.ts
 # Local dev / debug artifacts
 tmp_*
 .firebase/
+.verify_*/
+
+# Keystore / secrets (절대 커밋 금지)
+*.jks
+*.keystore
+.temp/

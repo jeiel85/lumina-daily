@@ -30,6 +30,14 @@
           }
         },
         {
+          "client_id": "136746254242-rcsufolbh8ha93445ldh0udqap292vtq.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.jeiel85.luminadaily",
+            "certificate_hash": "396439bf651dedf4cc4cb982581a2952ccaf1d9f"
+          }
+        },
+        {
           "client_id": "136746254242-28gd5pkpj6kj56p5d6a0egdve91vf4do.apps.googleusercontent.com",
           "client_type": 3
         }
