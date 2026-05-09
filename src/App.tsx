@@ -31,7 +31,7 @@ import { QuoteCard } from './components/QuoteCard';
 import { HistoryItem } from './components/HistoryItem';
 import { HistorySkeleton } from './components/HistorySkeleton';
 import { Header } from './components/Header';
-import { hapticLight, hapticMedium } from './utils/haptics';
+import { hapticLight, hapticMedium, setHapticEnabled } from './utils/haptics';
 
 // In-App Review helper
 let actionCount = parseInt(localStorage.getItem('actionCount') || '0', 10);
@@ -74,6 +74,7 @@ export default function App() {
     language: 'ko',
     darkMode: 'system',
     fontSize: 'medium',
+    hapticEnabled: true,
     role: 'client'
   });
   const [showOnboarding, setShowOnboarding] = useState(() => localStorage.getItem('hasSeenOnboarding') !== 'true');
@@ -160,6 +161,7 @@ export default function App() {
               language: data.language || i18n.language || 'ko',
               darkMode: data.darkMode || 'system',
               fontSize: data.fontSize || 'medium',
+              hapticEnabled: data.hapticEnabled ?? true,
               isSubscribed: data.isSubscribed || false,
               role: data.role || 'client',
               updatedAt: data.updatedAt,
@@ -295,6 +297,11 @@ export default function App() {
     html.style.fontSize = settings.fontSize === 'small' ? '14px' : 
                          settings.fontSize === 'large' ? '18px' : '16px';
   }, [settings.fontSize]);
+
+  // 햅틱 설정 → localStorage 동기화 (utils/haptics 가 즉시 읽음)
+  useEffect(() => {
+    setHapticEnabled(settings.hapticEnabled !== false);
+  }, [settings.hapticEnabled]);
 
   // Tab change with haptic feedback
   const handleTabChange = (tab: 'home' | 'history' | 'settings') => {
@@ -1222,6 +1229,31 @@ export default function App() {
                             <span className="text-[10px] font-bold">{t(`fontSizes.${size}`)}</span>
                           </button>
                         ))}
+                      </div>
+                    </div>
+                    {/* 햅틱 피드백 ON/OFF */}
+                    <div className="space-y-2">
+                      <p className="text-sm font-semibold text-neutral-600 dark:text-neutral-300 px-1">{t('settings.haptic')}</p>
+                      <div className="bg-white dark:bg-neutral-900 p-4 rounded-3xl border border-neutral-100 dark:border-neutral-800 flex items-center justify-between">
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium text-neutral-800 dark:text-neutral-200">{t('settings.haptic_label')}</span>
+                          <span className="text-xs text-neutral-400 dark:text-neutral-500 mt-0.5">{t('settings.haptic_desc')}</span>
+                        </div>
+                        <button
+                          onClick={() => {
+                            const next = !(settings.hapticEnabled !== false);
+                            // 먼저 prefs 동기화: OFF 로 가기 직전엔 마지막 햅틱 한 번 (UX 피드백)
+                            if (!next) hapticLight();
+                            saveSettings({ hapticEnabled: next });
+                          }}
+                          role="switch"
+                          aria-checked={settings.hapticEnabled !== false}
+                          className={`relative w-12 h-7 rounded-full transition-colors ${settings.hapticEnabled !== false ? 'bg-indigo-600' : 'bg-neutral-300 dark:bg-neutral-700'}`}
+                        >
+                          <span
+                            className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full shadow transition-transform ${settings.hapticEnabled !== false ? 'translate-x-5' : 'translate-x-0'}`}
+                          />
+                        </button>
                       </div>
                     </div>
                   </section>

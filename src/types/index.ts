@@ -21,6 +21,7 @@ export interface UserSettings {
   language: string;
   darkMode: 'light' | 'dark' | 'system' | 'material';
   fontSize?: 'small' | 'medium' | 'large';
+  hapticEnabled?: boolean;
   fcmToken?: string;
   role: string;
   updatedAt?: any;
