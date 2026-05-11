@@ -33,10 +33,14 @@ var __importStar = (this && this.__importStar) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.sendDailyNotifications = void 0;
+exports.generateQuote = exports.sendDailyNotifications = void 0;
 const admin = __importStar(require("firebase-admin"));
 const scheduler_1 = require("firebase-functions/v2/scheduler");
+const https_1 = require("firebase-functions/v2/https");
 const generative_ai_1 = require("@google/generative-ai");
+// 키워드 차단 목록 (클라이언트 측과 동일하게 유지)
+const BLOCKED_KEYWORDS = ['욕설', '음란', '폭력', 'sex', 'fuck', 'shit', 'porn', 'kill'];
+const DAILY_QUOTE_LIMIT = 10;
 admin.initializeApp();
 const db = admin.firestore();
 // ─── 상수 ────────────────────────────────────────────────────────────────────
@@ -66,8 +70,8 @@ const FALLBACK_BODIES = {
 const LANG_NAMES = {
     ko: '한국어', en: 'English', ja: '日本語', zh: '中文',
 };
-// ─── Gemini 명언 생성 ─────────────────────────────────────────────────────────
-async function generateQuote(preferredTheme, customKeyword, language, geminiApiKey) {
+// ─── Gemini 명언 생성 (내부 헬퍼) ────────────────────────────────────────────
+async function generateQuoteContent(preferredTheme, customKeyword, language, geminiApiKey) {
     var _a, _b;
     try {
         const genAI = new generative_ai_1.GoogleGenerativeAI(geminiApiKey);
@@ -129,7 +133,7 @@ exports.sendDailyNotifications = (0, scheduler_1.onSchedule)({
         const resolvedPreferredTheme = preferredTheme || (preferredThemes === null || preferredThemes === void 0 ? void 0 : preferredThemes[0]) || 'life';
         const lang = (language in NOTIF_TITLES) ? language : 'ko';
         const quote = geminiApiKey
-            ? await generateQuote(resolvedPreferredTheme, customKeyword, lang, geminiApiKey)
+            ? await generateQuoteContent(resolvedPreferredTheme, customKeyword, lang, geminiApiKey)
             : null;
         const title = NOTIF_TITLES[lang];
         const body = quote
@@ -175,5 +179,72 @@ exports.sendDailyNotifications = (0, scheduler_1.onSchedule)({
             }
         }
     }));
+});
+exports.generateQuote = (0, https_1.onCall)({
+    secrets: ['GEMINI_API_KEY'],
+    // 한국 사용자 latency 줄이기: 가까운 region 사용. 미배포 region 이면 us-central1 fallback
+    region: 'asia-northeast3',
+}, async (request) => {
+    var _a, _b;
+    // 1) 인증 검증 — 비로그인 거부
+    if (!request.auth) {
+        throw new https_1.HttpsError('unauthenticated', 'Login required to generate a quote.');
+    }
+    const uid = request.auth.uid;
+    const { preferredThemes = ['motivation'], customKeyword = '', language = 'ko' } = (_a = request.data) !== null && _a !== void 0 ? _a : {};
+    // 2) 키워드 차단
+    if (customKeyword) {
+        const lower = customKeyword.toLowerCase();
+        if (BLOCKED_KEYWORDS.some((b) => lower.includes(b))) {
+            throw new https_1.HttpsError('invalid-argument', 'Keyword contains blocked term.');
+        }
+    }
+    // 3) 일일 한도 체크 (atomic 트랜잭션 — 클라이언트 우회 불가)
+    const today = new Date().toISOString().split('T')[0];
+    const usageRef = db.doc(`users/${uid}/usage/${today}`);
+    const newCount = await db.runTransaction(async (tx) => {
+        var _a, _b;
+        const snap = await tx.get(usageRef);
+        const cur = snap.exists ? ((_b = (_a = snap.data()) === null || _a === void 0 ? void 0 : _a.count) !== null && _b !== void 0 ? _b : 0) : 0;
+        if (cur >= DAILY_QUOTE_LIMIT) {
+            throw new https_1.HttpsError('resource-exhausted', `Daily limit reached (${cur}/${DAILY_QUOTE_LIMIT}). Try again tomorrow.`);
+        }
+        tx.set(usageRef, { count: cur + 1 }, { merge: true });
+        return cur + 1;
+    });
+    // 4) 테마 resolution (클라이언트와 동일 로직 — 단 ALL_THEMES 는 함수 측 정의 사용)
+    const ALL_THEMES = Object.keys(THEME_NAMES);
+    const filtered = preferredThemes.filter((id) => id !== 'random');
+    const includesRandom = preferredThemes.includes('random');
+    const pool = includesRandom || filtered.length === 0 ? ALL_THEMES : filtered;
+    const resolvedTheme = pool[Math.floor(Math.random() * pool.length)];
+    // 5) Gemini 호출
+    const apiKey = (_b = process.env.GEMINI_API_KEY) !== null && _b !== void 0 ? _b : '';
+    if (!apiKey) {
+        throw new https_1.HttpsError('internal', 'Server is misconfigured (missing API key).');
+    }
+    const lang = language in LANG_NAMES ? language : 'ko';
+    const quote = await generateQuoteContent(resolvedTheme, customKeyword, lang, apiKey);
+    if (!quote) {
+        throw new https_1.HttpsError('internal', 'Quote generation failed. Please try again.');
+    }
+    // 6) Firestore history 에 저장
+    const docRef = await db.collection(`users/${uid}/history`).add({
+        text: quote.text,
+        author: quote.author,
+        explanation: quote.explanation,
+        theme: quote.resolvedTheme,
+        uid,
+        createdAt: admin.firestore.FieldValue.serverTimestamp(),
+        source: 'manual',
+    });
+    return {
+        id: docRef.id,
+        text: quote.text,
+        author: quote.author,
+        explanation: quote.explanation,
+        theme: quote.resolvedTheme,
+        usageCount: newCount,
+    };
 });
 //# sourceMappingURL=index.js.map

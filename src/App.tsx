@@ -4,12 +4,11 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { motion, AnimatePresence } from 'motion/react';
 import {
   auth,
   db,
-  localConfig,
+  functions,
   signInWithGoogle,
   logout,
   requestNotificationPermission,
@@ -20,6 +19,7 @@ import {
 } from './firebase';
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { doc, getDoc, setDoc, collection, query, orderBy, limit, onSnapshot, addDoc, serverTimestamp, Timestamp, getDocFromServer } from 'firebase/firestore';
+import { httpsCallable } from 'firebase/functions';
 import { useTranslation } from 'react-i18next';
 import './i18n/config';
 import { Capacitor } from '@capacitor/core';
@@ -364,109 +364,64 @@ export default function App() {
     };
   }, []);
 
-  // Quote Generation
+  // Quote Generation — Cloud Functions 프록시 호출 (서버측에서 Gemini 호출, 클라이언트에는 키 없음)
   const generateQuote = async (manualRetry = false) => {
     if (!user) return;
     if (manualRetry) setError(null);
     setIsGenerating(true);
 
-    const apiKey = (localConfig.geminiApiKey || import.meta.env.VITE_GEMINI_API_KEY) as string;
-    if (!apiKey || apiKey === 'undefined') {
-      setError(t('common.error_api_key_missing'));
-      setIsGenerating(false);
-      return;
-    }
-
-    // Daily usage limit check (max 10 per day)
-    try {
-      const today = new Date().toISOString().split('T')[0];
-      const usageRef = doc(db, 'users', user.uid, 'usage', today);
-      const usageSnap = await getDoc(usageRef);
-      const currentCount = usageSnap.exists() ? (usageSnap.data()?.count || 0) : 0;
-      
-      if (currentCount >= 10) {
-        setError(`하루 최대 10회까지 생성 가능합니다. (${currentCount}/10). 내일 다시 시도해주세요.`);
+    // 클라이언트 측 키워드 사전 차단 (서버에서도 다시 검증함 — 이건 UX 즉시 피드백용)
+    if (settings.customKeyword) {
+      const kw = settings.customKeyword.toLowerCase();
+      if (BLOCKED_KEYWORDS.some(b => kw.includes(b))) {
+        alert(t('settings.keyword_blocked'));
         setIsGenerating(false);
         return;
       }
-    } catch (usageError) {
-      console.error('[Usage Check] Failed to check daily limit:', usageError);
-      // Continue anyway - don't block on usage check failure
     }
 
     try {
-      const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ 
-        model: "gemini-2.5-flash",
-        systemInstruction: `당신은 세계 최고의 동기부여 전문가이자 작가입니다. 사용자가 선택한 테마에 맞춰 깊은 통찰력을 담은 명언과 그에 대한 따뜻한 해설을 제공하세요. 모든 응답은 반드시 '${i18n.language}' 언어로 작성해야 합니다.`,
-      });
-      
-      // Keyword blocking
-      if (settings.customKeyword) {
-        const kw = settings.customKeyword.toLowerCase();
-        if (BLOCKED_KEYWORDS.some(b => kw.includes(b))) {
-          alert(t('settings.keyword_blocked'));
-          setIsGenerating(false);
-          return;
-        }
-      }
+      const callable = httpsCallable<
+        { preferredThemes: string[]; customKeyword: string; language: string },
+        { id: string; text: string; author: string; explanation: string; theme: string; usageCount: number }
+      >(functions, 'generateQuote');
 
-      // Theme resolution
-      const selectedThemes = (settings.preferredThemes || ['motivation']).filter(id => id !== 'random');
-      const pool = (settings.preferredThemes || []).includes('random') || selectedThemes.length === 0
-        ? THEMES.filter(th => th.id !== 'random').map(th => th.id)
-        : selectedThemes;
-      const resolvedTheme = pool[Math.floor(Math.random() * pool.length)];
-
-      // Prompt
-      let promptThemePart: string;
-      if (settings.customKeyword?.trim()) {
-        promptThemePart = `키워드: "${settings.customKeyword.trim()}"`;
-      } else {
-        const themeLabel = THEMES.find(th => th.id === resolvedTheme)?.labelKey || 'themes.motivation';
-        promptThemePart = `테마: ${t(themeLabel)}`;
-      }
-      const prompt = `${promptThemePart}. 다음 JSON 형식으로 응답하세요: { "text": "명언 내용", "author": "저자 이름", "explanation": "해설 내용" }`;
-
-      const result = await model.generateContent({
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: "application/json" }
+      const result = await callable({
+        preferredThemes: settings.preferredThemes || ['motivation'],
+        customKeyword: settings.customKeyword || '',
+        language: i18n.language || 'ko',
       });
 
-      const response = await result.response;
-      const data = JSON.parse(response.text());
-
-      const newQuoteData: Omit<Quote, 'id'> = {
-        ...data,
-        theme: resolvedTheme,
+      const data = result.data;
+      const newQuote: Quote = {
+        id: data.id,
+        text: data.text,
+        author: data.author,
+        explanation: data.explanation,
+        theme: data.theme,
         createdAt: serverTimestamp(),
-        uid: user.uid
       };
 
-      setCurrentQuote({ ...newQuoteData, id: 'temp-' + Date.now() } as Quote);
+      setCurrentQuote(newQuote);
       setIsGenerating(false);
-      trackEvent('generate_quote', { theme: resolvedTheme, has_custom_keyword: !!settings.customKeyword });
+      trackEvent('generate_quote', { theme: data.theme, has_custom_keyword: !!settings.customKeyword });
       hapticMedium();
       trackActionForReview();
-
-      // Save to Firestore & Update usage count
-      try {
-        // Increment daily usage count
-        const today = new Date().toISOString().split('T')[0];
-        const usageRef = doc(db, 'users', user.uid, 'usage', today);
-        const usageSnap = await getDoc(usageRef);
-        const currentCount = usageSnap.exists() ? (usageSnap.data()?.count || 0) : 0;
-        await setDoc(usageRef, { count: currentCount + 1 }, { merge: true });
-
-        // Save quote to history
-        const docRef = await addDoc(collection(db, 'users', user.uid, 'history'), newQuoteData);
-        setCurrentQuote({ ...newQuoteData, id: docRef.id } as Quote);
-      } catch (err) {
-        console.error('[Firestore Error] Could not save to database:', err);
-      }
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error in generation process:', err);
-      setError(t('common.error_generating_quote'));
+      // Firebase Functions HttpsError code 매핑
+      const code = err?.code as string | undefined;
+      if (code === 'functions/resource-exhausted') {
+        // 일일 한도 초과 — 서버 메시지 그대로 표시
+        setError(err?.message || t('common.error_generating_quote'));
+      } else if (code === 'functions/unauthenticated') {
+        setError(t('common.error_api_key_missing'));
+      } else if (code === 'functions/invalid-argument') {
+        // 키워드 차단 등
+        alert(t('settings.keyword_blocked'));
+      } else {
+        setError(t('common.error_generating_quote'));
+      }
       setIsGenerating(false);
     }
   };
@@ -594,13 +549,7 @@ export default function App() {
     setCardProgress(10);
     setError(null);
 
-    const apiKey = localConfig.geminiApiKey || (import.meta.env.VITE_GEMINI_API_KEY as string);
-    if (!apiKey) {
-      setError(t('common.error_api_key_missing'));
-      setIsGeneratingCard(false);
-      return;
-    }
-
+    // 카드 생성은 picsum + canvas 로 클라이언트에서 처리 (Gemini 불필요)
     try {
       const seedPool = THEME_SEED_POOLS[quote.theme] ?? THEME_SEED_POOLS.life;
       const seed = seedPool[Math.floor(Math.random() * seedPool.length)];

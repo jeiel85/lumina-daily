@@ -1,6 +1,12 @@
 import * as admin from 'firebase-admin';
 import { onSchedule } from 'firebase-functions/v2/scheduler';
+import { onCall, HttpsError } from 'firebase-functions/v2/https';
 import { GoogleGenerativeAI } from '@google/generative-ai';
+
+// 키워드 차단 목록 (클라이언트 측과 동일하게 유지)
+const BLOCKED_KEYWORDS = ['욕설', '음란', '폭력', 'sex', 'fuck', 'shit', 'porn', 'kill'];
+
+const DAILY_QUOTE_LIMIT = 10;
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -37,9 +43,9 @@ const LANG_NAMES: Record<string, string> = {
   ko: '한국어', en: 'English', ja: '日本語', zh: '中文',
 };
 
-// ─── Gemini 명언 생성 ─────────────────────────────────────────────────────────
+// ─── Gemini 명언 생성 (내부 헬퍼) ────────────────────────────────────────────
 
-async function generateQuote(
+async function generateQuoteContent(
   preferredTheme: string,
   customKeyword: string,
   language: string,
@@ -116,7 +122,7 @@ export const sendDailyNotifications = onSchedule(
       const lang = (language in NOTIF_TITLES) ? language : 'ko';
 
       const quote = geminiApiKey
-        ? await generateQuote(resolvedPreferredTheme, customKeyword, lang, geminiApiKey)
+        ? await generateQuoteContent(resolvedPreferredTheme, customKeyword, lang, geminiApiKey)
         : null;
 
       const title = NOTIF_TITLES[lang];
@@ -163,5 +169,96 @@ export const sendDailyNotifications = onSchedule(
         }
       }
     }));
+  }
+);
+
+// ─── HTTPS Callable: 클라이언트가 직접 Gemini 호출 대신 이 함수로 ─────────────
+// 보안: API key 가 클라이언트 번들에서 사라지고 서버 시크릿에만 존재
+// 남용 방지: Firebase Auth 검증 + Firestore 일일 한도 (atomic transaction)
+
+interface GenerateQuoteRequest {
+  preferredThemes?: string[];
+  customKeyword?: string;
+  language?: string;
+}
+
+export const generateQuote = onCall<GenerateQuoteRequest>(
+  {
+    secrets: ['GEMINI_API_KEY'],
+    // 한국 사용자 latency 줄이기: 가까운 region 사용. 미배포 region 이면 us-central1 fallback
+    region: 'asia-northeast3',
+  },
+  async (request) => {
+    // 1) 인증 검증 — 비로그인 거부
+    if (!request.auth) {
+      throw new HttpsError('unauthenticated', 'Login required to generate a quote.');
+    }
+    const uid = request.auth.uid;
+
+    const { preferredThemes = ['motivation'], customKeyword = '', language = 'ko' } =
+      request.data ?? {};
+
+    // 2) 키워드 차단
+    if (customKeyword) {
+      const lower = customKeyword.toLowerCase();
+      if (BLOCKED_KEYWORDS.some((b) => lower.includes(b))) {
+        throw new HttpsError('invalid-argument', 'Keyword contains blocked term.');
+      }
+    }
+
+    // 3) 일일 한도 체크 (atomic 트랜잭션 — 클라이언트 우회 불가)
+    const today = new Date().toISOString().split('T')[0];
+    const usageRef = db.doc(`users/${uid}/usage/${today}`);
+
+    const newCount: number = await db.runTransaction(async (tx) => {
+      const snap = await tx.get(usageRef);
+      const cur: number = snap.exists ? (snap.data()?.count ?? 0) : 0;
+      if (cur >= DAILY_QUOTE_LIMIT) {
+        throw new HttpsError(
+          'resource-exhausted',
+          `Daily limit reached (${cur}/${DAILY_QUOTE_LIMIT}). Try again tomorrow.`
+        );
+      }
+      tx.set(usageRef, { count: cur + 1 }, { merge: true });
+      return cur + 1;
+    });
+
+    // 4) 테마 resolution (클라이언트와 동일 로직 — 단 ALL_THEMES 는 함수 측 정의 사용)
+    const ALL_THEMES = Object.keys(THEME_NAMES);
+    const filtered = preferredThemes.filter((id) => id !== 'random');
+    const includesRandom = preferredThemes.includes('random');
+    const pool = includesRandom || filtered.length === 0 ? ALL_THEMES : filtered;
+    const resolvedTheme = pool[Math.floor(Math.random() * pool.length)];
+
+    // 5) Gemini 호출
+    const apiKey = process.env.GEMINI_API_KEY ?? '';
+    if (!apiKey) {
+      throw new HttpsError('internal', 'Server is misconfigured (missing API key).');
+    }
+    const lang = language in LANG_NAMES ? language : 'ko';
+    const quote = await generateQuoteContent(resolvedTheme, customKeyword, lang, apiKey);
+    if (!quote) {
+      throw new HttpsError('internal', 'Quote generation failed. Please try again.');
+    }
+
+    // 6) Firestore history 에 저장
+    const docRef = await db.collection(`users/${uid}/history`).add({
+      text: quote.text,
+      author: quote.author,
+      explanation: quote.explanation,
+      theme: quote.resolvedTheme,
+      uid,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      source: 'manual',
+    });
+
+    return {
+      id: docRef.id,
+      text: quote.text,
+      author: quote.author,
+      explanation: quote.explanation,
+      theme: quote.resolvedTheme,
+      usageCount: newCount,
+    };
   }
 );
