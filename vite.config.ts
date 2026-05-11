@@ -9,7 +9,7 @@ export default defineConfig(({mode}) => {
   const isGithubPages = mode === 'github-pages' || process.env.NODE_ENV === 'github-pages';
   
   return {
-    base: isGithubPages ? '/daily-quote/' : '/',
+    base: isGithubPages ? '/lumina-daily/' : '/',
     plugins: [
       react(), 
       tailwindcss(),
