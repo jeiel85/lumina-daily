@@ -208,7 +208,7 @@ lumina-daily/
 - [MOBILE_GUIDELINES.md](./MOBILE_GUIDELINES.md) — 모바일 빌드/디버깅 가이드
 - [SIGNING_HANDOFF.md](./SIGNING_HANDOFF.md) — Play Store 서명키 핸드오프
 - [AGENTS.md](./AGENTS.md) — 에이전트 작업 규칙 (LOCKED POLICY 포함)
-- [ROADMAP_100.md](./ROADMAP_100.md) — 백로그 / 로드맵
+- [ROADMAP.md](./ROADMAP.md) — 현실 로드맵 (2026 KPI + 30개 핵심 이슈, Phase 1~4)
 - [CONTINUE_ON_ANOTHER_PC.md](./CONTINUE_ON_ANOTHER_PC.md) — 작업 환경 이전 가이드
 
 ---
