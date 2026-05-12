@@ -1268,7 +1268,7 @@ export default function App() {
                         </div>
                       )}
                       <p className="text-xs text-neutral-400 dark:text-neutral-500">
-                        {t('settings.referral_count', `초대 횟수: ${settings.referralCount || 0}`)}
+                        {t('settings.referral_count', { count: settings.referralCount || 0 })}
                       </p>
                     </div>
                   </section>

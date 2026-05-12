@@ -140,6 +140,7 @@
   },
   "onboarding": {
     "skip": "Skip",
+    "has_account": "I already have an account",
     "next": "Next",
     "start": "Get Started",
     "later": "Later",

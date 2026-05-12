@@ -140,6 +140,7 @@
   },
   "onboarding": {
     "skip": "スキップ",
+    "has_account": "すでにアカウントをお持ちの方",
     "next": "次へ",
     "start": "始める",
     "later": "後で",

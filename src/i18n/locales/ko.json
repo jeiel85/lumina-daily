@@ -94,7 +94,7 @@
     "referral_desc": "친구에게 앱을 공유하고 리워드를 받으세요!",
     "referral_code": "나의 리워드 코드",
     "referral_copy": "복사",
-    "referral_count": "초대한 친구",
+    "referral_count": "초대한 친구: {{count}}명",
     "referral_reward": "리워드 적립",
     "referral_section": "초대 리워드",
     "copy": "복사"
@@ -142,10 +142,12 @@
     "error": "공유 중 오류가 발생했습니다."
   },
   "onboarding": {
-    "skip": "걸너뛰기",
+    "skip": "건너뛰기",
     "has_account": "이미 계정이 있어요",
     "next": "다음",
     "start": "시작하기",
+    "later": "나중에",
+    "later_tooltip": "로그인 화면으로 이동 (나중에 다시 볼 수 있어요)",
     "step1_title": "매일 아침, 나를 위한 한 마디",
     "step1_desc": "AI가 당신의 취향에 맞춘 명언과 따뜻한 해설을\n매일 새롭게 만들어 드려요.",
     "step2_title": "나만의 테마를 골라보세요",

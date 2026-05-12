@@ -140,6 +140,7 @@
   },
   "onboarding": {
     "skip": "跳过",
+    "has_account": "我已有账号",
     "next": "下一步",
     "start": "开始",
     "later": "稍后",
