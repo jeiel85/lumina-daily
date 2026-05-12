@@ -6,7 +6,7 @@ Lumina는 AI 기반의 명언 · 성찰 앱입니다. Google Gemini로 맞춤형
 
 - 📱 Android: Google Play 출시 (패키지명 `com.jeiel85.luminadaily`)
 - 📢 앱 소개 페이지: [https://jeiel85.github.io/lumina-daily/](https://jeiel85.github.io/lumina-daily/) — 정적 랜딩 페이지 (앱이 아님)
-- 🏷 현재 버전: **v1.3.9** (Android versionCode 28)
+- 🏷 현재 버전: **v1.3.10** (Android versionCode 30)
 
 > ⚠️ **GitHub Pages URL은 앱의 웹 버전이 아니라 앱 소개용 정적 랜딩 페이지입니다.** 실제 앱은 Google Play의 Android APK에서만 동작합니다. 자세한 정책은 [CLAUDE.md](./CLAUDE.md) 참고.
 
@@ -179,7 +179,8 @@ lumina-daily/
 
 | 버전 | 주요 변경 |
 |---|---|
-| **1.3.9** | Cloud Functions Gemini 프록시 + OG 메타태그 + GitHub Pages를 정적 랜딩 페이지로 전환 |
+| **1.3.10** | i18n 누락 키 보강 + referral_count 인터폴레이션 버그 수정 |
+| 1.3.9 | Cloud Functions Gemini 프록시 + OG 메타태그 + GitHub Pages를 정적 랜딩 페이지로 전환 |
 | 1.3.8 | 햅틱 피드백 ON/OFF 설정 |
 | 1.3.7 | 서명키 핸드오프 문서 보강 |
 | 1.3.6 | 네이티브 앱이 hosting 의존 없이 내장 dist 로드 |
