@@ -1,6 +1,7 @@
 node_modules/
 build/
 dist/
+dev-dist/
 coverage/
 .DS_Store
 *.log
@@ -23,3 +24,8 @@ tmp_*
 *.jks
 *.keystore
 .temp/
+
+# 일회용 운영 스크립트 (gh 이슈 일괄 생성/삭제용 — 검토 후 삭제 권장)
+check_encoding.py
+cleanup_issues.py
+create_roadmap_issues.py
