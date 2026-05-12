@@ -6,10 +6,11 @@ import {defineConfig, loadEnv} from 'vite';
 
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
-  const isGithubPages = mode === 'github-pages' || process.env.NODE_ENV === 'github-pages';
-  
+
+  // NOTE: GitHub Pages는 정적 랜딩 페이지(docs/)만 서빙한다. React 앱은 APK에 번들된다.
+  // 자세한 정책은 CLAUDE.md / AGENTS.md의 "LOCKED POLICY" 참고.
   return {
-    base: isGithubPages ? '/lumina-daily/' : '/',
+    base: '/',
     plugins: [
       react(), 
       tailwindcss(),

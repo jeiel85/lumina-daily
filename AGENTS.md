@@ -25,7 +25,20 @@ lumina-daily/
 | Android APK | `dist/` (React 앱 번들) | Capacitor가 `dist/`를 android assets에 복사 |
 | GitHub Release | `app-release.apk` + `dist.zip` | 태그 푸시(v*) 시 CI 자동 생성 |
 
-**중요:** GitHub Pages는 React 앱을 서빙하지 않는다. `docs/`의 랜딩 페이지만 서빙한다. React 앱은 오직 APK 안에 번들된다.
+### 🔒 LOCKED POLICY — GitHub Pages 용도 (절대 변경 금지)
+
+**`https://jeiel85.github.io/lumina-daily/` 는 "앱 소개 브랜딩 랜딩 페이지" 전용이다. 앱의 웹앱(PWA) 버전이 아니다.**
+
+이 정책은 사용자가 명시적으로 박제 요청한 항목이다. 빌드/배포 작업 중 자꾸 뒤집히는 일이 반복되어 못박는다.
+
+- ❌ **금지**: React 앱 번들(Vite 빌드 산출물)을 `docs/`에 넣는 것
+- ❌ **금지**: `npm run build -- --mode github-pages` 산출물을 `docs/`로 복사/배포하는 CI step
+- ❌ **금지**: `docs/index.html`에 `<script type="module" src="/lumina-daily/assets/index-*.js">` 같은 Vite 번들 reference
+- ❌ **금지**: `docs/`에 `assets/`, `manifest.webmanifest`, `sw.js`, `workbox-*.js`, `registerSW.js` 같은 PWA 산출물
+- ✅ **허용**: 정적 HTML/CSS/이미지로 된 앱 소개 페이지 (스토어 링크, 기능 소개, 스크린샷, 개인정보처리방침 등)
+- ✅ **원칙**: 실제 React 앱은 **오직 Android APK/AAB에 번들**된다. 웹에서 앱을 돌릴 일은 없다.
+
+정책을 바꾸려면 사용자가 **명시적으로** "github.io에서 웹앱도 서빙하고 싶다"고 말한 경우에만 가능. 그 외엔 어떠한 사유(편의성/캐시 적중률/배포 단순화 등)로도 자동으로 뒤집지 말 것.
 
 ---
 

@@ -1,1 +1,0 @@
-import{W as e}from"./index-CPo-fHcL.js";import"./motion-DP05ArZT.js";import"./vendor-BqQHd_go.js";import"./firebase-czbI5exe.js";class n extends e{async requestReview(){throw this.unimplemented("Not implemented on web.")}}export{n as InAppReviewWeb};

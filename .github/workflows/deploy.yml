@@ -1,4 +1,7 @@
-name: Build and Deploy to GitHub Pages
+name: Build APK and Release
+# NOTE: GitHub Pages는 docs/ 폴더(정적 랜딩 페이지)를 main 브랜치에서 직접 서빙한다.
+# 이 워크플로는 GitHub Pages에 배포하지 않으며, APK/AAB 빌드와 GitHub Release 생성을 담당한다.
+# 정책: CLAUDE.md / AGENTS.md "LOCKED POLICY" 참고.
 
 on:
   push:
@@ -87,8 +90,11 @@ jobs:
       - name: Run type check
         run: npx tsc --noEmit || true
 
+      # NOTE: 이 build는 APK 번들 + Firebase Hosting Preview 용도다.
+      # GitHub Pages 배포에는 사용되지 않는다 (docs/ 폴더에 정적 랜딩 페이지가 따로 있음).
+      # 정책: CLAUDE.md / AGENTS.md "LOCKED POLICY" 참고.
       - name: Build
-        run: npm run build -- --mode github-pages
+        run: npm run build
         env:
           VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
           VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}

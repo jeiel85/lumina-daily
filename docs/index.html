@@ -1,20 +1,18 @@
 <!doctype html>
-<html lang="en">
+<html lang="ko">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Lumina Daily - 당신을 위한 특별한 명언</title>
-    <meta name="description" content="매일 아침 AI가 당신만을 위한 명언 한 줄을 배달합니다. 동기부여·위로·성장 등 8가지 테마, 4개 언어 지원." />
+    <title>Lumina Daily — 매일 당신을 위한 명언</title>
+    <meta name="description" content="매일 아침 AI가 당신만을 위한 명언 한 줄을 배달합니다. 동기부여·위로·성장 등 8가지 테마, 4개 언어 지원. Android 앱." />
     <link rel="canonical" href="https://jeiel85.github.io/lumina-daily/" />
-    <link rel="manifest" href="/lumina-daily/manifest.json" />
-    <meta name="theme-color" content="#fafafa" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0a0a0a" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#0a0a0a" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="Lumina Daily" />
     <meta property="og:title" content="Lumina Daily — 매일 당신을 위한 명언" />
-    <meta property="og:description" content="매일 아침 AI가 당신만을 위한 명언 한 줄을 배달합니다. 동기부여·위로·성장 등 8가지 테마, 4개 언어 지원." />
+    <meta property="og:description" content="매일 아침 AI가 당신만을 위한 명언 한 줄을 배달합니다. 8가지 테마, 4개 언어." />
     <meta property="og:url" content="https://jeiel85.github.io/lumina-daily/" />
     <meta property="og:image" content="https://jeiel85.github.io/lumina-daily/og-image.png" />
     <meta property="og:image:width" content="1024" />
@@ -30,18 +28,336 @@
     <meta name="twitter:description" content="매일 아침 AI가 당신만을 위한 명언 한 줄을 배달합니다." />
     <meta name="twitter:image" content="https://jeiel85.github.io/lumina-daily/og-image.png" />
 
+    <link rel="apple-touch-icon" href="/lumina-daily/icon-192.png" />
+    <link rel="icon" href="/lumina-daily/icon-192.png" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="apple-touch-icon" href="/lumina-daily/icon-192.png" />
-    <script type="module" crossorigin src="/lumina-daily/assets/index-Cbb6m9X_.js"></script>
-    <link rel="modulepreload" crossorigin href="/lumina-daily/assets/motion-DP05ArZT.js">
-    <link rel="modulepreload" crossorigin href="/lumina-daily/assets/vendor-BqQHd_go.js">
-    <link rel="modulepreload" crossorigin href="/lumina-daily/assets/firebase-czbI5exe.js">
-    <link rel="stylesheet" crossorigin href="/lumina-daily/assets/index-_nZNoCng.css">
-  <link rel="manifest" href="/lumina-daily/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/lumina-daily/registerSW.js"></script></head>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+    <style>
+      :root {
+        --bg: #0a0a0a;
+        --bg-2: #141414;
+        --fg: #fafafa;
+        --fg-2: #a1a1a1;
+        --accent: #f5c674;
+        --border: #262626;
+      }
+
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+
+      html { scroll-behavior: smooth; }
+
+      body {
+        font-family: 'Inter', 'Noto Sans KR', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        background: var(--bg);
+        color: var(--fg);
+        line-height: 1.6;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+
+      a { color: inherit; text-decoration: none; }
+
+      .container {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+
+      header {
+        padding: 24px 0;
+        border-bottom: 1px solid var(--border);
+      }
+
+      .nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 700;
+        font-size: 1.1rem;
+      }
+
+      .brand img {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+      }
+
+      .nav-links {
+        display: flex;
+        gap: 24px;
+        font-size: 0.9rem;
+        color: var(--fg-2);
+      }
+
+      .nav-links a:hover { color: var(--fg); }
+
+      .hero {
+        padding: 96px 0 80px;
+        text-align: center;
+      }
+
+      .hero h1 {
+        font-size: clamp(2rem, 5vw, 3.5rem);
+        font-weight: 800;
+        line-height: 1.15;
+        letter-spacing: -0.02em;
+        margin-bottom: 24px;
+      }
+
+      .hero h1 .accent {
+        color: var(--accent);
+      }
+
+      .hero p.lede {
+        font-size: clamp(1rem, 2vw, 1.25rem);
+        color: var(--fg-2);
+        max-width: 640px;
+        margin: 0 auto 40px;
+      }
+
+      .cta-row {
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 28px;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: transform 0.15s ease, background 0.15s ease;
+      }
+
+      .btn:hover { transform: translateY(-1px); }
+
+      .btn-primary {
+        background: var(--accent);
+        color: #0a0a0a;
+      }
+
+      .btn-primary:hover {
+        background: #ffd98a;
+      }
+
+      .btn-secondary {
+        background: transparent;
+        color: var(--fg);
+        border: 1px solid var(--border);
+      }
+
+      .btn-secondary:hover {
+        background: var(--bg-2);
+      }
+
+      .hero-note {
+        margin-top: 24px;
+        font-size: 0.85rem;
+        color: var(--fg-2);
+      }
+
+      .features {
+        padding: 80px 0;
+        border-top: 1px solid var(--border);
+      }
+
+      .section-title {
+        text-align: center;
+        font-size: clamp(1.5rem, 3vw, 2rem);
+        font-weight: 700;
+        margin-bottom: 16px;
+        letter-spacing: -0.01em;
+      }
+
+      .section-subtitle {
+        text-align: center;
+        color: var(--fg-2);
+        max-width: 560px;
+        margin: 0 auto 56px;
+      }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 20px;
+      }
+
+      .feature-card {
+        background: var(--bg-2);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 28px 24px;
+      }
+
+      .feature-icon {
+        font-size: 1.5rem;
+        margin-bottom: 12px;
+      }
+
+      .feature-card h3 {
+        font-size: 1.05rem;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+
+      .feature-card p {
+        font-size: 0.9rem;
+        color: var(--fg-2);
+        line-height: 1.6;
+      }
+
+      .download {
+        padding: 96px 0;
+        border-top: 1px solid var(--border);
+        text-align: center;
+      }
+
+      .download h2 {
+        font-size: clamp(1.5rem, 3vw, 2rem);
+        font-weight: 700;
+        margin-bottom: 16px;
+        letter-spacing: -0.01em;
+      }
+
+      .download p {
+        color: var(--fg-2);
+        margin-bottom: 32px;
+      }
+
+      footer {
+        padding: 40px 0 60px;
+        border-top: 1px solid var(--border);
+        font-size: 0.85rem;
+        color: var(--fg-2);
+      }
+
+      .footer-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+
+      .footer-links {
+        display: flex;
+        gap: 20px;
+      }
+
+      .footer-links a:hover { color: var(--fg); }
+
+      @media (max-width: 600px) {
+        .hero { padding: 64px 0 56px; }
+        .features, .download { padding: 64px 0; }
+        .nav-links { display: none; }
+      }
+    </style>
+  </head>
   <body>
-    <div id="root"></div>
+    <header>
+      <div class="container nav">
+        <div class="brand">
+          <img src="/lumina-daily/icon-192.png" alt="Lumina Daily" />
+          <span>Lumina Daily</span>
+        </div>
+        <nav class="nav-links">
+          <a href="#features">기능</a>
+          <a href="#download">다운로드</a>
+          <a href="/lumina-daily/privacy-policy.html">개인정보처리방침</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="container">
+          <h1>매일 한 줄, <span class="accent">당신만을 위한 빛</span></h1>
+          <p class="lede">
+            매일 아침 AI가 당신을 위한 명언 한 줄을 배달합니다.<br />
+            동기부여 · 위로 · 성장 등 8가지 테마, 4개 언어 지원.
+          </p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="https://play.google.com/store/apps/details?id=com.jeiel85.luminadaily" target="_blank" rel="noopener">
+              Google Play에서 받기
+            </a>
+            <a class="btn btn-secondary" href="#features">기능 살펴보기</a>
+          </div>
+          <p class="hero-note">Android 전용 · 무료</p>
+        </div>
+      </section>
+
+      <section class="features" id="features">
+        <div class="container">
+          <h2 class="section-title">하루를 여는 작은 의식</h2>
+          <p class="section-subtitle">Lumina Daily는 단순한 명언 앱이 아닙니다. 당신의 하루에 맞춘 한 줄의 빛입니다.</p>
+
+          <div class="feature-grid">
+            <div class="feature-card">
+              <div class="feature-icon">✨</div>
+              <h3>AI 맞춤형 명언</h3>
+              <p>Google Gemini가 당신의 테마와 언어, 분위기에 맞춘 명언을 매일 새로 생성합니다.</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">🎨</div>
+              <h3>감성 카드로 공유</h3>
+              <p>마음에 든 명언은 아름다운 이미지 카드로 만들어 SNS에 공유할 수 있습니다.</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">🌏</div>
+              <h3>4개 언어 지원</h3>
+              <p>한국어, English, 日本語, 简体中文 — 원하는 언어로 매일 만나보세요.</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">🔔</div>
+              <h3>매일 아침 알림</h3>
+              <p>원하는 시간에 알림으로 받아보거나, 직접 새 명언을 요청할 수 있습니다.</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">📚</div>
+              <h3>8가지 테마</h3>
+              <p>동기부여, 위로, 성장, 사랑, 지혜, 평온, 도전, 감사 — 그날의 기분에 맞춰 고르세요.</p>
+            </div>
+            <div class="feature-card">
+              <div class="feature-icon">🔒</div>
+              <h3>가벼움과 사생활</h3>
+              <p>가벼운 앱, 최소한의 권한. 당신의 데이터를 광고에 팔지 않습니다.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="download" id="download">
+        <div class="container">
+          <h2>지금 시작하세요</h2>
+          <p>Android에서 무료로 받아보실 수 있습니다.</p>
+          <a class="btn btn-primary" href="https://play.google.com/store/apps/details?id=com.jeiel85.luminadaily" target="_blank" rel="noopener">
+            Google Play에서 받기
+          </a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="container footer-row">
+        <div>© 2025 Lumina Daily</div>
+        <div class="footer-links">
+          <a href="/lumina-daily/privacy-policy.html">개인정보처리방침</a>
+          <a href="https://github.com/jeiel85/lumina-daily" target="_blank" rel="noopener">GitHub</a>
+        </div>
+      </div>
+    </footer>
   </body>
 </html>
-
