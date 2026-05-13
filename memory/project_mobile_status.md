@@ -1,6 +1,17 @@
 # Lumina Daily — 프로젝트 현황
 
-> 마지막 업데이트: 2026-05-06
+> 마지막 업데이트: 2026-05-13
+
+---
+
+## 현재 버전
+
+| 항목 | 값 |
+|------|-----|
+| 버전 | **1.3.10** |
+| versionCode | **30** |
+| 최신 릴리즈 | v1.3.10 |
+| 브랜치 | main |
 
 ---
 
@@ -10,29 +21,27 @@
 |------|------|
 | 프레임워크 | React 19 + TypeScript 5.8 + Vite 6 |
 | 모바일 | Capacitor 8 (Android) |
-| 백엔드 | Firebase 12 (Auth, Firestore) |
-| AI | Google Gemini 2.5 Flash |
+| 백엔드 | Firebase 12 (Auth, Firestore, Functions, FCM) |
+| AI | Google Gemini 2.5 Flash (Cloud Functions 프록시 경유) |
 | 번역 | i18next (ko / en / ja / zh) |
 | 스타일 | Tailwind CSS 4 + motion/react |
 | 테스트 | Vitest + Playwright |
 
 ---
 
-## 완료된 작업
+## 현재 Phase
 
-### 리팩토링 (2026-04-17)
-- App.tsx: 1545줄 → 797줄 (48% 감소)
-- 컴포넌트 분리: types/, constants/, components/
-- 테스트 셋업: Vitest (7 tests) + Playwright (10 tests)
+**Phase 1 — 안정화 + AI 비용 통제** (이슈 [#242](https://github.com/jeiel85/lumina-daily/issues/242) ~ [#247](https://github.com/jeiel85/lumina-daily/issues/247))
 
-### APK 빌드
-- Debug APK: `android/app/build/outputs/apk/debug/app-debug.apk` (8.3MB)
-- Release APK: `android/app/build/outputs/apk/release/app-release.apk` (6.6MB)
+전체 로드맵은 [ROADMAP.md](../ROADMAP.md) 참고.
 
-### 테스트 결과 (총 17 passed)
-```
-Vitest: 7 passed
-Playwright: 10 passed
+---
+
+## 테스트
+
+```bash
+npm test              # Vitest (단위)
+npx playwright test   # Playwright (E2E UI)
 ```
 
 ---
@@ -43,18 +52,19 @@ Playwright: 10 passed
 # 웹 개발
 npm run dev
 
-# APK 빌드
+# Android APK 빌드
 .\build-and-install.bat
 
-# 테스트
-npm test              # 단위 테스트
-npx playwright test  # UI 테스트
+# Play Store AAB
+npm run build
+npx cap sync android
+cd android && ./gradlew bundleRelease
 ```
 
 ---
 
 ## GitHub
 
-- 브랜치: `main`
-- 릴리즈: v1.3.1
-- URL: https://github.com/jeiel85/lumina-daily
+- 저장소: https://github.com/jeiel85/lumina-daily
+- 이슈 보드: https://github.com/jeiel85/lumina-daily/issues
+- GitHub Pages (앱 소개): https://jeiel85.github.io/lumina-daily/

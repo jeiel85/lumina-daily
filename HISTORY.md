@@ -1,51 +1,85 @@
-# HISTORY.md
+# HISTORY — 개발 마일스톤
 
-## 2026-05-06
-- 작업: 로딩 화면 정렬/가독성 개선 및 릴리즈 배포 (v1.3.3)
-- 변경 파일:
-  - src/App.tsx: 로딩 화면 텍스트 정렬 및 다크모드 텍스트 대비 수정
-  - package.json: 버전 업데이트 (1.3.2 -> 1.3.3)
-  - android/app/build.gradle: versionCode (22 -> 23), versionName ("1.3.2" -> "1.3.3") 업데이트
-  - CHANGELOG.md: v1.3.3 추가
-  - HISTORY.md: 작업 내역 기록
-- 결과: 진행 중 (CI 모니터링)
+> 각 항목은 GitHub 이슈와 연계되어 있다.  
+> 현재 이슈 30개 기준 로드맵은 [ROADMAP.md](ROADMAP.md) 참고.
 
-## 2026-05-06
-- 작업: GitHub 릴리즈 버전 범프 및 태그 배포 (v1.3.2)
-- 변경 파일:
-  - package.json: 버전 업데이트 (1.3.1 -> 1.3.2)
-  - android/app/build.gradle: versionCode (21 -> 22), versionName ("1.3.1" -> "1.3.2") 업데이트
-  - CHANGELOG.md: v1.3.2 추가
-  - HISTORY.md: 작업 내역 기록
-- 결과: 진행 중 (CI 모니터링)
+---
 
-## 2026-05-06
-- 작업: 최신 소스 동기화 및 버전 범프 (v1.3.1)
-- 변경 파일:
-  - package.json: 버전 업데이트 (1.3.0 -> 1.3.1)
-  - android/app/build.gradle: versionCode (20 -> 21), versionName ("1.3.0" -> "1.3.1") 업데이트
-  - CHANGELOG.md: v1.3.1 추가
-  - HISTORY.md: 작업 내역 기록
-  - memory/project_mobile_status.md: 최신 버전 정보 업데이트
-- 결과: 성공
+## ✅ Phase 0 — 기초 작업 (완료, 이슈 #50~#77)
 
-## 2026-05-04
-- 작업: .templates/ MD 파일 통합 및 프로젝트 루트 문서 정비 (Issue #26)
-- 변경 파일:
-  - AGENTS.md: 공통 작업 규칙 병합 및 버전 정보 업데이트 (1.2.7)
-  - CHANGELOG.md: 릴리즈 히스토리 기반 생성
-  - HISTORY.md: 개발 마일스톤 기록을 위해 생성
-- 검증: 로컬 파일 생성 및 내용 확인
-- 결과: 성공
-- 후속 작업: .templates/ 디렉토리 삭제
+### 보안 (Security)
+| 이슈 | 내용 |
+|------|------|
+| [#67](https://github.com/jeiel85/lumina-daily/issues/67) | 로컬 저장소 암호화 |
+| [#66](https://github.com/jeiel85/lumina-daily/issues/66) | 무차별 대입 방어 |
+| [#65](https://github.com/jeiel85/lumina-daily/issues/65) | 민감 정보 최소화 |
+| [#64](https://github.com/jeiel85/lumina-daily/issues/64) | Firestore 보안 규칙 |
+| [#63](https://github.com/jeiel85/lumina-daily/issues/63) | API 키 프록시화 → Cloud Functions로 해결 |
 
-## 2026-04-29
-- 작업: 프로젝트 초기화 및 기본 문서 작성
-- 변경 파일:
-  - AGENTS.md: 범용 에이전트 규칙 작성 및 프로젝트 설정 업데이트
-  - README.md: 프로젝트 소개 및 사용법 작성
-  - HISTORY.md: 이력 관리 문서 생성
-  - CHANGELOG.md: 변경 로그 문서 생성
-- 검증: 로컬 파일 생성 확인
-- 결과: 성공
-- 후속 작업: GitHub 저장소 푸시 및 에이전트 연동 테스트
+### 기능 (Feature)
+| 이슈 | 내용 |
+|------|------|
+| [#62](https://github.com/jeiel85/lumina-daily/issues/62) | 데이터 백업 및 복원 기초 |
+| [#61](https://github.com/jeiel85/lumina-daily/issues/61) | AI 기반 명언 해설 심화 |
+| [#60](https://github.com/jeiel85/lumina-daily/issues/60) | 명언 챌린지 기능 |
+| [#59](https://github.com/jeiel85/lumina-daily/issues/59) | 소셜 로그인 확장 (Google +) |
+| [#58](https://github.com/jeiel85/lumina-daily/issues/58) | 푸시 알림 고도화 |
+| [#57](https://github.com/jeiel85/lumina-daily/issues/57) | 사용자 창작 명언 등록 |
+| [#56](https://github.com/jeiel85/lumina-daily/issues/56) | 명언 캘린더 공유 |
+| [#55](https://github.com/jeiel85/lumina-daily/issues/55) | 연속 출석(Streak) 게이미피케이션 |
+| [#54](https://github.com/jeiel85/lumina-daily/issues/54) | 명언 카테고리/태그 필터 |
+| [#53](https://github.com/jeiel85/lumina-daily/issues/53) | 기분(Mood) 기반 명언 생성 |
+
+### 성능 (Performance)
+| 이슈 | 내용 |
+|------|------|
+| [#52](https://github.com/jeiel85/lumina-daily/issues/52) | 에러 모니터링 (Sentry 대체 → Crashlytics) |
+| [#51](https://github.com/jeiel85/lumina-daily/issues/51) | 초기 로딩 시간(TTI) 단축 |
+| [#50](https://github.com/jeiel85/lumina-daily/issues/50) | 애니메이션 프레임 최적화 |
+| [#49](https://github.com/jeiel85/lumina-daily/issues/49) | 메모리 누수(Memory Leak) 점검 |
+
+### ASO / 마케팅
+| 이슈 | 내용 |
+|------|------|
+| [#77](https://github.com/jeiel85/lumina-daily/issues/77) | A/B 테스트 계획 수립 |
+| [#76](https://github.com/jeiel85/lumina-daily/issues/76) | 커뮤니티(소셜) 기능 카드 |
+| [#75](https://github.com/jeiel85/lumina-daily/issues/75) | 프로모션 비디오 제작 |
+| [#74](https://github.com/jeiel85/lumina-daily/issues/74) | 네이티브(Native) 광고 삽입 |
+| [#73](https://github.com/jeiel85/lumina-daily/issues/73) | 프리미엄 구독(Pro) 모델 |
+| [#72](https://github.com/jeiel85/lumina-daily/issues/72) | 다국어 설명 번역 |
+| [#71](https://github.com/jeiel85/lumina-daily/issues/71) | 초대/공유 리워드 (바이럴 루프) |
+| [#70](https://github.com/jeiel85/lumina-daily/issues/70) | 인앱 리뷰 로직 |
+| [#69](https://github.com/jeiel85/lumina-daily/issues/69) | 키워드 최적화 (ASO) |
+| [#68](https://github.com/jeiel85/lumina-daily/issues/68) | 스토어 스크린샷 디자인 |
+
+### Closed — 마케팅/ASO 아이디어 스크랩 (#194~#235)
+> 42개 마케팅/ASO 아이디어 이슈가 있었으나, 1인 무예산 환경에서 비현실적이라고 판단해 폐기.  
+> 핵심은 현 30개 이슈에 집중.
+
+---
+
+## 🚧 현재 — Phase 1 진행 중 (이슈 #242~#247)
+
+1인 무예산 제약에 맞춘 [현실 로드맵](ROADMAP.md) 수립. 총 30개 이슈, 4개 Phase.
+
+| Phase | 이슈 범위 | 기간 | 핵심 목표 |
+|-------|----------|------|----------|
+| **Phase 1** | [#242~#247](https://github.com/jeiel85/lumina-daily/issues?q=is%3Aissue+is%3Aopen+label%3Aphase-1) | 3주 | 안정화 + AI 비용 통제 |
+| **Phase 2** | [#248~#255](https://github.com/jeiel85/lumina-daily/issues?q=is%3Aissue+is%3Aopen+label%3Aphase-2) | 5주 | 리텐션 코어 |
+| **Phase 3** | [#256~#264](https://github.com/jeiel85/lumina-daily/issues?q=is%3Aissue+is%3Aopen+label%3Aphase-3) | 5주 | 바이럴 (무예산 유일 유입) |
+| **Phase 4** | [#265~#270](https://github.com/jeiel85/lumina-daily/issues?q=is%3Aissue+is%3Aopen+label%3Aphase-4) | 지속 | ASO & 무예산 홍보 |
+
+---
+
+## 📋 릴리즈 이력
+
+상세는 [CHANGELOG.md](CHANGELOG.md) 참고.
+
+| 버전 | 날짜 | 주요 변경 |
+|------|------|----------|
+| v1.3.10 | 2026-05-12 | i18n 누락 보강 + referral_count 수정 |
+| v1.3.9 | 2026-05-11 | Cloud Functions Gemini 프록시 + GitHub Pages 정적 전환 |
+| v1.3.8 | 2026-05-10 | 햅틱 피드백 ON/OFF |
+| v1.3.3 | 2026-05-06 | 로딩 화면 정렬/가독성 개선 |
+| v1.3.0 | 2026-05-06 | 인앱 리뷰(#70), 로컬 알림(#58), 리퍼럴(#71) |
+| v1.2.0 | 2026-04-24 | 초기 릴리즈 — Google 로그인, Firebase |

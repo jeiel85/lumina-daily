@@ -2,8 +2,8 @@
 
 ## v1.3.10 - 2026-05-12
 ### 🐛 버그 수정 (Fix)
-- 다국어(i18n) 누락 키 보강 — 일부 화면에서 키가 그대로 노출되던 문제 수정
-- `referral_count`에 `{{count}}` 인터폴레이션 적용 (친구 초대 카운트 표시 정상화)
+- [#267](https://github.com/jeiel85/lumina-daily/issues/267) 다국어(i18n) 누락 키 보강 — 일부 화면에서 키가 그대로 노출되던 문제 수정
+- [#260](https://github.com/jeiel85/lumina-daily/issues/260) `referral_count`에 `{{count}}` 인터폴레이션 적용 (친구 초대 카운트 표시 정상화)
 
 ### 📦 설정
 - 버전 범프: 1.3.9 → 1.3.10
@@ -14,6 +14,7 @@
 ### 🎨 개선 (Improvement)
 - 앱 로딩 화면 텍스트 가운데 정렬 적용 (왼쪽 치우침 수정)
 - 다크 테마 로딩 화면 텍스트 대비 개선 (가독성 향상)
+  - [#246](https://github.com/jeiel85/lumina-daily/issues/246) 에러 바운더리 관련 UI 일관성
 
 ### 📦 설정
 - 버전 범프: 1.3.2 → 1.3.3

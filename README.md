@@ -175,17 +175,22 @@ lumina-daily/
 
 ---
 
+## 🗺 로드맵
+
+**현재: Phase 1 — 안정화 + AI 비용 통제** (이슈 [#242](https://github.com/jeiel85/lumina-daily/issues/242)~[#247](https://github.com/jeiel85/lumina-daily/issues/247))
+
+전체 로드맵(30개 이슈, 4개 Phase)은 [ROADMAP.md](./ROADMAP.md) 참고.
+
 ## 🗺 버전 하이라이트
 
 | 버전 | 주요 변경 |
 |---|---|
 | **1.3.10** | i18n 누락 키 보강 + referral_count 인터폴레이션 버그 수정 |
-| 1.3.9 | Cloud Functions Gemini 프록시 + OG 메타태그 + GitHub Pages를 정적 랜딩 페이지로 전환 |
+| 1.3.9 | Cloud Functions Gemini 프록시 (#63) + OG 메타태그 + GitHub Pages 정적 랜딩 전환 |
 | 1.3.8 | 햅틱 피드백 ON/OFF 설정 |
-| 1.3.7 | 서명키 핸드오프 문서 보강 |
+| 1.3.7 | 서명키 핸드오프 문서 보강 (#27) |
 | 1.3.6 | 네이티브 앱이 hosting 의존 없이 내장 dist 로드 |
-| 1.3.5 | CI에서 Gemini 키를 VITE_GEMINI_API_KEY로 주입 (deprecated, 1.3.9에서 프록시로 대체) |
-| 1.3.0 | 인앱 리뷰, 로컬 알림, 리퍼럴 UI, ASO 다국어 |
+| 1.3.0 | 인앱 리뷰(#70), 로컬 알림(#58), 리퍼럴(#71), ASO 다국어 |
 | 1.2.4 | Android Google 로그인 수정 (Credential Manager) |
 | 1.2.0 | 초기 릴리즈 — Google 로그인, Firebase 연동 |
 
@@ -211,6 +216,7 @@ lumina-daily/
 - [AGENTS.md](./AGENTS.md) — 에이전트 작업 규칙 (LOCKED POLICY 포함)
 - [ROADMAP.md](./ROADMAP.md) — 현실 로드맵 (2026 KPI + 30개 핵심 이슈, Phase 1~4)
 - [CONTINUE_ON_ANOTHER_PC.md](./CONTINUE_ON_ANOTHER_PC.md) — 작업 환경 이전 가이드
+- [HISTORY.md](./HISTORY.md) — 이슈 기반 마일스톤 트래커
 
 ---
 
