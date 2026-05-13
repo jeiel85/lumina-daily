@@ -1,0 +1,83 @@
+<ko-KR>
+✨ 더 안전하고 깔끔해진 Lumina Daily
+
+🔒 보안 강화
+- AI 명언 요청을 서버 프록시로 전환해 API 사용을 안전하게 보호했어요.
+
+🔑 안정성
+- Google 로그인이 외부 서비스 상태와 무관하게 동작합니다.
+- 다크모드 가독성을 더 부드럽게 다듬었어요.
+
+🎁 새로운 기능
+- 친구 초대(리퍼럴) 기능 추가
+- 햅틱 피드백 ON/OFF 설정
+- 글자 크기 조절, 카드 스타일 다양화, 스켈레톤 로딩 개선
+
+🐛 버그 수정
+- 다국어 누락 텍스트와 친구 초대 카운트 표시 문제를 수정했어요.
+
+🌍 번역
+- 한/영/일/중 번역을 더 정교하게 보강했어요.
+</ko-KR>
+<en-US>
+✨ Safer, smoother Lumina Daily
+
+🔒 Security
+- AI requests now route through a secure server proxy.
+
+🔑 Stability
+- Google Sign-In works independently of external services
+- Improved dark mode contrast
+
+🎁 New
+- Invite friends with referrals
+- Haptic feedback toggle in Settings
+- Font size, more card styles, polished loading
+
+🐛 Fixes
+- Missing translations and referral count display
+
+🌍 Refined KO/EN/JA/ZH translations
+</en-US>
+<ja-JP>
+✨ より安全・快適になったLumina Daily
+
+🔒 セキュリティ強化
+- AI名言の取得をサーバープロキシ経由に変更し、APIをより安全に保護しました。
+
+🔑 安定性
+- Googleログインが外部サービスの状態に左右されず動作します。
+- ダークモードの読みやすさを調整しました。
+
+🎁 新機能
+- 友だち招待（リファラル）機能を追加
+- ハプティックフィードバックのON/OFF設定
+- 文字サイズ調整、カードスタイル追加、ローディング表示の改善
+
+🐛 不具合修正
+- 一部の未翻訳テキストと招待カウント表示の不具合を修正しました。
+
+🌍 翻訳
+- 韓国語・英語・日本語・中国語の翻訳をさらに磨きました。
+</ja-JP>
+<zh-CN>
+✨ 更安全、更顺畅的 Lumina Daily
+
+🔒 安全升级
+- AI 名言请求改由安全的服务器代理转发，更稳妥地保护 API 使用。
+
+🔑 稳定性
+- Google 登录不再依赖外部服务状态。
+- 深色模式的对比度更舒适。
+
+🎁 新功能
+- 全新邀请好友（推荐码）功能
+- 可在设置中开启或关闭触感反馈
+- 字号调节、更多卡片风格、加载骨架优化
+
+🐛 修复
+- 修复了部分缺失的翻译以及邀请人数显示的小问题。
+
+🌍 翻译
+- 中、英、日、韩四语翻译再度精修。
+</zh-CN>

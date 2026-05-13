@@ -145,7 +145,7 @@ server: {
 1. `package.json` → `"version": "x.x.x"`
 2. `android/app/build.gradle` → `versionCode N` (정수, 1씩 증가), `versionName "x.x.x"`
 
-**현재 버전**: `package.json` = `1.2.7`, `versionCode` = `17`, `versionName` = `1.2.7`
+**현재 버전**: `package.json` = `1.3.10`, `versionCode` = `30`, `versionName` = `1.3.10`
 
 ---
 
@@ -163,9 +163,9 @@ grep -E "versionCode" android/app/build.gradle
 
 | 파일 | 확인할 값 | 예시 |
 |------|-----------|------|
-| `package.json` | `"version"` | `"1.2.7"` |
-| `android/app/build.gradle` | `versionName` | `"1.2.7"` |
-| `android/app/build.gradle` | `versionCode` | `17` (1씩 단조 증가) |
+| `package.json` | `"version"` | `"1.3.10"` |
+| `android/app/build.gradle` | `versionName` | `"1.3.10"` |
+| `android/app/build.gradle` | `versionCode` | `30` (1씩 단조 증가) |
 
 **체크 통과 후에만 태그 생성:**
 
